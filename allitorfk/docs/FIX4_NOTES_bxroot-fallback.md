@@ -1,6 +1,6 @@
 # fix4 里 bxroot 和冷安装回退的要点（供 DSHA-AllitorFk. 参考）
 
-来源：我们之前的 fix4 仓库 mopth/dsha021-build-fix4（本地提交 e6420cd，**尚未公开**），以及 dsha-build 中 fix2–fix4 的提交。只读整理，没有改任何代码。
+来源：我们之前的 fix4 仓库 mopth/dsha021-build-fix4（已公开的 main 为 `fa71ef4`；之后的本地提交 `e6420cd` **尚未公开**），以及 dsha-build 中 fix2–fix4 的提交。只读整理，没有改任何代码。
 
 ## 1. 来历：bxroot 不是 fix4 加的
 - bxroot 来自 dsha-build 的 build172（CHANGELOG 写着“默认与首次升级优先 bxroot，保留 proot 兼容选择……引擎启动失败后才有限回退”）。fix 系列是在这个基础上修的：
@@ -9,7 +9,7 @@
   - fix4 `1d0774c`：Web 端口探测遇到绑定错误不再中止启动，同时修了恢复 agent 的报错细节。
 - **要点（已核实）：** build190（`c750348a`）里**没有** `tools/bxroot`，也没有 `ColdEngineFallback`，所以要把 build172 起的整套 bxroot 连同 fix2–fix4 的修复一起移植。上游另有 `feat/bxroot-runtime` 分支（`13b2750b`，3 个提交，未合入 main），可作对照。
 
-## 2. 要带过来的文件（fix 补丁共 35 个文件；补丁文件 `dsha-fix4/patches/*.patch` 在 fix4 仓库中，**尚未公开**）
+## 2. 要带过来的文件（fix 补丁共 35 个文件；已公开：fix4 仓库 `patches/dsha-fix4-dsh0.2.1-rc.2.patch`）
 - 回退核心：`runtime/ColdEngineFallback.java`（只在预检**明确失败**时才 bxroot→proot，生成脱敏原因），配 `ColdEngineFallbackTest`。
 - 引擎资格判定和执行：`RuntimeEngineQualification`、`RuntimeExecution`、`RuntimeTools`、`ColdToolsInstaller`、`IsolatedInstallProcess`。
 - 进程出生身份（坑最多）：`OwnedBirthEvidence`、`ProcessBirthHandshake`、`NativeTreeControl`、`BoundedGuestSessions`、`BoundedGuestBootRecovery`。fix2 让它在 `/proc` 和 getsid 被拒的手机上也能放行，并把等待改成 15 秒，各类错误分开报告。
