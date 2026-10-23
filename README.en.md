@@ -11,7 +11,7 @@
 > ⚠️ **Disclaimer: this is an unofficial fork of [DSH-APP/DSHA](https://github.com/DSH-APP/DSHA). It is not an official release, has not been reviewed by the upstream author, and is not affiliated with them. Use at your own risk.**
 > - **Based on**: official DSHA build190 (`0.2.1-rc.2`), commit `c750348a`.
 > - **Planned changes**: fix4's bxroot engine with automatic cold-install fallback (bxroot → proot on failure), the Low package (Android 6+), and built-in offline extensions rewritten after the ideas of DSH-Kxxy (no Kxxy code copied).
-> - **Coexists with the official app**: package name `dsha.AllitorFk_.dsh0_2_1_rc_2`; the signature also differs from the official one, so it **cannot overwrite or replace the official install** — both can be installed side by side.
+> - **Coexists with the official app**: package name `dsha.AllitorFk_.dsh0_2_1_rc_2`. Because the package name differs, it is a separate app that **does not overwrite or replace the official install** — both can be installed side by side.
 > - **License**: upstream MIT license; the original copyright notice is kept unchanged, see [LICENSE](LICENSE). This fork's own material lives in [`allitorfk/`](allitorfk/README.md); upstream files stay where they are.
 
 ---
