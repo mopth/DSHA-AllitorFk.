@@ -15,6 +15,7 @@ public final class ColdInstallPlan {
   public enum Mode {
     PROROOT("proroot", false),
     PROROOT_DYNAMIC("proroot", false),
+    BXROOT("bxroot", false),
     PROOT("proot", false),
     PROOT_COMPAT("proot", true);
     public final String runtime;
@@ -27,6 +28,34 @@ public final class ColdInstallPlan {
 
     public boolean staticLoader(boolean configured) {
       return this == PROROOT_DYNAMIC ? false : configured;
+    }
+
+    /** 非 proot 引擎：能力预检明确失败时可以自动回落 proot。 */
+    public boolean fallsBackToProot() {
+      return !"proot".equals(runtime);
+    }
+
+    public static Mode forEngine(String engine) {
+      if ("proroot".equals(engine)) return PROROOT;
+      if ("bxroot".equals(engine)) return BXROOT;
+      return PROOT;
+    }
+  }
+
+  /**
+   * 能力预检结论。只有 {@link #FAILED} 允许换引擎；{@link #UNKNOWN} 一律停止，不得猜测切换。
+   */
+  public enum Verdict {
+    READY,
+    FAILED,
+    UNKNOWN;
+
+    /**
+     * 进程退出已确认（含超时后已确认杀死）且没有就绪标记 = 预检明确失败；退出未确认 = 未知。
+     */
+    public static Verdict of(Observation observation, String marker) {
+      if (observation == null || !observation.exited) return UNKNOWN;
+      return observation.ready(marker) ? READY : FAILED;
     }
   }
 
@@ -59,6 +88,9 @@ public final class ColdInstallPlan {
 
   public interface Recorder {
     void record(Mode mode, boolean probe, Observation observation);
+
+    /** 非 proot 引擎预检明确失败、即将改用下一个方式时的真实原因（默认不额外记录）。 */
+    default void fallback(Mode from, Mode to, String reason) {}
   }
 
   public interface CheckedAction {
@@ -74,11 +106,40 @@ public final class ColdInstallPlan {
 
   public static List<Mode> modes(
       boolean preferProroot, boolean prorootAvailable, boolean isolated, boolean noSeccomp) {
+    return modes(preferProroot ? "proroot" : "proot", prorootAvailable, isolated, noSeccomp);
+  }
+
+  /**
+   * 请求的引擎（proot/proroot/bxroot）排在首位，其后固定是 proot 与兼容 proot。
+   * engineSupported=false 表示宿主能力检查已明确失败，直接不排入该引擎。
+   */
+  public static List<Mode> modes(
+      String requestedEngine, boolean engineSupported, boolean isolated, boolean noSeccomp) {
     List<Mode> modes = new ArrayList<>();
-    if (preferProroot && prorootAvailable && isolated) modes.add(Mode.PROROOT);
+    Mode requested = Mode.forEngine(requestedEngine);
+    if (requested.fallsBackToProot() && engineSupported && isolated) modes.add(requested);
     if (!noSeccomp) modes.add(Mode.PROOT);
     modes.add(Mode.PROOT_COMPAT);
     return List.copyOf(modes);
+  }
+
+  private static void fallback(
+      Recorder recorder, List<Mode> modes, Mode failed, Observation observation) {
+    int next = modes.indexOf(failed) + 1;
+    if (!failed.fallsBackToProot() || next >= modes.size()) return;
+    String detail = observation.diagnostic == null ? "" : observation.diagnostic;
+    if (detail.length() > 400) detail = detail.substring(0, 400);
+    recorder.fallback(
+        failed,
+        modes.get(next),
+        "COLD_ENGINE_PRECHECK_FAILED engine="
+            + failed.runtime
+            + " exit="
+            + observation.exitCode
+            + " timedOut="
+            + observation.timedOut
+            + "\n"
+            + detail);
   }
 
   /** At most three probes and one package installation; no retry after package writes. */
@@ -92,8 +153,13 @@ public final class ColdInstallPlan {
     for (Mode mode : modes) {
       Observation probe = runner.run(mode, true);
       recorder.record(mode, true, probe);
-      if (!probe.exited) throw new IOException("COLD_INSTALL_PROCESS_EXIT_UNCONFIRMED");
-      if (!probe.ready(PROBE_READY)) continue;
+      Verdict verdict = Verdict.of(probe, PROBE_READY);
+      if (verdict == Verdict.UNKNOWN)
+        throw new IOException("COLD_INSTALL_PROCESS_EXIT_UNCONFIRMED");
+      if (verdict == Verdict.FAILED) {
+        fallback(recorder, modes, mode, probe);
+        continue;
+      }
       Observation installed = runner.run(mode, false);
       recorder.record(mode, false, installed);
       if (!installed.exited) throw new IOException("COLD_INSTALL_PROCESS_EXIT_UNCONFIRMED");
@@ -128,7 +194,8 @@ public final class ColdInstallPlan {
     for (Mode mode : modes) {
       Observation result = runner.run(mode, true);
       recorder.record(mode, true, result);
-      if (!result.exited) throw new IOException("COLD_INSTALL_PROCESS_EXIT_UNCONFIRMED");
+      if (Verdict.of(result, PROBE_READY) == Verdict.UNKNOWN)
+        throw new IOException("COLD_INSTALL_PROCESS_EXIT_UNCONFIRMED");
       if (result.ready(PROBE_READY) && result.ready(INSTALL_READY)) return mode;
       if (allowDynamicLoaderRetry && mode == Mode.PROROOT && staticSignalStackFailure(result)) {
         Observation dynamic = runner.run(Mode.PROROOT_DYNAMIC, true);
@@ -136,6 +203,7 @@ public final class ColdInstallPlan {
         if (!dynamic.exited) throw new IOException("COLD_INSTALL_PROCESS_EXIT_UNCONFIRMED");
         if (dynamic.ready(PROBE_READY) && dynamic.ready(INSTALL_READY)) return Mode.PROROOT_DYNAMIC;
       }
+      fallback(recorder, modes, mode, result);
     }
     throw new IOException("COLD_CONFIGURED_CHECK_FAILED");
   }

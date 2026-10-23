@@ -674,6 +674,7 @@ public class WebProcessManager {
       String name = new File(argv[0]).getName();
       if (!(name.startsWith("libproot")
           || name.startsWith("libproroot")
+          || name.startsWith("libbxroot")
           || name.startsWith("libdsha-proroot"))) continue;
       // 此处只证明“没有”，不授予signal权限。旧记录缺少可信标记时，
       // 同UID的任何此类启动器都保留屏障；不能把未识别的终端或旧argv当作已经退出。

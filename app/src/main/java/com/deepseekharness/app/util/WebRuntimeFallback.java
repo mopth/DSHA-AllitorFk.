@@ -1,6 +1,9 @@
 package com.deepseekharness.app.util;
 
-/** 兼容重试只由已确认的进程退出触发；等待时间、插件报错和用户停止都不能触发。 */
+/**
+ * 兼容重试只由已确认的进程退出触发；等待时间、插件报错和用户停止都不能触发。
+ * 适用于任何非 proot 引擎（proroot、bxroot）：明确退出后改用 proot 一次。
+ */
 public final class WebRuntimeFallback {
   private WebRuntimeFallback() {}
 
@@ -11,7 +14,9 @@ public final class WebRuntimeFallback {
       boolean pluginFailure,
       boolean current,
       Integer exitCode) {
-    return "proroot".equals(runtime)
+    return runtime != null
+        && !"proot".equals(runtime)
+        && com.deepseekharness.app.runtime.RuntimeEngine.known(runtime)
         && !retried
         && !hadAuth
         && !pluginFailure

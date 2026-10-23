@@ -52,4 +52,31 @@ public class ProcessBirthHandshakeTest {
         () ->
             ProcessBirthHandshake.read(new ByteArrayInputStream(new byte[0]), 99, () -> true, 20));
   }
+
+  @Test
+  public void failuresCarrySanitizedLauncherOutput() throws Exception {
+    IOException invalid =
+        assertThrows(
+            IOException.class,
+            () ->
+                ProcessBirthHandshake.read(
+                    new ByteArrayInputStream("DSHA_SESSION_SETSID\n".getBytes()), 99, () -> true, 50));
+    assertTrue(
+        invalid.getMessage(),
+        invalid.getMessage().contains("PROCESS_BIRTH_HANDSHAKE_INVALID:DSHA_SESSION_SETSID"));
+    IOException exited =
+        assertThrows(
+            IOException.class,
+            () ->
+                ProcessBirthHandshake.read(
+                    new ByteArrayInputStream("partial\u0001".getBytes()), 99, () -> false, 50));
+    assertTrue(
+        exited.getMessage(), exited.getMessage().contains("PROCESS_BIRTH_HANDSHAKE_EXITED:partial?"));
+    IOException silent =
+        assertThrows(
+            IOException.class,
+            () -> ProcessBirthHandshake.read(new ByteArrayInputStream(new byte[0]), 99, () -> true, 20));
+    assertTrue(
+        silent.getMessage(), silent.getMessage().startsWith("PROCESS_BIRTH_HANDSHAKE_TIMEOUT:20ms"));
+  }
 }

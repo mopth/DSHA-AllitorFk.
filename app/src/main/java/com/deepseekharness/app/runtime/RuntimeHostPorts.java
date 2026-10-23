@@ -23,16 +23,35 @@ public final class RuntimeHostPorts {
 
   public static final class Settings {
     public final String dnsMode;
-    public final boolean proroot, staticLoader, disableProotSeccomp;
+    /** 用户选择的引擎标识（{@link RuntimeEngine#id}），唯一可信来源。 */
+    public final String engine;
+    /** 兼容旧调用方：等价于 engine == proroot。 */
+    public final boolean proroot;
+    public final boolean staticLoader, disableProotSeccomp;
 
     public Settings(
         String dnsMode, boolean proroot, boolean staticLoader, boolean disableProotSeccomp) {
+      this(
+          dnsMode,
+          proroot ? RuntimeEngine.PROROOT.id : RuntimeEngine.PROOT.id,
+          staticLoader,
+          disableProotSeccomp);
+    }
+
+    public Settings(
+        String dnsMode, String engine, boolean staticLoader, boolean disableProotSeccomp) {
       if (dnsMode == null || !dnsMode.matches("auto|ipv4|native"))
         throw new IllegalArgumentException("RUNTIME_DNS_MODE");
+      if (!RuntimeEngine.known(engine)) throw new IllegalArgumentException("RUNTIME_ENGINE");
       this.dnsMode = dnsMode;
-      this.proroot = proroot;
+      this.engine = engine;
+      this.proroot = RuntimeEngine.PROROOT.id.equals(engine);
       this.staticLoader = staticLoader;
       this.disableProotSeccomp = disableProotSeccomp;
+    }
+
+    public RuntimeEngine runtimeEngine() {
+      return RuntimeEngine.parse(engine);
     }
   }
 
@@ -226,9 +245,12 @@ public final class RuntimeHostPorts {
     Provider provider = required();
     Settings stored = provider.snapshot();
     if (stored == null) throw new java.io.IOException("RUNTIME_SETTINGS_UNAVAILABLE");
-    if ("proroot".equals(mode.runtime)
+    boolean nonProot = !RuntimeEngine.PROOT.id.equals(mode.runtime);
+    if (RuntimeEngine.PROROOT.id.equals(mode.runtime)
         && (!stored.proroot && !provider.preferFastColdMode()
             || stored.staticLoader != frozen.staticLoader))
+      throw new java.io.IOException("COLD_RUNTIME_SELECTION_CHANGED");
+    if (RuntimeEngine.BXROOT.id.equals(mode.runtime) && !mode.runtime.equals(stored.engine))
       throw new java.io.IOException("COLD_RUNTIME_SELECTION_CHANGED");
     if (mode == com.deepseekharness.app.util.ColdInstallPlan.Mode.PROROOT_DYNAMIC
         && (!provider.preferFastColdMode() || !frozen.staticLoader))
@@ -242,9 +264,9 @@ public final class RuntimeHostPorts {
     Settings candidate =
         new Settings(
             frozen.dnsMode,
-            "proroot".equals(mode.runtime),
+            mode.runtime,
             mode.staticLoader(frozen.staticLoader),
-            "proroot".equals(mode.runtime) ? frozen.disableProotSeccomp : mode.noSeccomp);
+            nonProot ? frozen.disableProotSeccomp : mode.noSeccomp);
     pendingCold.set(
         new PendingColdSelection(
             root, identity, packageSlotSha, expectedRuntimeId, mode, candidate, frozen, before));
@@ -268,9 +290,9 @@ public final class RuntimeHostPorts {
     Object actual = proof.get("runtimeMode");
     boolean sameMode = pending.mode.runtime.equals(actual);
     boolean compatibilityFallback =
-        "proroot".equals(pending.mode.runtime)
-            && "proot".equals(actual)
-            && "proroot".equals(proof.get("fallbackFrom"))
+        !RuntimeEngine.PROOT.id.equals(pending.mode.runtime)
+            && RuntimeEngine.PROOT.id.equals(actual)
+            && pending.mode.runtime.equals(proof.get("fallbackFrom"))
             && (proof.get("fallbackExitCode") instanceof Integer
                 || proof.get("fallbackExitCode") instanceof Long)
             && ((Number) proof.get("fallbackExitCode")).longValue() >= Integer.MIN_VALUE
@@ -304,10 +326,11 @@ public final class RuntimeHostPorts {
     Settings proven = settings();
     Settings selected = required().successfulColdRuntime(rootfs, mode, packageSlotSha);
     if (selected == null
-        || selected.proroot != "proroot".equals(mode.runtime)
-        || "proroot".equals(mode.runtime)
+        || !mode.runtime.equals(selected.engine)
+        || RuntimeEngine.PROROOT.id.equals(mode.runtime)
             && selected.staticLoader != mode.staticLoader(proven.staticLoader)
-        || !"proroot".equals(mode.runtime) && selected.disableProotSeccomp != mode.noSeccomp)
+        || RuntimeEngine.PROOT.id.equals(mode.runtime)
+            && selected.disableProotSeccomp != mode.noSeccomp)
       throw new java.io.IOException("COLD_RUNTIME_SELECTION_MISMATCH");
     if (invocation.get() != null) invocation.set(selected);
   }

@@ -854,9 +854,9 @@ final class WebLifecycleController {
             generation,
             com.deepseekharness.app.util.UiText.format(
                 "运行方式：%s",
-                config.isProroot() && android.os.Build.VERSION.SDK_INT >= 26
-                    ? "proroot"
-                    : "proot"));
+                android.os.Build.VERSION.SDK_INT >= config.getContainerRuntime().minSdk
+                    ? config.getContainerRuntime().id
+                    : com.deepseekharness.app.runtime.RuntimeEngine.PROOT.id));
         new File(proot.getRootfsDir(), "root/.dsha-web-activity.json").delete();
         io.execute(
             () -> {
@@ -1140,8 +1140,10 @@ final class WebLifecycleController {
                     reportStatus(
                         generation,
                         onStatus,
-                        com.deepseekharness.app.util.UiText.text(
-                            "proroot 已退出，正在自动使用 proot 兼容重试；本轮只重试一次。"));
+                        com.deepseekharness.app.util.UiText.choose(
+                            runtimeName + " 已退出，正在自动使用 proot 兼容重试；本轮只重试一次。",
+                            runtimeName
+                                + " has stopped; retrying once automatically with proot compatibility mode."));
                     io.execute(() -> retryWithProot(generation, onStatus, safeMode));
                     return;
                   }

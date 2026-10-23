@@ -65,7 +65,7 @@ final class RuntimeLauncher {
 
   private void environment(ProcessBuilder builder, LaunchSpec spec, File preparedPreloads)
       throws IOException {
-    spec.runtime.applyEnv(builder, base, lib, tmp);
+    spec.runtime.applyEnv(builder, base, lib, tmp, rootfs);
     if ("proot".equals(spec.runtime.id()) && !spec.hardlinks) {
       File l2s = new File(rootfs, ".l2s");
       if (!l2s.isDirectory() && !l2s.mkdirs())
@@ -101,6 +101,8 @@ final class RuntimeLauncher {
       builder
           .environment()
           .put("DSHA_MANAGED_PACKAGE_PROOFS_SHA256", managedPackageProofAssetSha256(context));
+    builder.environment().put("DSHA_RUNTIME_ENGINE", spec.runtime.id());
+    spec.runtime.finalizeEnvironment(builder.environment(), tmp, rootfs);
   }
 
   static String managedPackageProofAssetSha256(Context context) throws IOException {

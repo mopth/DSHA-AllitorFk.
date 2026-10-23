@@ -374,4 +374,117 @@ public class ColdInstallPlanTest {
     String output = new String(process.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
     return result(process.exitValue(), true, output);
   }
+
+  private static ColdInstallPlan.Recorder capture(List<String> fallbacks) {
+    return new ColdInstallPlan.Recorder() {
+      @Override
+      public void record(ColdInstallPlan.Mode mode, boolean probe, ColdInstallPlan.Observation o) {}
+
+      @Override
+      public void fallback(ColdInstallPlan.Mode from, ColdInstallPlan.Mode to, String reason) {
+        fallbacks.add(from + "->" + to + ":" + reason);
+      }
+    };
+  }
+
+  @Test
+  public void requestedEngineLeadsAndUnsupportedEngineIsNeverPlanned() {
+    assertEquals(
+        List.of(
+            ColdInstallPlan.Mode.BXROOT,
+            ColdInstallPlan.Mode.PROOT,
+            ColdInstallPlan.Mode.PROOT_COMPAT),
+        ColdInstallPlan.modes("bxroot", true, true, false));
+    assertEquals(
+        List.of(ColdInstallPlan.Mode.PROOT, ColdInstallPlan.Mode.PROOT_COMPAT),
+        ColdInstallPlan.modes("bxroot", false, true, false));
+    assertEquals(
+        List.of(ColdInstallPlan.Mode.PROOT_COMPAT), ColdInstallPlan.modes("bxroot", true, false, true));
+    assertEquals(
+        ColdInstallPlan.modes(true, true, true, false),
+        ColdInstallPlan.modes("proroot", true, true, false));
+    assertEquals(
+        List.of(ColdInstallPlan.Mode.PROOT, ColdInstallPlan.Mode.PROOT_COMPAT),
+        ColdInstallPlan.modes("proot", true, true, false));
+  }
+
+  @Test
+  public void explicitBxrootPrecheckFailureFallsBackToProotWithReason() throws Exception {
+    List<String> calls = new ArrayList<>(), fallbacks = new ArrayList<>();
+    var selected =
+        ColdInstallPlan.run(
+            ColdInstallPlan.modes("bxroot", true, true, false),
+            (mode, probe) -> {
+              calls.add(mode + ":" + probe);
+              if (mode == ColdInstallPlan.Mode.BXROOT) return result(126, true, "ulx: exec format");
+              return ready(probe);
+            },
+            capture(fallbacks));
+    assertEquals(ColdInstallPlan.Mode.PROOT, selected);
+    assertEquals(List.of("BXROOT:true", "PROOT:true", "PROOT:false"), calls);
+    assertEquals(1, fallbacks.size());
+    assertTrue(fallbacks.get(0), fallbacks.get(0).startsWith("BXROOT->PROOT:COLD_ENGINE_PRECHECK_FAILED"));
+    assertTrue(fallbacks.get(0), fallbacks.get(0).contains("exit=126"));
+  }
+
+  @Test
+  public void unknownBxrootPrecheckNeverSwitchesEngine() {
+    List<String> calls = new ArrayList<>(), fallbacks = new ArrayList<>();
+    IOException stopped =
+        assertThrows(
+            IOException.class,
+            () ->
+                ColdInstallPlan.run(
+                    ColdInstallPlan.modes("bxroot", true, true, false),
+                    (mode, probe) -> {
+                      calls.add(mode + ":" + probe);
+                      return result(0, false, "");
+                    },
+                    capture(fallbacks)));
+    assertEquals("COLD_INSTALL_PROCESS_EXIT_UNCONFIRMED", stopped.getMessage());
+    assertEquals(List.of("BXROOT:true"), calls);
+    assertTrue(fallbacks.isEmpty());
+    assertEquals(ColdInstallPlan.Verdict.UNKNOWN, ColdInstallPlan.Verdict.of(null, "x"));
+    assertEquals(
+        ColdInstallPlan.Verdict.FAILED,
+        ColdInstallPlan.Verdict.of(result(1, true, ""), ColdInstallPlan.PROBE_READY));
+    assertEquals(
+        ColdInstallPlan.Verdict.READY,
+        ColdInstallPlan.Verdict.of(ready(true), ColdInstallPlan.PROBE_READY));
+  }
+
+  @Test
+  public void configuredBxrootCheckFallsBackOnlyAfterConfirmedExit() throws Exception {
+    List<String> fallbacks = new ArrayList<>();
+    assertEquals(
+        ColdInstallPlan.Mode.PROOT,
+        ColdInstallPlan.runConfigured(
+            ColdInstallPlan.modes("bxroot", true, true, false),
+            false,
+            (mode, probe) ->
+                mode == ColdInstallPlan.Mode.BXROOT ? result(139, true, "SIGSEGV") : configuredReady(),
+            capture(fallbacks)));
+    assertEquals(1, fallbacks.size());
+    List<String> none = new ArrayList<>();
+    assertThrows(
+        IOException.class,
+        () ->
+            ColdInstallPlan.runConfigured(
+                ColdInstallPlan.modes("bxroot", true, true, false),
+                false,
+                (mode, probe) -> result(0, false, ""),
+                capture(none)));
+    assertTrue(none.isEmpty());
+  }
+
+  @Test
+  public void prootFailuresAreNotEngineFallbacks() throws Exception {
+    List<String> fallbacks = new ArrayList<>();
+    ColdInstallPlan.run(
+        ColdInstallPlan.modes("proot", false, true, false),
+        (mode, probe) ->
+            probe && mode == ColdInstallPlan.Mode.PROOT ? result(1, true, "x") : ready(probe),
+        capture(fallbacks));
+    assertTrue(fallbacks.isEmpty());
+  }
 }

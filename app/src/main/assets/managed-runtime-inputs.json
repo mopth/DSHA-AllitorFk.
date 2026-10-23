@@ -454,7 +454,8 @@
     "plugin-inventory-management-remote-codec-patch.json",
     "plugin-inventory-management-api-codec-patch.json",
     "plugin-manager-management-probe-patch.json",
-    "plugin-bundle-proof-workers-patch.json"
+    "plugin-bundle-proof-workers-patch.json",
+    "bxroot-native-lock.json"
   ],
   "assetTrees": [
     "web-integration",
@@ -670,6 +671,9 @@
     "tools/proroot-compat/linker-entry.c",
     "tools/prepare-welcome-notice-patch.py",
     "tools/welcome-notice/WelcomeNotice.js",
-    "tools/welcome-notice/WelcomeNoticeStore.js"
+    "tools/welcome-notice/WelcomeNoticeStore.js",
+    "tools/bxroot/lock.json",
+    "tools/prepare-bxroot-native-proof.py",
+    "tools/native_runtime_proof.py"
   ]
 }

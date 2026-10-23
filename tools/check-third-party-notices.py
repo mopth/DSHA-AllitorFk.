@@ -14,7 +14,9 @@ generator = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(generator)
 REQUIRED_LICENSES = ['proot-COPYING.txt', 'GPL-3.0.txt', 'LGPL-3.0.txt', 'MPL-2.0.txt',
                      'gson-LICENSE.txt', 'bouncycastle-LICENSE.txt', 'certifi-LICENSE.txt',
-                     'Shizuku-MIT.txt', 'Termux-terminal-Apache-2.0.txt', 'snakeyaml-LICENSE.txt']
+                     'Shizuku-MIT.txt', 'Termux-terminal-Apache-2.0.txt', 'snakeyaml-LICENSE.txt',
+                     'bxroot-MIT.txt', 'bxroot-glibc-COPYING.LIB.txt', 'bxroot-glibc-copyright.txt',
+                     'bxroot-gcc-copyright.txt', 'GCC-RUNTIME-EXCEPTION-3.1.txt']
 
 
 def verify_licenses(root=ROOT):

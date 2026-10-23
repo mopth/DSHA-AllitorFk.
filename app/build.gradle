@@ -6,6 +6,8 @@ plugins {
 // AllitorFk：显示名 / APK 文件名 / Release 名的唯一来源（改名只改这一行）。
 // APK 文件 = <名>.apk，Low 版 = <名>-low.apk；applicationId 另见 defaultConfig，不随此变。
 ext.dshaReleaseName = 'dsha-AllitorFk.-dsh0.2.1-rc.2'
+// 是否启用官方 dsha.cc 更新源：待老板决定，默认关闭。
+ext.dshaOfficialUpdateFeed = (project.findProperty('dsha.officialUpdateFeed') ?: 'false') == 'true'
 if (!(dshaReleaseName ==~ /[A-Za-z0-9][A-Za-z0-9._-]{0,100}/))
     throw new GradleException('dshaReleaseName 只能含字母数字和 ._-')
 def bundledTools = new groovy.json.JsonSlurper().parse(rootProject.file('tools/runtime-tools.lock.json'))
@@ -55,6 +57,8 @@ android {
         targetSdk 37
         buildConfigField 'String', 'BUNDLED_PNPM_VERSION', '"' + bundledTools.pnpm.version + '"'
         buildConfigField 'String', 'DISPLAY_NAME', '"' + dshaReleaseName + '"'
+        // AllitorFk 默认不访问官方 dsha.cc 更新源（不同包名无法覆盖安装，只会产生误导提示）。
+        buildConfigField 'boolean', 'OFFICIAL_UPDATE_FEED', String.valueOf(dshaOfficialUpdateFeed)
         resValue 'string', 'app_name', dshaReleaseName
         versionCode 190
         // DSHA 修订号 + 固定的北京时间戳 + 内置 DSH 版本；同一交付重建不变。
@@ -121,7 +125,9 @@ android {
         jniLibs {
             useLegacyPackaging = true
             // 应急启动器按签名 APK 中的完整字节校验，禁止打包阶段再改写这两份 ELF。
-            keepDebugSymbols += ['**/libproot.so', '**/libprootloader.so']
+            // bxroot 三件由 assets/bxroot-native-lock.json 逐字节锁定，打包时同样不能 strip。
+            keepDebugSymbols += ['**/libproot.so', '**/libprootloader.so',
+                                 '**/libbxroot.so', '**/libbxroot-runtime.so', '**/libbxroot-ulx.so']
             // 使用 app 自带的同版本 16 KB JNI，覆盖 terminal-emulator AAR 中的旧库。
             pickFirsts += ['**/libtermux.so']
             excludes += ['**/x86/**', '**/x86_64/**', '**/armeabi/**', '**/armeabi-v7a/**']
@@ -196,6 +202,15 @@ def verifyBuiltinRegistry = tasks.register('verifyBuiltinRegistry', Exec) {
     commandLine(System.getenv('DSHA_PYTHON') ?: 'python3', '-B',
             rootProject.file('tools/generate-builtin-plugins.py').absolutePath, '--verify')
 }
+// bxroot（开源，来自 fix4 e6420cd）：锁文件与 jniLibs 实际字节一致才允许打包。
+def verifyBxrootNative = tasks.register('verifyBxrootNative', Exec) {
+    inputs.files(rootProject.files('tools/bxroot/lock.json', 'tools/bxroot/build.py',
+            'tools/prepare-bxroot-native-proof.py', 'tools/native_runtime_proof.py',
+            'app/src/main/assets/bxroot-native-lock.json'))
+    inputs.files(fileTree('src/main/jniLibs') { include '**/libbxroot*.so' })
+    commandLine(System.getenv('DSHA_PYTHON') ?: 'python3', '-B',
+            rootProject.file('tools/prepare-bxroot-native-proof.py').absolutePath, '--check')
+}
 def verifyCredentialRegistry = tasks.register('verifyCredentialRegistry', Exec) {
     inputs.files(rootProject.files('tools/generate-credential-paths.py', 'app/src/main/assets/credential-paths.json',
             'app/src/main/java/com/deepseekharness/app/util/CredentialPathRules.java'))
@@ -210,7 +225,7 @@ def verifyProrootCompat = tasks.register('verifyProrootCompat', Exec) {
     commandLine(System.getenv('DSHA_PYTHON') ?: 'python3', '-B',
             rootProject.file('tools/test-proroot-compat.py').absolutePath)
 }
-tasks.named('preBuild').configure { dependsOn(verifyBundledIdentities, verifyBuiltinRegistry, verifyCredentialRegistry, verifyBundledDshVersion, verifyProrootCompat) }
+tasks.named('preBuild').configure { dependsOn(verifyBxrootNative, verifyBundledIdentities, verifyBuiltinRegistry, verifyCredentialRegistry, verifyBundledDshVersion, verifyProrootCompat) }
 tasks.withType(Test).configureEach {
     systemProperty 'dsha.assetsDir', file('src/main/assets').absolutePath
 }

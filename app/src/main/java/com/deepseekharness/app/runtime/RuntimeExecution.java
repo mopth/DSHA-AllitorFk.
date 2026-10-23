@@ -51,22 +51,39 @@ final class RuntimeExecution {
     hardlinks = new RuntimeHardlinks(context, rootfs, ports);
   }
 
+  /**
+   * 解析本次调用实际使用的引擎：请求的非 proot 引擎在宿主明确不支持、原生文件缺失或准备失败时
+   * 回到 proot 并记录原因；内核版本读取失败等「未知」不触发切换，照常尝试所选引擎。
+   */
   ContainerRuntime runtime() {
     RuntimeHostPorts.Settings settings = ports.settings();
+    RuntimeEngine engine = settings.runtimeEngine();
+    if (forceProot || engine.isProot()) return proot();
     try {
-      if (!forceProot && android.os.Build.VERSION.SDK_INT >= 26 && settings.proroot) {
-        ContainerRuntime selected =
-            new ContainerRuntime.Proroot(
-                context, ContainerRuntime.Proroot.defaultDir(context), settings.staticLoader);
-        if (selected.available()) {
-          selected.prepare();
-          return selected;
-        }
-        ports.record(
-            "RUNTIME_SELECTION_FALLBACK", SensitiveData.redact(selected.unavailableReason()));
+      String release;
+      try {
+        release = android.system.Os.uname().release;
+      } catch (RuntimeException unreadable) {
+        release = null;
       }
+      EngineCapability gate =
+          EngineCapability.evaluate(engine, android.os.Build.VERSION.SDK_INT, release, "");
+      if (gate.verdict == EngineCapability.Verdict.UNSUPPORTED) {
+        ports.record("RUNTIME_SELECTION_FALLBACK", SensitiveData.redact(gate.reason));
+        return proot();
+      }
+      ContainerRuntime selected = engine.create(context, settings, nativeFiles.find("libproot.so"));
+      if (selected.available()) {
+        selected.prepare();
+        return selected;
+      }
+      ports.record(
+          "RUNTIME_SELECTION_FALLBACK",
+          SensitiveData.redact(engine.id + ": " + selected.unavailableReason()));
     } catch (Exception failure) {
-      ports.record("RUNTIME_SELECTION_FALLBACK", SensitiveData.redact(String.valueOf(failure)));
+      ports.record(
+          "RUNTIME_SELECTION_FALLBACK",
+          SensitiveData.redact(engine.id + ": " + String.valueOf(failure)));
     }
     return proot();
   }
@@ -173,10 +190,13 @@ final class RuntimeExecution {
       ContainerRuntime runtime = selected == null ? runtime() : selected;
       boolean links = hardlinks();
       prepareTools();
-      if (!"proroot".equals(runtime.id()))
+      if (!runtime.engine().boundedNeedsSession)
         return start(command, launch(runtime).hardlinks(links).build());
       if (IsolatedInstallProcess.bundledLauncher(context) == null)
-        throw new IOException("BOUNDED_PROROOT_SESSION_UNAVAILABLE");
+        throw new IOException(
+            "BOUNDED_"
+                + runtime.id().toUpperCase(java.util.Locale.ROOT)
+                + "_SESSION_UNAVAILABLE");
       nativeFiles();
       BoundedGuestSessions.Operation record = BoundedGuestSessions.begin(context.getFilesDir());
       try {

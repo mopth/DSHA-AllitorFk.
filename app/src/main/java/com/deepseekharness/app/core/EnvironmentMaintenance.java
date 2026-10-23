@@ -361,8 +361,8 @@ public final class EnvironmentMaintenance {
           String title =
               stage.equals("TRIAL_COMPATIBILITY_RETRY")
                   ? com.deepseekharness.app.util.UiText.choose(
-                      "proroot 已确认退出，正在使用 proot 进行一次兼容验证…",
-                      "proroot has stopped; verifying once with proot compatibility mode…")
+                      "所选引擎（proroot/bxroot）已确认退出，正在使用 proot 进行一次兼容验证…",
+                      "The selected engine (proroot/bxroot) has stopped; verifying once with proot compatibility mode…")
                   : stage.startsWith("TRIAL_")
                       ? trialProgress(stage)
                       : com.deepseekharness.app.util.UiText.choose(

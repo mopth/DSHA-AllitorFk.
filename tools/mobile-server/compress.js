@@ -4,6 +4,13 @@
  * once, with its original encoding, callback and backpressure. Headers alone
  * may wait one event-loop turn; no response body is ever accumulated here.
  * SSE, HEAD, already encoded bodies and oversized JSON remain native streams.
+ *
+ * AllitorFk defensive guard (download "Failed to fetch"; root cause NOT
+ * confirmed): a response is compressed at most once. Any Content-Encoding
+ * visible at end() time (headers set after writeHead, another layer such as
+ * the host's compression middleware), a body that already looks encoded, or a
+ * declared Content-Length that disagrees with the body passes through
+ * byte-identical, so the declared length always describes the bytes sent.
  */
 import { brotliCompress, constants as zlibConstants, gzip } from 'node:zlib';
 import { ServerResponse as NodeServerResponse } from 'node:http';
@@ -44,6 +51,23 @@ function pickEncoding(res) {
     const br = values.get('br') ?? values.get('*') ?? 0;
     const gzip = values.get('gzip') ?? values.get('*') ?? 0;
     return br > 0 && br >= gzip ? 'br' : gzip > 0 ? 'gzip' : null;
+}
+/** Defensive: JSON text never starts with a gzip or zstd frame magic. */
+export function looksEncoded(body) {
+    return body.byteLength >= 2 && body[0] === 0x1f && body[1] === 0x8b
+        || body.byteLength >= 4 && body[0] === 0x28 && body[1] === 0xb5 && body[2] === 0x2f && body[3] === 0xfd;
+}
+/** Defensive: never re-frame a body whose declared length is not its real length. */
+export function declaredLengthMatches(headers, body) {
+    const declared = headerValue(headers, 'content-length');
+    if (declared === undefined) return true;
+    return /^\d+$/.test(declared.trim()) && Number(declared.trim()) === body.byteLength;
+}
+/** Defensive: another layer may have chosen an encoding after writeHead. */
+export function alreadyEncoded(res, headers) {
+    if (headerValue(headers, 'content-encoding') !== undefined) return true;
+    try { return res.getHeader('content-encoding') !== undefined; }
+    catch { return true; }
 }
 function hasBody(res, status = res.statusCode) {
     return res.req?.method !== 'HEAD' && status >= 200 && ![204, 205, 206, 304].includes(status);
@@ -165,6 +189,9 @@ export function installResponseCompression({ matches = () => true } = {}) {
                 body = Buffer.from(chunk);
             }
         }
+        if (body !== undefined && (alreadyEncoded(this, headers) || looksEncoded(body)
+            || !declaredLengthMatches(headers, body)))
+            body = undefined;
         if (body === undefined) {
             flush(this);
             return delegate(origEnd, this, args);

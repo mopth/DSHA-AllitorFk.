@@ -19,4 +19,13 @@ public class WebRuntimeFallbackTest {
     assertFalse(WebRuntimeFallback.shouldRetry("proroot", false, true, false, true, 139));
     assertFalse(WebRuntimeFallback.shouldRetry("proroot", false, false, false, false, 139));
   }
+
+  @Test
+  public void everyNonProotEngineButNoUnknownNameCanRetryOnce() {
+    assertTrue(WebRuntimeFallback.shouldRetry("bxroot", false, false, false, true, 1));
+    assertFalse(WebRuntimeFallback.shouldRetry("bxroot", true, false, false, true, 1));
+    assertFalse(WebRuntimeFallback.shouldRetry("bxroot", false, false, false, true, null));
+    assertFalse(WebRuntimeFallback.shouldRetry("unknown", false, false, false, true, 1));
+    assertFalse(WebRuntimeFallback.shouldRetry(null, false, false, false, true, 1));
+  }
 }

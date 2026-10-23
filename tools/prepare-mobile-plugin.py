@@ -11,7 +11,9 @@ ROOT = Path(__file__).resolve().parents[1]
 LOCK = ROOT / 'tools/mobile-plugin-upstream.lock.json'
 DESTINATION = ROOT / 'app/src/main/assets/builtin-plugins/dsh-web-mobile'
 PATCHED = {'lib/client.js', 'lib/compress.js', 'lib/delete-session.js', 'lib/index.js',
-           'lib/compress.js.map', 'lib/delete-session.js.map', 'lib/index.js.map'}
+           'lib/compress.js.map', 'lib/delete-session.js.map', 'lib/index.js.map',
+           # AllitorFk：src/compress.ts 已与实际发布的 lib/compress.js 对齐，不再等于上游字节。
+           'src/compress.ts'}
 
 def prepare(source, write):
     lock = json.loads(LOCK.read_text(encoding='utf8'))

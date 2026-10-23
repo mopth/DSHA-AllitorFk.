@@ -79,9 +79,21 @@ final class IsolatedInstallProcess extends Process implements AutoCloseable {
               supervisor.getInputStream(),
               android.os.Process.myPid(),
               () -> !ProcessTermination.exited(supervisor),
-              2000);
-      ProcessIdentity identity = readIdentity(birth.pid);
-      if (birth.sameProcess(identity) && identity.ownsSession()) {
+              BIRTH_HANDSHAKE_TIMEOUT_MS);
+      ProcessIdentity inspected = readIdentity(birth.pid);
+      boolean alive = !ProcessTermination.exited(supervisor);
+      int sid = inspected == null ? NativeProcess.sessionId(birth.pid) : inspected.session;
+      ProcessIdentity identity = OwnedBirthEvidence.current(birth, inspected, alive, sid);
+      if (identity == null && launcherPid(supervisor) == birth.pid) {
+        // 只在 Java 句柄 pid 与出生行一致、且 /proc 与 getsid 均被拒读时放宽（fix2）。
+        identity = OwnedBirthEvidence.uninspectable(birth, inspected, alive, sid);
+        if (identity != null)
+          android.util.Log.w(
+              "DSHA",
+              "OWNED_BIRTH_INSPECTION_UNAVAILABLE "
+                  + OwnedBirthEvidence.describe(birth, inspected, alive, sid));
+      }
+      if (identity != null) {
         ready = new IsolatedInstallProcess(supervisor, identity, status, record);
         if (record != null) record.beforeLaunch(identity);
         supervisor
@@ -91,7 +103,9 @@ final class IsolatedInstallProcess extends Process implements AutoCloseable {
         accepted = true;
         return ready;
       }
-      throw new IOException("PROCESS_BIRTH_RECHECK_UNCONFIRMED");
+      throw new IOException(
+          "PROCESS_BIRTH_RECHECK_UNCONFIRMED:"
+              + OwnedBirthEvidence.describe(birth, inspected, alive, sid));
     } catch (InterruptedException error) {
       Thread.currentThread().interrupt();
       throw new IOException(com.deepseekharness.app.util.UiText.text("安装准备被中断"), error);
@@ -124,6 +138,24 @@ final class IsolatedInstallProcess extends Process implements AutoCloseable {
     this.status = status;
     this.record = null;
     this.evidence = evidence;
+  }
+
+  /** fix2：部分设备上会话启动器冷启动较慢，2 秒不足以读到出生行。 */
+  static final long BIRTH_HANDSHAKE_TIMEOUT_MS = 15_000;
+
+  private static int launcherPid(Process process) {
+    return ProcessIdentity.androidPid(process.getClass().getName(), process.toString());
+  }
+
+  /**
+   * /proc 与 getsid 都被 ROM 拒读时，仍可用本进程尚未回收的监督器句柄确认身份：只要句柄未退出，
+   * 它的 pid（也是会话/进程组号）就不会被复用。
+   */
+  private boolean uninspectableButOwned() {
+    if (ProcessTermination.exited(supervisor) || launcherPid(supervisor) != identity.pid)
+      return false;
+    int sid = NativeProcess.sessionId(identity.pid);
+    return sid == identity.session || OwnedBirthEvidence.sessionUnreadable(sid);
   }
 
   private static ProcessIdentity readIdentity(int pid) {
@@ -234,7 +266,9 @@ final class IsolatedInstallProcess extends Process implements AutoCloseable {
     }
     closing = true;
     ProcessIdentity current = readIdentity(identity.pid);
-    if (!identity.sameProcess(current) || !current.ownsSession()) {
+    boolean owned =
+        current == null ? uninspectableButOwned() : identity.sameProcess(current) && current.ownsSession();
+    if (!owned) {
       if (ProcessTermination.exited(supervisor) && groupGone() && boundedSessionEmpty()) {
         closed = true;
         status.delete();

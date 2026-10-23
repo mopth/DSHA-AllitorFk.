@@ -20,19 +20,29 @@ public final class ProcessBirthHandshake {
     while (System.nanoTime() - started < budget) {
       while (input.available() > 0) {
         int value = input.read();
-        if (value < 0) throw new IOException("PROCESS_BIRTH_HANDSHAKE_EOF");
+        if (value < 0) throw new IOException("PROCESS_BIRTH_HANDSHAKE_EOF:" + safe(line));
         if (value == '\n') {
           ProcessIdentity identity = parse(line.toString(StandardCharsets.US_ASCII.name()), owner);
-          if (identity == null) throw new IOException("PROCESS_BIRTH_HANDSHAKE_INVALID");
+          if (identity == null)
+            throw new IOException("PROCESS_BIRTH_HANDSHAKE_INVALID:" + safe(line));
           return identity;
         }
         if (line.size() >= LIMIT) throw new IOException("PROCESS_BIRTH_HANDSHAKE_LIMIT");
         line.write(value);
       }
-      if (!running.getAsBoolean()) throw new IOException("PROCESS_BIRTH_HANDSHAKE_EXITED");
+      if (!running.getAsBoolean())
+        throw new IOException("PROCESS_BIRTH_HANDSHAKE_EXITED:" + safe(line));
       Thread.sleep(5);
     }
-    throw new IOException("PROCESS_BIRTH_HANDSHAKE_TIMEOUT");
+    throw new IOException("PROCESS_BIRTH_HANDSHAKE_TIMEOUT:" + timeoutMs + "ms:" + safe(line));
+  }
+
+  /** 启动器在握手前的输出（如 DSHA_SESSION_*）有助定位；脱敏、去控制字符并限长（fix2）。 */
+  static String safe(ByteArrayOutputStream line) {
+    String text =
+        new String(line.toByteArray(), StandardCharsets.US_ASCII).replaceAll("[^\\x20-\\x7e]", "?");
+    text = SensitiveData.redact(text);
+    return text.length() > 160 ? text.substring(0, 160) : text;
   }
 
   public static ProcessIdentity parse(String line, int owner) {

@@ -30139,5 +30139,13 @@
     "source": [
       "app/src/main/java/com/deepseekharness/app/ui/AdbPairActivity.java"
     ]
+  },
+  {
+    "id": "allitorfk_trial_engine_compatibility",
+    "zh": "所选引擎（proroot/bxroot）已确认退出，正在使用 proot 进行一次兼容验证…",
+    "en": "The selected engine (proroot/bxroot) has stopped; verifying once with proot compatibility mode…",
+    "files": [
+      "app/src/main/java/com/deepseekharness/app/core/EnvironmentMaintenance.java"
+    ]
   }
 ]

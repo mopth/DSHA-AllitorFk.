@@ -73,4 +73,16 @@ public class ConfigStoreRuntimeSettingsTest {
     assertTrue(snapshot.staticLoader);
     assertFalse(snapshot.disableProotSeccomp);
   }
+
+  @Test
+  public void engineSelectionCoversBxrootAndUnknownValuesStayOnProot() {
+    var bx = ConfigStore.runtimeSettingsFrom(Map.of(Constants.KEY_CONTAINER_RUNTIME, "bxroot"));
+    assertEquals("bxroot", bx.engine);
+    assertFalse(bx.proroot);
+    assertEquals("proot", ConfigStore.runtimeSettingsFrom(Map.of()).engine);
+    assertEquals(
+        "proot",
+        ConfigStore.runtimeSettingsFrom(Map.of(Constants.KEY_CONTAINER_RUNTIME, "future-engine"))
+            .engine);
+  }
 }

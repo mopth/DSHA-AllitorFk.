@@ -7,12 +7,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 容器运行时抽象：把「怎么进 rootfs 执行命令」独立出来，让 proot 与 proroot 并存、可切换。
+ * 容器运行时抽象：把「怎么进 rootfs 执行命令」独立出来，三种引擎并存、可动态切换。
  *
- * <p>两条实现：
+ * <p>三条实现（引擎能力统一登记在 {@link RuntimeEngine}）：
  * <ul>
  *   <li>{@link Proot} —— Termux 的 proot（APK 内置 libproot.so），默认稳定路径；</li>
- *   <li>{@link Proroot} —— coderredlab/proroot，LD_PRELOAD + 二进制补丁，零 ptrace 开销。</li>
+ *   <li>{@link Proroot} —— coderredlab/proroot，LD_PRELOAD + 二进制补丁，零 ptrace 开销；</li>
+ *   <li>{@link BxrootRuntime} —— 开源 bxroot（glibc ULX），来自 fix4。</li>
  * </ul>
  *
  * <p>proroot 的 argv 里<b>没有</b> {@code --kill-on-exit}：{@code Process.destroy()} 只杀启动器，
@@ -38,6 +39,20 @@ public interface ContainerRuntime {
   /** 设置进程环境（LD_LIBRARY_PATH、TMPDIR 之类）。 */
   void applyEnv(ProcessBuilder pb, File baseDir, File libDir, File tmpDir)
       throws java.io.IOException;
+
+  /** 需要 rootfs 位置的引擎（bxroot）覆盖此入口；其余引擎与四参数版本相同。 */
+  default void applyEnv(ProcessBuilder pb, File baseDir, File libDir, File tmpDir, File rootfs)
+      throws java.io.IOException {
+    applyEnv(pb, baseDir, libDir, tmpDir);
+  }
+
+  /** 宿主写完通用环境后的最后一步收口；默认不改动。 */
+  default void finalizeEnvironment(java.util.Map<String, String> env, File tmpDir, File rootfs) {}
+
+  /** 该实现对应的引擎表项。 */
+  default RuntimeEngine engine() {
+    return RuntimeEngine.parse(id());
+  }
 
   /** 首次使用前的准备。抛异常表示失败，调用方应回退。 */
   void prepare() throws Exception;
@@ -316,7 +331,7 @@ public interface ContainerRuntime {
   }
 
   /**
-   * 两个运行时共用的 bind 列表，写在一处（避免「改了 proot 忘了改 proroot」）。
+   * 三个运行时共用的 bind 列表，写在一处（避免「改了 proot 忘了改 proroot」）。
    * Bundled Termux Python 要用 Android 的 linker 和 APEX 库，所以映射 /system、/apex。
    *
    * <p>注意：<b>不</b>映射 /linkerconfig —— app 进程对它无权限（selinux），

@@ -89,6 +89,10 @@ public final class WebProcSel {
     // 只接受已知的 Node + dsh web 参数序列，不能因命令中带有 bridge 名称就放行。
     String[] argv =
         cmdline.indexOf('\0') >= 0 ? cmdline.split("\u0000") : cmdline.trim().split("\\s+");
+    if (argv.length > 0 && basename(argv[0]).equals("libbxroot-ulx.so")) {
+      String[] logical = ulxArguments(argv);
+      return logical != null && looksLikeWeb(String.join("\u0000", logical));
+    }
     argv = directProrootPreloads(argv);
     if (argv.length > 0 && basename(argv[0]).equals("libproroot-bridge.so"))
       return isProrootWebPayload(argv) || isProrootManagedWebShell(argv);
@@ -96,6 +100,7 @@ public final class WebProcSel {
     String executable = basename(argv[0]);
     if (executable.equals("libproot.so")
         || executable.startsWith("libproroot")
+        || executable.startsWith("libbxroot")
         || executable.equals("proot")) return false;
     if (maySignalWeb(cmdline)) return true;
     // Exact executable script positions only; grep/vim/echo and shell -c text are not processes we
@@ -225,6 +230,39 @@ public final class WebProcSel {
     return name.equals("node") || name.equals("nodejs");
   }
 
+  /**
+   * bxroot 的 ULX 加载链：libbxroot-ulx.so ld-linux --argv0 NAME --preload libbxroot-runtime.so
+   * EXEC ARGS…；还原为逻辑 argv（NAME ARGS…）。只接受受管 Node 与 bash/sh，不认旧占位链。
+   */
+  private static String[] ulxArguments(String[] argv) {
+    if (argv.length < 8
+        || !argv[1].endsWith("/ld-linux-aarch64.so.1")
+        || !argv[2].equals("--argv0")
+        || !argv[4].equals("--preload")
+        || !basename(argv[5]).equals("libbxroot-runtime.so")) return null;
+    boolean node = isNode(argv[3]) && isManagedNode(argv[6]);
+    boolean shell =
+        (basename(argv[3]).equals("bash") || basename(argv[3]).equals("sh"))
+            && (argv[6].endsWith("/bin/bash") || argv[6].endsWith("/bin/sh"));
+    if (!node && !shell) return null;
+    String[] logical = new String[argv.length - 6];
+    logical[0] = argv[3];
+    System.arraycopy(argv, 7, logical, 1, argv.length - 7);
+    return logical;
+  }
+
+  /** 供其它识别器使用：bxroot ULX 链还原为逻辑 argv，其余原样切分。 */
+  public static String[] logicalArguments(String command) {
+    if (command == null) return new String[0];
+    String[] args =
+        command.indexOf('\0') >= 0 ? command.split("\u0000") : command.trim().split("\\s+");
+    if (args.length > 0 && basename(args[0]).equals("libbxroot-ulx.so")) {
+      String[] logical = ulxArguments(args);
+      return logical == null ? new String[0] : logical;
+    }
+    return args;
+  }
+
   private static boolean isManagedNode(String path) {
     return path.endsWith("/usr/local/bin/node") || path.endsWith("/usr/local/bin/nodejs");
   }
@@ -234,6 +272,10 @@ public final class WebProcSel {
     if (cmdline == null || cmdline.isEmpty()) return false;
     String[] args =
         cmdline.indexOf('\0') >= 0 ? cmdline.split("\u0000") : cmdline.trim().split("\\s+");
+    if (args.length > 0 && basename(args[0]).equals("libbxroot-ulx.so")) {
+      String[] logical = ulxArguments(args);
+      return logical != null && maySignalWeb(String.join("\u0000", logical));
+    }
     args = directProrootPreloads(args);
     if (args.length > 0 && basename(args[0]).equals("libproroot-bridge.so"))
       return isProrootWebPayload(args);
@@ -250,6 +292,10 @@ public final class WebProcSel {
     if (cmdline == null || cmdline.isEmpty()) return "";
     String[] args =
         cmdline.indexOf('\0') >= 0 ? cmdline.split("\u0000") : cmdline.trim().split("\\s+");
+    if (args.length > 0 && basename(args[0]).equals("libbxroot-ulx.so")) {
+      String[] logical = ulxArguments(args);
+      return logical == null ? "" : trialProfile(String.join("\u0000", logical));
+    }
     args = directProrootPreloads(args);
     int argument;
     if (args.length > 0 && basename(args[0]).equals("libproroot-bridge.so")) {

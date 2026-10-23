@@ -83,11 +83,13 @@ final class ColdToolsInstaller {
                       125, false, true, "", SensitiveData.redact(String.valueOf(failed)));
                 }
               },
-              (mode, probe, result) ->
-                  boot.hostPorts()
-                      .record(
-                          (probe ? "RUNTIME_PROBE_" : "PACKAGE_INSTALL_") + mode.name(),
-                          result.diagnostic));
+              recorder(
+                  boot,
+                  (mode, probe, result) ->
+                      boot.hostPorts()
+                          .record(
+                              (probe ? "RUNTIME_PROBE_" : "PACKAGE_INSTALL_") + mode.name(),
+                              result.diagnostic)));
       return new ProotBootstrap.ColdRuntimeSelection(selected, frozen);
     } catch (InterruptedException error) {
       Thread.currentThread().interrupt();
@@ -156,7 +158,14 @@ final class ColdToolsInstaller {
                     com.deepseekharness.app.util.ColdInstallPlan.probeCommand(
                             "/root/.dsha-cold-probe-" + java.util.UUID.randomUUID())
                         + " && printf '\\nDSHA_UBUNTU_TOOLS_READY\\n'";
-                var result = collectColdCommand(boot, mode, command, 30_000);
+                com.deepseekharness.app.util.BoundedProcessRunner.Result result;
+                try {
+                  result = collectColdCommand(boot, mode, command, 30_000);
+                } catch (EnginePrepareFailed failed) {
+                  // 引擎在启动 guest 之前就明确失败（原生文件/锁校验）：属于明确失败，可回落。
+                  return new com.deepseekharness.app.util.ColdInstallPlan.Observation(
+                      125, false, true, "", SensitiveData.redact(String.valueOf(failed)));
+                }
                 return new com.deepseekharness.app.util.ColdInstallPlan.Observation(
                     result.exitCode,
                     result.timedOut,
@@ -164,9 +173,11 @@ final class ColdToolsInstaller {
                     result.output + "\n" + result.tail,
                     result.diagnostic());
               },
-              (mode, probe, result) ->
-                  boot.hostPorts()
-                      .record("CONFIGURED_TOOLS_CHECK_" + mode.name(), result.diagnostic));
+              recorder(
+                  boot,
+                  (mode, probe, result) ->
+                      boot.hostPorts()
+                          .record("CONFIGURED_TOOLS_CHECK_" + mode.name(), result.diagnostic)));
       return new ProotBootstrap.ColdRuntimeSelection(selected, archiveHash);
     } catch (InterruptedException interrupted) {
       Thread.currentThread().interrupt();
@@ -174,35 +185,87 @@ final class ColdToolsInstaller {
     }
   }
 
+  /** 引擎预检明确失败（启动 guest 之前）。与「退出未确认」不同，它允许回落 proot。 */
+  static final class EnginePrepareFailed extends IOException {
+    EnginePrepareFailed(String engine, Throwable cause) {
+      super("COLD_ENGINE_PREPARE_FAILED engine=" + engine, cause);
+    }
+  }
+
+  /** 统一给冷安装计划挂上「回落原因」记录：写入运行日志 ENGINE_FALLBACK。 */
+  private static com.deepseekharness.app.util.ColdInstallPlan.Recorder recorder(
+      ProotBootstrap boot, com.deepseekharness.app.util.ColdInstallPlan.Recorder base) {
+    return new com.deepseekharness.app.util.ColdInstallPlan.Recorder() {
+      @Override
+      public void record(
+          com.deepseekharness.app.util.ColdInstallPlan.Mode mode,
+          boolean probe,
+          com.deepseekharness.app.util.ColdInstallPlan.Observation observation) {
+        base.record(mode, probe, observation);
+      }
+
+      @Override
+      public void fallback(
+          com.deepseekharness.app.util.ColdInstallPlan.Mode from,
+          com.deepseekharness.app.util.ColdInstallPlan.Mode to,
+          String reason) {
+        boot.hostPorts()
+            .record(
+                "ENGINE_FALLBACK",
+                "from=" + from.name() + " to=" + to.name() + "\n" + SensitiveData.redact(reason));
+      }
+    };
+  }
+
+  /**
+   * 选择冷安装的方式序列。请求的非 proot 引擎若宿主能力检查明确失败，就不排入并记录原因（回落
+   * proot）；若能力检查结果未知（例如无法读取内核版本），停止安装、不猜测切换。
+   */
   private static java.util.List<com.deepseekharness.app.util.ColdInstallPlan.Mode> modes(
-      ProotBootstrap boot, boolean configured) {
+      ProotBootstrap boot, boolean configured) throws IOException {
     var settings = boot.hostPorts().settings();
-    ContainerRuntime.Proroot candidate =
-        new ContainerRuntime.Proroot(
-            boot.ctx, ContainerRuntime.Proroot.defaultDir(boot.ctx), settings.staticLoader);
-    boolean available = android.os.Build.VERSION.SDK_INT >= 26 && candidate.available();
     boolean isolated = IsolatedInstallProcess.supported(boot.ctx);
     // 自动选择只用于已经完成 dpkg 的签名覆盖层及独立首次候选；旧环境/重建保持用户选择。
     boolean automatic =
         configured && boot.coldCandidate != null && boot.hostPorts().preferFastColdMode();
-    boolean preferProroot = !boot.forceProot && (settings.proroot || automatic);
+    RuntimeEngine requested =
+        boot.forceProot
+            ? RuntimeEngine.PROOT
+            : !settings.runtimeEngine().isProot()
+                ? settings.runtimeEngine()
+                : automatic ? RuntimeEngine.PROROOT : RuntimeEngine.PROOT;
+    EngineCapability capability =
+        requested.isProot()
+            ? EngineCapability.supported(requested)
+            : EngineCapability.probe(boot.ctx, requested, settings);
     boot.hostPorts()
         .record(
             "CAPABILITY",
-            "proroot="
-                + available
+            "engine="
+                + requested.id
+                + " capability="
+                + capability.verdict
                 + " isolation="
                 + isolated
-                + " preferProroot="
-                + preferProroot
                 + " automaticCold="
                 + automatic
                 + " supervisor="
                 + IsolatedInstallProcess.sessionLauncher(boot.ctx)
                 + "\n"
-                + (available ? "" : candidate.unavailableReason()));
+                + capability.reason);
+    if (capability.verdict == EngineCapability.Verdict.UNKNOWN)
+      throw new IOException("COLD_ENGINE_CAPABILITY_UNKNOWN: " + capability.reason);
+    boolean supported = capability.verdict == EngineCapability.Verdict.SUPPORTED;
+    if (!requested.isProot() && (!supported || !isolated))
+      boot.hostPorts()
+          .record(
+              "ENGINE_FALLBACK",
+              "from="
+                  + requested.id
+                  + " to=proot\n"
+                  + (supported ? "SESSION_SUPERVISOR_UNAVAILABLE" : capability.reason));
     return com.deepseekharness.app.util.ColdInstallPlan.modes(
-        preferProroot, available, isolated, settings.disableProotSeccomp);
+        requested.id, supported, isolated, settings.disableProotSeccomp);
   }
 
   private static String packageFingerprint(
@@ -218,6 +281,18 @@ final class ColdToolsInstaller {
             fs, host, boot.coldCandidate, slot);
   }
 
+  static ContainerRuntime coldRuntime(
+      ProotBootstrap boot, com.deepseekharness.app.util.ColdInstallPlan.Mode mode) {
+    RuntimeEngine engine = RuntimeEngine.parse(mode.runtime);
+    if (engine == RuntimeEngine.PROROOT)
+      return new ContainerRuntime.Proroot(
+          boot.ctx,
+          ContainerRuntime.Proroot.defaultDir(boot.ctx),
+          mode.staticLoader(boot.hostPorts().settings().staticLoader));
+    if (engine == RuntimeEngine.BXROOT) return new BxrootRuntime(boot.ctx);
+    return new ContainerRuntime.Proot(boot.ctx, boot.findNativeLib("libproot.so"));
+  }
+
   private static com.deepseekharness.app.util.BoundedProcessRunner.Result collectColdCommand(
       ProotBootstrap boot,
       com.deepseekharness.app.util.ColdInstallPlan.Mode mode,
@@ -230,13 +305,13 @@ final class ColdToolsInstaller {
       Process process = null;
       BoundedGuestSessions.Operation coldRecord = null;
       try {
-        ContainerRuntime rt =
-            "proroot".equals(mode.runtime)
-                ? new ContainerRuntime.Proroot(
-                    boot.ctx,
-                    ContainerRuntime.Proroot.defaultDir(boot.ctx),
-                    mode.staticLoader(boot.hostPorts().settings().staticLoader))
-                : new ContainerRuntime.Proot(boot.ctx, boot.findNativeLib("libproot.so"));
+        ContainerRuntime rt = coldRuntime(boot, mode);
+        if (mode.fallsBackToProot())
+          try {
+            rt.prepare();
+          } catch (Exception failed) {
+            throw new EnginePrepareFailed(mode.runtime, failed);
+          }
         boolean isolated = IsolatedInstallProcess.supported(boot.ctx);
         coldRecord = isolated ? BoundedGuestSessions.begin(boot.ctx.getFilesDir()) : null;
         if (boot.coldCandidate != null)

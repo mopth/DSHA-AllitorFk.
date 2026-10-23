@@ -118,6 +118,7 @@ public class ConfigFragment extends Fragment {
     automaticPort.setChecked("auto".equals(c.getWebPortMode()));
     port.setEnabled(!automaticPort.isChecked());
     checkUpdate.setChecked(c.isCheckUpdate());
+    checkUpdate.setEnabled(com.deepseekharness.app.core.UpdateEngine.feedEnabled());
     desktop.setChecked(c.isDesktopMode());
     CompoundButton gecko = v.findViewById(R.id.config_gecko_core);
     gecko.setVisibility(View.GONE);
@@ -125,19 +126,21 @@ public class ConfigFragment extends Fragment {
         .setVisibility(com.deepseekharness.app.BuildConfig.LOW_ANDROID ? View.VISIBLE : View.GONE);
     gecko.setChecked(c.isGeckoCore());
     proroot.setChecked(c.isProroot());
+    java.util.concurrent.atomic.AtomicReference<com.deepseekharness.app.runtime.RuntimeEngine>
+        engineChoice = new java.util.concurrent.atomic.AtomicReference<>(c.getContainerRuntime());
     lan.setChecked(c.isLanMode());
     overlay.setChecked(pref(ctx, "overlay_stream", false));
     bindChoice(
         v,
         R.id.config_runtime_choice,
         com.deepseekharness.app.util.UiText.choose("运行方式", "Runtime"),
-        new String[] {
-          com.deepseekharness.app.util.UiText.choose("proot（默认，稳定）", "proot (default, stable)"),
-          com.deepseekharness.app.util.UiText.choose(
-              "proroot（可选，实验）", "proroot (optional, experimental)")
-        },
-        c.isProroot() ? 1 : 0,
-        index -> proroot.setChecked(index == 1));
+        engineLabels(),
+        engineChoice.get().ordinal(),
+        index -> {
+          engineChoice.set(com.deepseekharness.app.runtime.RuntimeEngine.values()[index]);
+          proroot.setChecked(
+              engineChoice.get() == com.deepseekharness.app.runtime.RuntimeEngine.PROROOT);
+        });
     bindChoice(
         v,
         R.id.config_dns_choice,
@@ -228,7 +231,7 @@ public class ConfigFragment extends Fragment {
                   c.setDesktopMode(desktop.isChecked());
                   if (com.deepseekharness.app.BuildConfig.LOW_ANDROID)
                     c.setGeckoCore(gecko.isChecked());
-                  c.setProroot(proroot.isChecked());
+                  c.setContainerRuntime(engineChoice.get());
                   c.setProrootStaticLoader(staticLoader.isChecked());
                   c.setProotSeccompDisabled(noSeccomp.isChecked());
                   c.setDnsMode(
@@ -421,5 +424,38 @@ public class ConfigFragment extends Fragment {
             action.accept(position);
           }
         });
+  }
+
+  /** 三个引擎的选项文字；本机系统版本不满足的引擎会注明，选择后运行时会记录原因并回到 proot。 */
+  static String[] engineLabels() {
+    var engines = com.deepseekharness.app.runtime.RuntimeEngine.values();
+    String[] labels = new String[engines.length];
+    for (int index = 0; index < engines.length; index++) {
+      var engine = engines[index];
+      String label;
+      switch (engine) {
+        case PROROOT:
+          label =
+              com.deepseekharness.app.util.UiText.choose(
+                  "proroot（可选，实验）", "proroot (optional, experimental)");
+          break;
+        case BXROOT:
+          label =
+              com.deepseekharness.app.util.UiText.choose(
+                  "bxroot（开源，实验）", "bxroot (open source, experimental)");
+          break;
+        case PROOT:
+        default:
+          label =
+              com.deepseekharness.app.util.UiText.choose(
+                  "proot（默认，稳定）", "proot (default, stable)");
+      }
+      if (android.os.Build.VERSION.SDK_INT < engine.minSdk)
+        label +=
+            com.deepseekharness.app.util.UiText.choose(
+                "（本机系统不支持，将回到 proot）", " (unsupported here, falls back to proot)");
+      labels[index] = label;
+    }
+    return labels;
   }
 }

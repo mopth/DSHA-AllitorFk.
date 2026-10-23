@@ -1,342 +1,281 @@
 /**
- * Transparent response compression for large JSON payloads.
+ * TypeScript source of lib/compress.js (AllitorFk: realigned with the shipped
+ * DSHA implementation; the canonical runtime file is tools/mobile-server/compress.js
+ * deployed as lib/compress.js — keep both in step, see tools/test-mobile-compress-once.mjs).
  *
- * Long sessions make `session.history` responses megabytes of JSON; on a
- * phone that is a slow, data-hungry transfer. This module patches
- * `http.ServerResponse.prototype` (process-wide, restored on dispose) so any
- * JSON response the host serves — the harness's own `/api/*` routes included —
- * is compressed when the client accepts it:
+ * DSHA bounded compression for complete JSON responses.
+ * Only a single end(data) can be compressed. Every write() is delegated at
+ * once, with its original encoding, callback and backpressure. Headers alone
+ * may wait one event-loop turn; no response body is ever accumulated here.
+ * SSE, HEAD, already encoded bodies and oversized JSON remain native streams.
  *
- * - The client's `Accept-Encoding` picks the codec: `br` (brotli, quality 6)
- *   preferred, `gzip` fallback.
- * - Only JSON responses of at least MIN_JSON_BYTES are compressed; small
- *   JSON and every other content type (HTML, static assets, ZIP, SSE streams)
- *   pass through byte-identical with the original headers.
- * - The response header write is deferred until the body is known, so the
- *   decision (compress or not) is made on the actual size, and `Content-Length`
- *   always matches what is sent. Non-JSON responses call the original
- *   `writeHead` immediately and are never touched.
- * - Compression itself runs OFF the event loop (`brotliCompress` / `gzip` with
- *   a callback = libuv thread pool). It used to run synchronously inside
- *   `end()`, and on a phone the host process shares the device with the
- *   WebView: one multi-megabyte JSON response blocked every other request in
- *   flight — including the small settings write behind the first-run notice,
- *   which then sat at 「正在保存…」 for seconds. `end()` now returns before the
- *   headers are written; the reply completes from the zlib callback
- *   (2026-10-20, see tests/compress.test.ts「deferred off the event loop」).
- *   Identity (no compression needed) and the abandon paths stay synchronous.
- *
- * The browser's fetch decompresses transparently, so no client change is
- * needed. SSE (`text/event-stream`) is intentionally left uncompressed: it is
- * a continuous stream and the /api bridge never buffers it.
- *
- * Known limitations (issue #80): while a response is deferred, write()
- * reports unconditional success (true) — the socket is untouched, so no
- * backpressure signal exists; buffered write() completion callbacks replay
- * fire-once, in order, right after the real end(), without error propagation
- * (the real flush cannot fail them individually).
- *
- * Ported from community fork wzxmt-zhc/dsh-web-mobile (v2.5.0).
+ * AllitorFk defensive guard (download "Failed to fetch"; root cause NOT
+ * confirmed): a response is compressed at most once. Any Content-Encoding
+ * visible at end() time (headers set after writeHead, another layer such as
+ * the host's compression middleware), a body that already looks encoded, or a
+ * declared Content-Length that disagrees with the body passes through
+ * byte-identical, so the declared length always describes the bytes sent.
  */
-import { brotliCompress, constants as zlibConstants, gzip } from 'node:zlib'
-import { ServerResponse as NodeServerResponse } from 'node:http'
-import type { IncomingMessage, ServerResponse } from 'node:http'
+import { brotliCompress, constants as zlibConstants, gzip } from 'node:zlib';
+import { ServerResponse as NodeServerResponse } from 'node:http';
+import type { IncomingMessage, ServerResponse } from 'node:http';
 
-/** Only payloads at least this large are worth compressing. */
-const MIN_JSON_BYTES = 4 * 1024
-
-/** Brotli quality: 6 balances size and CPU for large JSON (17MB → ~1MB). */
-const BROTLI_QUALITY = 6
-
-/** One deferred response: headers held back until the body size is known. */
-interface DeferredResponse {
-  /** Original writeHead argument list (status/message/headers) to replay. */
-  writeHeadArgs: unknown[]
-  /** Original headers object carried by writeHeadArgs. */
-  headers: Record<string, string | number | string[]>
-  /** Codec chosen from the request's Accept-Encoding. */
-  encoding: 'br' | 'gzip'
-  /** Buffered body chunks. */
-  chunks: Buffer[]
-  /** write() completion callbacks buffered during deferral. */
-  writeCallbacks: Array<() => void>
+type Headers = Record<string, string | number | string[] | undefined>;
+type Encoding = 'br' | 'gzip';
+interface Pending {
+    args: unknown[];
+    headers: Headers;
+    timer?: ReturnType<typeof setImmediate>;
+    onClose?: () => void;
 }
+interface Options {
+    matches?: (req: IncomingMessage | undefined, res: ServerResponse) => boolean;
+}
+// Node keeps these on the instance; the patch only reads them.
+type Response = ServerResponse & { req?: IncomingMessage; strictContentLength?: boolean };
 
-/** Per-response state; only present while a JSON response is being deferred. */
-const deferred = new WeakMap<ServerResponse, DeferredResponse>()
+const MIN_JSON_BYTES = 4 * 1024;
+export const MAX_JSON_BYTES = 1024 * 1024;
+export const MAX_COMPRESSIONS = 2;
+let inflight = 0;
+const deferred = new WeakMap<ServerResponse, Pending>();
 
-/**
- * Parse one `Accept-Encoding` field into a coding → qvalue map. A missing
- * weight means 1; an unparsable or out-of-range weight means 0 ("not
- * acceptable"), which is what HTTP implementations do with garbage. The
- * wildcard `*` is kept as its own entry and consulted as the fallback for any
- * coding the client did not name.
- */
-export function parseAcceptedEncodings(field: string): Map<string, number> {
-  const quality = new Map<string, number>()
-  for (const part of field.split(',')) {
-    const [rawName, ...params] = part.trim().toLowerCase().split(';')
-    const name = rawName.trim()
-    if (name === '') continue
-    let value = 1
-    const weight = params.find((param) => /^\s*q\s*=/.test(param))
-    if (weight !== undefined) {
-      const parsed = Number.parseFloat(weight.slice(weight.indexOf('=') + 1))
-      value = Number.isFinite(parsed) ? Math.min(Math.max(parsed, 0), 1) : 0
+export function headerValue(headers: Headers, name: string): string | undefined {
+    const key = Object.keys(headers).find(key => key.toLowerCase() === name);
+    return key === undefined ? undefined : String(headers[key]);
+}
+export function isDeferrable(headers: Headers): boolean {
+    return headerValue(headers, 'content-encoding') === undefined
+        && /(?:^|\s|;)application\/(?:[\w.+-]+\+)?json(?:\s*;|$)/i.test(headerValue(headers, 'content-type') ?? '')
+        && !/\bno-transform\b/i.test(headerValue(headers, 'cache-control') ?? '')
+        && headerValue(headers, 'content-range') === undefined
+        && headerValue(headers, 'transfer-encoding') === undefined
+        && headerValue(headers, 'content-md5') === undefined
+        && !/^"/.test(headerValue(headers, 'etag') ?? '');
+}
+export function varyWithAcceptEncoding(headers: Headers): void {
+    const key = Object.keys(headers).find(key => key.toLowerCase() === 'vary') ?? 'vary';
+    const value = String(headers[key] ?? '');
+    if (!value.split(',').some(token => /^(?:accept-encoding|\*)$/i.test(token.trim())))
+        headers[key] = value ? `${value}, Accept-Encoding` : 'Accept-Encoding';
+}
+function pickEncoding(res: Response): Encoding | null {
+    const values = new Map<string, number>();
+    for (const part of String(res.req?.headers['accept-encoding'] ?? '').split(',')) {
+        const [name, ...params] = part.trim().toLowerCase().split(';');
+        const q = params.find(value => /^\s*q\s*=/.test(value));
+        const quality = q === undefined ? 1 : Number(q.split('=')[1]);
+        values.set(name, Number.isFinite(quality) && quality >= 0 && quality <= 1 ? quality : 0);
     }
-    // First occurrence wins: RFC 9110 does not define duplicates and every
-    // real client names a coding once.
-    if (!quality.has(name)) quality.set(name, value)
-  }
-  return quality
+    const br = values.get('br') ?? values.get('*') ?? 0;
+    const gzip = values.get('gzip') ?? values.get('*') ?? 0;
+    return br > 0 && br >= gzip ? 'br' : gzip > 0 ? 'gzip' : null;
 }
-
-/**
- * Choose the codec the client accepts; `br` outranks `gzip`, and a weight of 0
- * is a refusal (RFC 9110 §12.4.2) — `br;q=0` must not select brotli, and a
- * bare `*` is an offer, not a refusal. No acceptable coding means `null` and
- * the response passes through identity (never 406: identity stays acceptable).
- */
-export function pickEncoding(res: ServerResponse): 'br' | 'gzip' | null {
-  const accepted = (res.req as IncomingMessage | undefined)?.headers['accept-encoding'] ?? ''
-  const quality = parseAcceptedEncodings(accepted)
-  const wildcard = quality.get('*') ?? 0
-  const br = quality.get('br') ?? wildcard
-  const gzip = quality.get('gzip') ?? wildcard
-  if (br > 0 && br >= gzip) return 'br'
-  return gzip > 0 ? 'gzip' : null
+/** Defensive: JSON text never starts with a gzip or zstd frame magic. */
+export function looksEncoded(body: Uint8Array): boolean {
+    return body.byteLength >= 2 && body[0] === 0x1f && body[1] === 0x8b
+        || body.byteLength >= 4 && body[0] === 0x28 && body[1] === 0xb5 && body[2] === 0x2f && body[3] === 0xfd;
 }
-
-/**
- * Find a header value regardless of the caller's key casing. The patch sees
- * the RAW writeHead argument (before Node lowercases), and HTTP header names
- * are case-insensitive — a caller may pass `Content-Type` or `content-type`.
- * (Case-insensitivity fix ported from community fork wzxmt-zhc/dsh-web-mobile.)
- */
-export function headerValue(headers: Record<string, string | number | string[]>, name: string): string | undefined {
-  for (const key of Object.keys(headers)) {
-    if (key.toLowerCase() === name) return String(headers[key])
-  }
-  return undefined
+/** Defensive: never re-frame a body whose declared length is not its real length. */
+export function declaredLengthMatches(headers: Headers, body: Uint8Array): boolean {
+    const declared = headerValue(headers, 'content-length');
+    if (declared === undefined) return true;
+    return /^\d+$/.test(declared.trim()) && Number(declared.trim()) === body.byteLength;
 }
-
-/** Whether a response warrants deferred (potentially compressed) handling. */
-export function isDeferrable(headers: Record<string, string | number | string[]>): boolean {
-  if (headerValue(headers, 'content-encoding') !== undefined) return false
-  const contentType = headerValue(headers, 'content-type') ?? ''
-  return contentType.includes('json')
+/** Defensive: another layer may have chosen an encoding after writeHead. */
+export function alreadyEncoded(res: ServerResponse, headers: Headers): boolean {
+    if (headerValue(headers, 'content-encoding') !== undefined) return true;
+    try { return res.getHeader('content-encoding') !== undefined; }
+    catch { return true; }
 }
-
-/**
- * Append the Accept-Encoding Vary token without clobbering an existing Vary
- * and without duplicating the token: re-running the patch (or a caller that
- * already varied on it, in any casing) must stay idempotent, and `*` already
- * covers Accept-Encoding.
- */
-export function varyWithAcceptEncoding(headers: Record<string, string | number | string[]>): void {
-  const existingKey = Object.keys(headers).find((key) => key.toLowerCase() === 'vary')
-  if (existingKey === undefined) {
-    headers['vary'] = 'Accept-Encoding'
-    return
-  }
-  const tokens = String(headers[existingKey])
-    .split(',')
-    .map((token) => token.trim())
-    .filter((token) => token !== '')
-  if (tokens.some((token) => token.toLowerCase() === 'accept-encoding' || token === '*')) return
-  headers[existingKey] = [...tokens, 'Accept-Encoding'].join(', ')
+function hasBody(res: Response, status: number = res.statusCode): boolean {
+    return res.req?.method !== 'HEAD' && status >= 200 && ![204, 205, 206, 304].includes(status);
 }
-
-/** Buffer one body chunk for a deferred response, honoring the caller's encoding. */
-function bufferChunk(pending: DeferredResponse, chunk: unknown, encoding?: unknown): void {
-  const enc = typeof encoding === 'string' ? (encoding as BufferEncoding) : undefined
-  if (typeof chunk === 'string') pending.chunks.push(Buffer.from(chunk, enc))
-  else if (chunk instanceof Uint8Array) pending.chunks.push(Buffer.from(chunk))
-  else if (chunk !== null && chunk !== undefined) pending.chunks.push(Buffer.from(String(chunk)))
+function snapshotHeaders(headers: Headers): Headers {
+    return Object.fromEntries(Object.entries(headers).map(([key, value]) => [key, Array.isArray(value) ? value.slice() : value]));
 }
-
-/** Fire the buffered write() callbacks once, in order, after the replay. */
-function fireWriteCallbacks(pending: DeferredResponse): void {
-  for (const callback of pending.writeCallbacks.splice(0)) callback()
-}
-
-/** Replay the stored writeHead args with a replacement headers object. */
-function writeHeadWith(res: ServerResponse, origWriteHead: (...args: unknown[]) => ServerResponse, pending: DeferredResponse, headers: Record<string, string | number | string[]>): ServerResponse {
-  const args = pending.writeHeadArgs.slice() as unknown[]
-  if (typeof args[1] === 'string') args[2] = headers
-  else args[1] = headers
-  // Keep the receiver: node's writeHead reads this._header etc.
-  return origWriteHead.apply(res, args) as ServerResponse
-}
-
-/**
- * Finish a deferred JSON response from the zlib callback, i.e. off the event
- * loop (libuv thread pool). Everything the synchronous path used to do inside
- * `end()` — header replay, `Content-Encoding`/`Content-Length` rewrite, body
- * write, buffered `write()` callbacks — happens here, one tick later at the
- * earliest. `end()` has already returned by then, so:
- *
- * - a caller that wrote or flushed headers during the compression window wins
- *   (its own headers are on the wire; the buffered body goes out verbatim
- *   instead of throwing ERR_HTTP_HEADERS_SENT out of a callback);
- * - a compression error degrades to identity rather than a broken reply;
- * - nothing may throw out of the callback — an uncaught throw there takes the
- *   whole host process down, and this patch is process-wide.
- */
-function finishDeferred(
-  res: ServerResponse,
-  pending: DeferredResponse,
-  body: Buffer,
-  callbacks: unknown[],
-  origWriteHead: (...args: unknown[]) => ServerResponse,
-  origWrite: (chunk: unknown, ...rest: unknown[]) => boolean,
-  origEnd: (chunk?: unknown, ...rest: unknown[]) => ServerResponse,
-): void {
-  const send = (compressed: Buffer | null): void => {
-    try {
-      if (res.writableEnded || res.destroyed) return
-      if (res.headersSent || compressed === null) {
-        // Abandon the deferral: headers are already out (or compression
-        // failed), so replay the body verbatim, exactly like the sync path.
-        if (!res.headersSent) writeHeadWith(res, origWriteHead, pending, pending.headers)
-        if (body.byteLength === 0) origEnd.apply(res, callbacks as never)
-        else origEnd.apply(res, [body, ...callbacks] as never)
-        fireWriteCallbacks(pending)
-        return
-      }
-      const headers = { ...pending.headers }
-      for (const key of Object.keys(headers)) {
-        if (key.toLowerCase() === 'content-length') delete headers[key]
-      }
-      headers['content-encoding'] = pending.encoding
-      headers['content-length'] = compressed.byteLength
-      varyWithAcceptEncoding(headers)
-      writeHeadWith(res, origWriteHead, pending, headers)
-      origWrite.call(res, compressed)
-      origEnd.apply(res, callbacks as never)
-      fireWriteCallbacks(pending)
-    } catch (error) {
-      // A throw out of an async callback is an unhandled exception: kill this
-      // one reply instead of the host process.
-      fireWriteCallbacks(pending)
-      res.destroy(error instanceof Error ? error : new Error(String(error)))
+function mergedHeaders(base: Headers, overlay: Headers): Headers {
+    const headers: Headers = { ...base };
+    for (const [name, value] of Object.entries(overlay)) {
+        for (const key of Object.keys(headers))
+            if (key.toLowerCase() === name.toLowerCase()) delete headers[key];
+        headers[name] = value;
     }
-  }
-  const done = (error: Error | null, compressed?: Buffer): void => {
-    send(error === null && compressed !== undefined ? compressed : null)
-  }
-  if (pending.encoding === 'br') {
-    brotliCompress(body, { params: { [zlibConstants.BROTLI_PARAM_QUALITY]: BROTLI_QUALITY } }, done)
-  } else {
-    gzip(body, { level: 6 }, done)
-  }
+    return headers;
 }
 
-/**
- * Install the compression patch on http.ServerResponse.prototype.
- * @returns disposer restoring the original methods (plugin reload safety).
- */
-export function installResponseCompression(): () => void {
-  const proto = NodeServerResponse.prototype
-  // Capture the originals under the simple signatures the wrappers use; the
-  // real overloaded implementations are restored unchanged on dispose.
-  const origWriteHead = proto.writeHead as (...args: unknown[]) => ServerResponse
-  const origWrite = proto.write as (chunk: unknown, ...rest: unknown[]) => boolean
-  const origEnd = proto.end as (chunk?: unknown, ...rest: unknown[]) => ServerResponse
-
-  function patchedWriteHead(this: ServerResponse, ...args: unknown[]): ServerResponse {
-    const rawHeaders = typeof args[1] === 'string' ? args[2] : args[1]
-    const headers = rawHeaders as Record<string, string | number | string[]> | undefined
-    if (headers === undefined || !isDeferrable(headers)) {
-      return origWriteHead.apply(this, args as never) as ServerResponse
+export function installResponseCompression({ matches = () => true }: Options = {}): () => void {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const proto = NodeServerResponse.prototype as any;
+    const origWriteHead = proto.writeHead;
+    const origWrite = proto.write;
+    const origEnd = proto.end;
+    const origFlushHeaders = proto.flushHeaders;
+    const active = new Set<Response>();
+    const nativeBody = new WeakSet<Response>();
+    function delegate(method: (...args: unknown[]) => unknown, res: Response, args: unknown[]): any {
+        nativeBody.add(res);
+        try { return method.apply(res, args); }
+        finally { nativeBody.delete(res); }
     }
-    const encoding = pickEncoding(this)
-    if (encoding === null) {
-      return origWriteHead.apply(this, args as never) as ServerResponse
+    function belongs(res: Response): boolean {
+        try { return matches(res.req, res) === true; }
+        catch { return false; }
     }
-    // Hold the header write until the body size is known (see module doc).
-    deferred.set(this, { writeHeadArgs: args, headers, encoding, chunks: [], writeCallbacks: [] })
-    return this
-  }
-
-  function patchedWrite(this: ServerResponse, chunk: unknown, ...rest: unknown[]): boolean {
-    const pending = deferred.get(this)
-    if (pending !== undefined) {
-      // Buffer the encoding with the chunk (a latin1 write must not be
-      // silently re-encoded) and keep the completion callback for a
-      // fire-once replay after the real end() (issue #80).
-      bufferChunk(pending, chunk, typeof rest[0] === 'string' ? rest[0] : undefined)
-      for (const arg of rest) {
-        if (typeof arg === 'function') pending.writeCallbacks.push(arg as () => void)
-      }
-      return true
-    }
-    return origWrite.apply(this, [chunk, ...rest] as never) as boolean
-  }
-
-  function patchedEnd(this: ServerResponse, chunk?: unknown, ...rest: unknown[]): ServerResponse {
-    const pending = deferred.get(this)
-    if (pending === undefined) {
-      return chunk === undefined
-        ? origEnd.apply(this, rest as never) as ServerResponse
-        : origEnd.apply(this, [chunk, ...rest] as never) as ServerResponse
-    }
-    deferred.delete(this)
-    // `end(callback)`: the function is a completion callback, never body
-    // data — keep it out of the buffers and replay it at the real end().
-    const callbacks = (typeof chunk === 'function' ? [chunk, ...rest] : rest)
-      .filter((arg) => typeof arg === 'function')
-    // `end(data, encoding)` and friends: the data is buffered above and the
-    // encoding is consumed by that buffering, so only the callbacks may be
-    // replayed — origEnd('utf8') would write the string as body data after
-    // the compressed payload (issue #78).
-    if (chunk !== undefined && typeof chunk !== 'function') bufferChunk(pending, chunk, typeof rest[0] === 'string' ? rest[0] : undefined)
-    const body = Buffer.concat(pending.chunks)
-
-    // The header write was deferred to learn the body size, but something else
-    // may have sent the headers first: `flushHeaders()`, a `write()` issued
-    // before `writeHead()`, or any other path Node treats as an implicit
-    // header write. Replaying the stored writeHead() then throws
-    // ERR_HTTP_HEADERS_SENT synchronously out of end(), which terminates the
-    // process when the caller has no try/catch. Abandon the deferral instead:
-    // hand the buffered body to the native path verbatim (uncompressed, no
-    // header replay) so the response still completes and no bytes are lost.
-    if (this.headersSent) {
-      const ended = body.byteLength === 0
-        ? origEnd.apply(this, callbacks as never) as ServerResponse
-        : origEnd.apply(this, [body, ...callbacks] as never) as ServerResponse
-      fireWriteCallbacks(pending)
-      return ended
+    // end() has accepted the complete body while libuv compresses it. Keep
+    // Node's public end guard so a subsequent write/end follows its native
+    // error path. Do not change any private stream/socket fields. The false
+    // writableFinished view lasts only until the compressed native end.
+    function reserveEnd(res: Response): ((closed?: boolean) => void) | undefined {
+        const finished = Object.getOwnPropertyDescriptor(res, 'finished');
+        if (!finished?.configurable || !finished.writable || finished.value !== false
+            || Object.hasOwn(res, 'writableFinished')) return undefined;
+        let value = finished.value;
+        Object.defineProperty(res, 'finished', { configurable: true, enumerable: finished.enumerable,
+            get: () => true, set: (next: boolean) => { value = next; } });
+        Object.defineProperty(res, 'writableFinished', { configurable: true, get: () => false });
+        return (closed = false) => {
+            Object.defineProperty(res, 'finished', { ...finished, value: closed || value });
+            delete (res as { writableFinished?: boolean }).writableFinished;
+        };
     }
 
-    // Small or empty JSON: replay the ORIGINAL header write and body verbatim
-    // (no Content-Encoding, original Content-Length intact).
-    if (body.byteLength < MIN_JSON_BYTES) {
-      writeHeadWith(this, origWriteHead, pending, pending.headers)
-      const ended = body.byteLength === 0
-        ? origEnd.apply(this, callbacks as never) as ServerResponse
-        : origEnd.apply(this, [body, ...callbacks] as never) as ServerResponse
-      fireWriteCallbacks(pending)
-      return ended
+    function take(res: Response): Pending | undefined {
+        const pending = deferred.get(res);
+        if (pending !== undefined) {
+            deferred.delete(res);
+            active.delete(res);
+            if (pending.timer !== undefined) clearImmediate(pending.timer);
+            if (pending.onClose !== undefined) res.off('close', pending.onClose);
+        }
+        return pending;
     }
-
-    // Large JSON: compress ASYNCHRONOUSLY and finish the reply from the zlib
-    // callback. See the module doc: keeping zlib on the event loop here used to
-    // stall every other in-flight request on a phone-sized host (first-run
-    // notice at 「正在保存…」). end() must therefore return before any byte of
-    // this response is written — headers, body and the buffered write()
-    // callbacks all land in finishDeferred().
-    finishDeferred(this, pending, body, callbacks, origWriteHead, origWrite, origEnd)
-    return this
-  }
-
-  proto.writeHead = patchedWriteHead
-  proto.write = patchedWrite
-  proto.end = patchedEnd
-
-  return () => {
-    if (proto.writeHead === patchedWriteHead) proto.writeHead = origWriteHead
-    if (proto.write === patchedWrite) proto.write = origWrite
-    if (proto.end === patchedEnd) proto.end = origEnd
-  }
+    function flush(res: Response): void {
+        const pending = take(res);
+        if (pending !== undefined && !res.destroyed)
+            origWriteHead.apply(res, pending.args);
+    }
+    function patchedWriteHead(this: Response, ...args: unknown[]): Response {
+        flush(this);
+        const raw = typeof args[1] === 'string' ? args[2] : args[1];
+        // Raw header arrays, including duplicate headers, keep Node's exact path.
+        if (Array.isArray(raw) || (raw !== undefined && (raw === null || typeof raw !== 'object')))
+            return origWriteHead.apply(this, args);
+        const headers = mergedHeaders(this.getHeaders() as Headers, (raw ?? {}) as Headers);
+        if (!belongs(this) || nativeBody.has(this) || this.headersSent || !hasBody(this, Number(args[0])) || !isDeferrable(headers) || pickEncoding(this) === null)
+            return origWriteHead.apply(this, args);
+        // Use Node itself to validate all overloads/status/header values now,
+        // rather than deferring a native exception into an unrelated timer.
+        const validation = new NodeServerResponse(this.req as IncomingMessage);
+        for (const [name, value] of Object.entries(this.getHeaders())) validation.setHeader(name, value as string | number | readonly string[]);
+        const copied = args.slice();
+        if (raw !== undefined) copied[typeof args[1] === 'string' ? 2 : 1] = snapshotHeaders(raw as Headers);
+        origWriteHead.apply(validation, copied);
+        this.statusCode = validation.statusCode;
+        this.statusMessage = validation.statusMessage;
+        const pending: Pending = { args: copied, headers: (raw === undefined ? {} : copied[typeof args[1] === 'string' ? 2 : 1]) as Headers };
+        pending.onClose = () => take(this);
+        pending.timer = setImmediate(() => flush(this));
+        deferred.set(this, pending);
+        active.add(this);
+        this.once('close', pending.onClose);
+        return this;
+    }
+    function patchedWrite(this: Response, ...args: unknown[]): boolean {
+        flush(this);
+        return delegate(origWrite, this, args);
+    }
+    function patchedFlushHeaders(this: Response, ...args: unknown[]): void {
+        flush(this);
+        return delegate(origFlushHeaders, this, args);
+    }
+    function patchedEnd(this: Response, ...args: unknown[]): Response {
+        const pending = deferred.get(this);
+        const headers = mergedHeaders(this.getHeaders() as Headers, pending?.headers ?? {});
+        const encoding = pickEncoding(this);
+        const chunk = args[0];
+        const textEncoding = typeof args[1] === 'string' ? args[1] : undefined;
+        let body: Buffer | undefined;
+        const validEncodingArgument = args[1] === undefined || typeof args[1] === 'string' || typeof args[1] === 'function';
+        const validCallbackArgument = typeof args[1] === 'function' || args[2] === undefined || typeof args[2] === 'function';
+        if (belongs(this) && inflight < MAX_COMPRESSIONS && !this.finished && !this.headersSent && !this.destroyed && !this.strictContentLength && validEncodingArgument && validCallbackArgument && hasBody(this) && isDeferrable(headers) && encoding !== null) {
+            if (typeof chunk === 'string') {
+                // Preserve invalid-encoding errors through the native end path.
+                if (textEncoding === undefined || Buffer.isEncoding(textEncoding)) {
+                    const bytes = Buffer.byteLength(chunk, textEncoding as BufferEncoding | undefined);
+                    if (bytes >= MIN_JSON_BYTES && bytes <= MAX_JSON_BYTES) body = Buffer.from(chunk, textEncoding as BufferEncoding | undefined);
+                }
+            } else if (chunk instanceof Uint8Array && chunk.byteLength >= MIN_JSON_BYTES && chunk.byteLength <= MAX_JSON_BYTES) {
+                body = Buffer.from(chunk);
+            }
+        }
+        if (body !== undefined && (alreadyEncoded(this, headers) || looksEncoded(body)
+            || !declaredLengthMatches(headers, body)))
+            body = undefined;
+        if (body === undefined) {
+            flush(this);
+            return delegate(origEnd, this, args);
+        }
+        const restoreEnd = reserveEnd(this);
+        if (restoreEnd === undefined) {
+            flush(this);
+            return delegate(origEnd, this, args);
+        }
+        take(this);
+        for (const key of Object.keys(headers))
+            if (key.toLowerCase() === 'content-length') delete headers[key];
+        headers['content-encoding'] = encoding as Encoding;
+        varyWithAcceptEncoding(headers);
+        this.removeHeader('content-length');
+        // Commit the selected representation now. Its size is not known until
+        // the worker finishes, so Node supplies its native chunked boundary.
+        // This also preserves synchronous header validation and headersSent.
+        try { origWriteHead.call(this, this.statusCode, this.statusMessage, headers); }
+        catch (error) { restoreEnd(); throw error; }
+        const callback = typeof args[1] === 'function' ? args[1] : args[2];
+        let called = false, complete = false;
+        const done = (error?: Error): void => {
+            if (called) return;
+            called = true;
+            if (typeof callback === 'function') (callback as (error?: Error) => void)(error);
+        };
+        const finish = (error?: Error | null, compressed?: Buffer): void => {
+            if (complete) return;
+            complete = true;
+            this.off('close', onClose);
+            restoreEnd(Boolean(error) || this.destroyed);
+            if (error || this.destroyed) {
+                const failure: Error = error ?? Object.assign(new Error('response closed during compression'), { code: 'ERR_STREAM_PREMATURE_CLOSE' });
+                this.destroy(failure);
+                queueMicrotask(() => done(failure));
+                return;
+            }
+            // The original encoding was consumed by Buffer.from; only end's
+            // callback remains. Node still owns socket writes/backpressure.
+            origEnd.call(this, compressed, done);
+        };
+        const onClose = () => finish();
+        this.once('close', onClose);
+        inflight++;
+        const compressed = (error: Error | null, bytes: Buffer): void => { inflight--; finish(error, bytes); };
+        try {
+            if (encoding === 'br') brotliCompress(body, { params: { [zlibConstants.BROTLI_PARAM_QUALITY]: 4 } }, compressed);
+            else gzip(body, { level: 4 }, compressed);
+        } catch (error) { inflight--; finish(error as Error); }
+        return this;
+    }
+    proto.writeHead = patchedWriteHead;
+    proto.write = patchedWrite;
+    proto.end = patchedEnd;
+    proto.flushHeaders = patchedFlushHeaders;
+    return () => {
+        for (const res of active) flush(res);
+        // Already accepted end bodies retain their worker and callback until
+        // completion. Unload restores the hook immediately and never cancels
+        // or resends a response that another route still owns.
+        if (proto.writeHead === patchedWriteHead) proto.writeHead = origWriteHead;
+        if (proto.write === patchedWrite) proto.write = origWrite;
+        if (proto.end === patchedEnd) proto.end = origEnd;
+        if (proto.flushHeaders === patchedFlushHeaders) proto.flushHeaders = origFlushHeaders;
+    };
 }

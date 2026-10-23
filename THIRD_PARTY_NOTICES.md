@@ -21,7 +21,7 @@
 
 - `client.js`：`44c5d2c2ac47d7e5222c4a18381b1c0efaa94d5d5bf43e70c69b3746e4c0b689`
 - `index.js`：`99129229d403a48658d23e04ce2b0f17415ed669aa4f1d1b34498db2dc0bf7cf`
-- `compress.js`：`8a65d79c01aa8f600def5a330b41b4168bb18282b18ee0a84d9736f7b5f644f8`
+- `compress.js`：`03bbb9ef983a4c46dbfeb4ea8482377d1f4742da3efe39dab1ef355e69632af0`
 - `delete-session.js`：`cb119ff9703716fe1111ee5a2f211d14886ab1d2310601c5787efc8d91219d51`
 
 ## 终端与会话启动器
@@ -30,10 +30,13 @@
 - 本地 PTY 身份握手和会话查询差异见 `dsha-pty.c`、`dsha-process.c` 与 `build.ps1`，目标 API 23、LOAD 16 KiB、common-page-size 4096。
 - DSHA 独立会话启动器源码为 `tools/native-session/session-launcher.c`；跨平台构建入口 `tools/native-session/build.py`，锁定 NDK 26.3.11579264。
 
-## proot / proroot
+## proot / proroot / bxroot
 
 - proot（Termux 分支）为 GPL-2.0。标准与兼容资产保留 COPYING；API 23 构建及源码差异见 `tools/build-low-proot.py`。完整声明位于 `assets/licenses/proot-COPYING.txt`。
 - proroot v1.2.8 为上游专有许可。DSHA 分发上游原始二进制，不声称可重编、审计源码或任意修改后再分发；许可证与来源见随包声明。不能用容器 root 身份推断 Android root 权限。
+- bxroot **0.2.4** 源码为 MIT，固定来源 `https://github.com/qiannianhuanxiang/bxroot`、提交 `d5f9ac30d05f8fc4302465037b1195e3080f3a60`；原始许可全文为 `assets/licenses/bxroot-MIT.txt`。本地变更、构建工具链、源包/补丁和每个原生文件的摘要见 `tools/bxroot/lock.json`，不是未修改的上游发行二进制。AllitorFk 原样随包 fix4（e6420cd）的预编译产物，本仓库未重编。
+- bxroot launcher 与 ulx 为静态 ELF；bxroot 自有源码的 MIT 不改变其中静态工具链运行库的许可。glibc 的 LGPL-2.1-or-later 全文和实际 sysroot 包 copyright 分别随 `assets/licenses/bxroot-glibc-COPYING.LIB.txt`、`bxroot-glibc-copyright.txt` 提供；GCC 包 copyright 为 `bxroot-gcc-copyright.txt`，GPL-3.0 全文及 `GCC-RUNTIME-EXCEPTION-3.1.txt` 同时提供。对应 glibc 源获取入口为 `https://archive.ubuntu.com/ubuntu/pool/main/g/glibc/glibc_2.39-0ubuntu8.dsc`。
+- bxroot 是兼容运行时，不是安全沙箱或 Android root；最低内核要求（Linux 4.11+）与 APK 的 minSdk 是不同门槛。
 - Windows 重编、Linux 重编与手机执行是不同证据；不能从一种宿主成功推导全部平台通过。
 
 ## Android 与备份依赖
@@ -69,6 +72,9 @@
 | `app/src/low/jniLibs/arm64-v8a/libproot_legacy.so` | GPL-2.0 | tools/build-low-proot.py, proot v5.1.107.92 source archive and local changes |
 | `app/src/low/jniLibs/arm64-v8a/libprootloader_legacy.so` | GPL-2.0 | tools/build-low-proot.py, proot v5.1.107.92 source archive |
 | `app/src/main/jniLibs/arm64-v8a/libandroidshmem.so` | unknown origin/license for this original binary | Retained original; no current exact-source reproduction receipt |
+| `app/src/main/jniLibs/arm64-v8a/libbxroot-runtime.so` | MIT | tools/bxroot/lock.json pins upstream commit, local patches and glibc shared runtime build |
+| `app/src/main/jniLibs/arm64-v8a/libbxroot-ulx.so` | MIT bxroot source; static toolchain runtime has separate terms | tools/bxroot/lock.json pins upstream commit, local patches and static relink inputs |
+| `app/src/main/jniLibs/arm64-v8a/libbxroot.so` | MIT bxroot source; static toolchain runtime has separate terms | tools/bxroot/lock.json pins upstream commit, local patches and static relink inputs |
 | `app/src/main/jniLibs/arm64-v8a/libdsha-proroot-compat.so` | MIT | tools/proroot-compat/stack-sysconf.c; independent GNU AArch64 sysconf proxy, locked NDK build; original proroot binaries unchanged |
 | `app/src/main/jniLibs/arm64-v8a/libdsha-proroot-linker.so` | MIT | tools/proroot-compat/linker-entry.c; freestanding GNU AArch64 direct-preload adapter; original proroot binaries unchanged |
 | `app/src/main/jniLibs/arm64-v8a/libdsha-session.so` | MIT | tools/native-session/session-launcher.c; locked API 23 build |

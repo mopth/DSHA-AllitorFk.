@@ -257,7 +257,7 @@ public final class ErrorLogRepository extends AndroidViewModel {
     value.put("versionCode", (long) BuildConfig.VERSION_CODE);
     value.put("versionName", BuildConfig.VERSION_NAME);
     value.put("flavor", BuildConfig.LOW_ANDROID ? "low" : "standard");
-    value.put("configuredRuntime", config.isProroot() ? "proroot" : "proot");
+    value.put("configuredRuntime", config.getContainerRuntime().id);
     value.put("failureStage", category(config.getDiagnosticFailureStage()));
     value.put("failureRecorded", !config.getDiagnosticFailureReason().isEmpty());
     value.put(

@@ -13,6 +13,7 @@
     "backup-plugin-graph.py",
     "bridge-token-compat.cjs",
     "builtin-plugins.json",
+    "bxroot-native-lock.json",
     "ca-certificates.crt",
     "client-combo-patch.json",
     "composer-enter-patch.json",

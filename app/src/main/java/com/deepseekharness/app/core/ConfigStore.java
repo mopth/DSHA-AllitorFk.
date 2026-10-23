@@ -248,7 +248,9 @@ public class ConfigStore {
   }
 
   public boolean isCheckUpdate() {
-    return flag(Constants.KEY_CHECK_UPDATE, true);
+    // AllitorFk：默认值跟随构建开关（默认关闭官方更新源）；关闭时即使勾选也不会联网。
+    return flag(Constants.KEY_CHECK_UPDATE, com.deepseekharness.app.BuildConfig.OFFICIAL_UPDATE_FEED)
+        && com.deepseekharness.app.BuildConfig.OFFICIAL_UPDATE_FEED;
   }
 
   public void setCheckUpdate(boolean v) {
@@ -307,13 +309,28 @@ public class ConfigStore {
     prefs.edit().putBoolean(Constants.KEY_GECKO_CORE, v).apply();
   }
 
-  /** 默认稳定的 proot；用户可选择 proroot。 */
+  /** 默认稳定的 proot；用户可选择 proroot 或 bxroot。未知值按默认引擎处理。 */
   public boolean isProroot() {
-    return "proroot".equals(text(Constants.KEY_CONTAINER_RUNTIME, "proot"));
+    return getContainerRuntime() == com.deepseekharness.app.runtime.RuntimeEngine.PROROOT;
   }
 
   public void setProroot(boolean v) {
-    prefs.edit().putString(Constants.KEY_CONTAINER_RUNTIME, v ? "proroot" : "proot").apply();
+    setContainerRuntime(
+        v
+            ? com.deepseekharness.app.runtime.RuntimeEngine.PROROOT
+            : com.deepseekharness.app.runtime.RuntimeEngine.PROOT);
+  }
+
+  public com.deepseekharness.app.runtime.RuntimeEngine getContainerRuntime() {
+    return com.deepseekharness.app.runtime.RuntimeEngine.parse(
+        text(
+            Constants.KEY_CONTAINER_RUNTIME,
+            com.deepseekharness.app.runtime.RuntimeEngine.DEFAULT.id));
+  }
+
+  public void setContainerRuntime(com.deepseekharness.app.runtime.RuntimeEngine engine) {
+    if (engine == null) throw new IllegalArgumentException("RUNTIME_ENGINE");
+    prefs.edit().putString(Constants.KEY_CONTAINER_RUNTIME, engine.id).apply();
   }
 
   /** 首次安装同样默认稳定 proot；只由用户显式选择启用 proroot。 */
@@ -366,7 +383,7 @@ public class ConfigStore {
               .putString("cold_runtime_mode", mode.name());
       if (mode == com.deepseekharness.app.util.ColdInstallPlan.Mode.PROROOT_DYNAMIC)
         edit.putBoolean("proroot_static_loader", false);
-      if (!"proroot".equals(mode.runtime)) edit.putBoolean("proot_disable_seccomp", mode.noSeccomp);
+      if ("proot".equals(mode.runtime)) edit.putBoolean("proot_disable_seccomp", mode.noSeccomp);
       if (!edit.commit()) throw new java.io.IOException("COLD_RUNTIME_SELECTION_PERSISTENCE");
       return runtimeSettingsSnapshot();
     }
@@ -410,10 +427,10 @@ public class ConfigStore {
     return new com.deepseekharness.app.runtime.RuntimeHostPorts.Settings(
         com.deepseekharness.app.util.ResolverConfig.mode(
             com.deepseekharness.app.util.PreferenceValue.text(values.get("dns_mode"), "auto")),
-        "proroot"
-            .equals(
+        com.deepseekharness.app.runtime.RuntimeEngine.parse(
                 com.deepseekharness.app.util.PreferenceValue.text(
-                    values.get(Constants.KEY_CONTAINER_RUNTIME), "proot")),
+                    values.get(Constants.KEY_CONTAINER_RUNTIME), "proot"))
+            .id,
         com.deepseekharness.app.util.PreferenceValue.flag(
             values.get("proroot_static_loader"), true),
         com.deepseekharness.app.util.PreferenceValue.flag(

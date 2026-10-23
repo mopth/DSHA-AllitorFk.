@@ -42,6 +42,14 @@ public final class UpdateEngine {
   }
 
   public static final String FEED = com.deepseekharness.app.util.UpdateLocations.FEED;
+
+  /**
+   * AllitorFk：官方 dsha.cc 更新源默认关闭（包名不同，官方 APK 无法覆盖安装本应用，提示只会误导）。
+   * 由构建属性 dsha.officialUpdateFeed 控制；是否开启待老板决定。关闭时不发起任何网络请求。
+   */
+  public static boolean feedEnabled() {
+    return com.deepseekharness.app.BuildConfig.OFFICIAL_UPDATE_FEED;
+  }
   private static final ExecutorService IO = Executors.newSingleThreadExecutor();
   private final AtomicBoolean busy = new AtomicBoolean();
   private volatile boolean cancelled;
@@ -223,6 +231,15 @@ public final class UpdateEngine {
   }
 
   private void check(boolean startup) {
+    if (!feedEnabled()) {
+      if (!startup)
+        state.setValue(
+            snapshot(
+                com.deepseekharness.app.util.UiText.choose(
+                    "本版本未启用官方更新源", "The official update feed is disabled in this build"),
+                false));
+      return;
+    }
     final String requestedChannel = channel;
     submit(
         com.deepseekharness.app.util.UiText.format(
