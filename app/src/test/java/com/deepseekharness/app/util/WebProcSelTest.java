@@ -330,4 +330,25 @@ public class WebProcSelTest {
         WebProcSel.maySignalWeb(
             command.replace("dsha-recovery-0123456789abcdef", "dsha-recovery-invalid")));
   }
+
+  /**
+   * 对照官方 feat/bxroot-runtime 的同名安全断言：bxroot 启动器的 cmdline 带着 guest 命令文本，
+   * 但启动器本身绝不能被当成 Web 进程杀掉。本实现比官方更严：libbxroot* 启动器任何形态（含 exec dsh web）都不算。
+   */
+  @Test
+  public void neverMistakesBxrootLauncherForWeb() {
+    String rootfs = "/data/user/0/dsha.AllitorFk_.dsh0_2_1_rc_2/files/linux/ubuntu";
+    String[][] forms = {
+      {"libbxroot.so", "-r", rootfs, "--link2symlink", "/bin/bash", "-c", "echo 'dsh web'"},
+      {"libbxroot.so", "-r", rootfs, "--link2symlink", "/bin/bash", "-c", "dsh plugin list"},
+      {"libbxroot.so", "-r", rootfs, "-0", "-w", "/root", "/bin/bash", "-c", "exec dsh web --port 3090"},
+      {"/data/app/x/lib/arm64/libbxroot.so", "-w", "/root", "/bin/bash", "-c", "exec /usr/local/bin/dsh web"},
+      {"libbxroot-runtime.so", "-r", rootfs, "/usr/local/bin/dsh", "web"},
+    };
+    for (String[] argv : forms) {
+      assertFalse(String.join(" ", argv), WebProcSel.looksLikeWeb(String.join("\u0000", argv)));
+      assertFalse(String.join(" ", argv), WebProcSel.looksLikeWeb(String.join(" ", argv)));
+      assertFalse(String.join(" ", argv), WebProcSel.maySignalWeb(String.join("\u0000", argv)));
+    }
+  }
 }

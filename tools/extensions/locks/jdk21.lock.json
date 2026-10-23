@@ -1,0 +1,302 @@
+{
+ "format": 1,
+ "id": "jdk21",
+ "base": {
+  "rootfsVersion": "10",
+  "toolsLockSha256": "5f75c41bb6a543143e4a05d78fc13f0abf54367c1f4454526a9266e119299c1e",
+  "statusSha256": "f4edc364d3d98514ae7567063645013b2e36f3eb3493ce0076fcc270e4b248b2"
+ },
+ "sources": [
+  {
+   "suite": "noble",
+   "inReleaseSha256": "cdb2f31d809f589719a53c6ad15f255b27569c4059542ada282aaa21b8e164b0",
+   "date": "Thu, 25 Apr 2024 15:10:33 UTC"
+  },
+  {
+   "suite": "noble-updates",
+   "inReleaseSha256": "4fcba3fb02086679f7e86677e320b92e0d076a8c02e30dc0abbbe06b67640db7",
+   "date": "Fri, 23 Oct 2026 20:23:43 UTC"
+  },
+  {
+   "suite": "noble-security",
+   "inReleaseSha256": "e56daa3c9903f06da8161b4f0e61a747aab215647f4bfabbecd5655631200f09",
+   "date": "Fri, 23 Oct 2026 13:38:44 UTC"
+  }
+ ],
+ "requires": [],
+ "seeds": [
+  "openjdk-21-jdk-headless",
+  "libapksig-java",
+  "zipalign"
+ ],
+ "packages": [
+  {
+   "Package": "android-libbacktrace",
+   "Version": "1:34.0.4-1build3",
+   "Architecture": "arm64",
+   "Filename": "pool/universe/a/android-platform-tools/android-libbacktrace_34.0.4-1build3_arm64.deb",
+   "Size": "217846",
+   "SHA256": "a6e73175e232ecc4adefd0ed9b6b1c472c409b9388b27953156e127e8cc79d22",
+   "Installed-Size": "744",
+   "Source": "android-platform-tools (34.0.4-1build3)",
+   "Section": "universe/libs",
+   "Suite": "noble"
+  },
+  {
+   "Package": "android-libbase",
+   "Version": "1:34.0.4-1build3",
+   "Architecture": "arm64",
+   "Filename": "pool/universe/a/android-platform-tools/android-libbase_34.0.4-1build3_arm64.deb",
+   "Size": "96774",
+   "SHA256": "0d764f726449e35b4a861b056d661da6526ef8b7d3403fc8d11836e63a9ac6d6",
+   "Installed-Size": "354",
+   "Source": "android-platform-tools (34.0.4-1build3)",
+   "Section": "universe/libs",
+   "Suite": "noble"
+  },
+  {
+   "Package": "android-libcutils",
+   "Version": "1:34.0.4-1build3",
+   "Architecture": "arm64",
+   "Filename": "pool/universe/a/android-platform-tools/android-libcutils_34.0.4-1build3_arm64.deb",
+   "Size": "35818",
+   "SHA256": "6888e9ed1722b63e1c8dd4656927da299b291ad83d141451f6e6394f9d7b0071",
+   "Installed-Size": "123",
+   "Source": "android-platform-tools (34.0.4-1build3)",
+   "Section": "universe/libs",
+   "Suite": "noble"
+  },
+  {
+   "Package": "android-liblog",
+   "Version": "1:34.0.4-1build3",
+   "Architecture": "arm64",
+   "Filename": "pool/universe/a/android-platform-tools/android-liblog_34.0.4-1build3_arm64.deb",
+   "Size": "35688",
+   "SHA256": "81e9bcec0986b8111f63617fc226d3690ed90cca61af27b57750fd1ec65e994b",
+   "Installed-Size": "111",
+   "Source": "android-platform-tools (34.0.4-1build3)",
+   "Section": "universe/libs",
+   "Suite": "noble"
+  },
+  {
+   "Package": "android-libutils",
+   "Version": "1:34.0.4-1build3",
+   "Architecture": "arm64",
+   "Filename": "pool/universe/a/android-platform-tools/android-libutils_34.0.4-1build3_arm64.deb",
+   "Size": "50218",
+   "SHA256": "5366c298ff87d347359b41357a5cce93fc8dbf260ba1b0ae60812f093f825af3",
+   "Installed-Size": "186",
+   "Source": "android-platform-tools (34.0.4-1build3)",
+   "Section": "universe/libs",
+   "Suite": "noble"
+  },
+  {
+   "Package": "android-libziparchive",
+   "Version": "1:34.0.4-1build3",
+   "Architecture": "arm64",
+   "Filename": "pool/universe/a/android-platform-tools/android-libziparchive_34.0.4-1build3_arm64.deb",
+   "Size": "40496",
+   "SHA256": "c924e3e4fd363cb0889ce977d2f1716c63532b17bc5f55f8a78d20496b4014a6",
+   "Installed-Size": "145",
+   "Source": "android-platform-tools (34.0.4-1build3)",
+   "Section": "universe/libs",
+   "Suite": "noble"
+  },
+  {
+   "Package": "ca-certificates-java",
+   "Version": "20240118",
+   "Architecture": "all",
+   "Filename": "pool/main/c/ca-certificates-java/ca-certificates-java_20240118_all.deb",
+   "Size": "11624",
+   "SHA256": "6d5859b713371c4725cf8deca131685067219ffa30129a6c5b09d53ff63d40e9",
+   "Installed-Size": "42",
+   "Section": "misc",
+   "Source": "ca-certificates-java",
+   "Suite": "noble"
+  },
+  {
+   "Package": "java-common",
+   "Version": "0.75+exp1",
+   "Architecture": "all",
+   "Filename": "pool/main/j/java-common/java-common_0.75+exp1_all.deb",
+   "Size": "6798",
+   "SHA256": "9029d787c97f9b9e9bb04e7a4fb92bfc12fbd10b5809aab8694a8735b85bc070",
+   "Installed-Size": "28",
+   "Section": "misc",
+   "Source": "java-common",
+   "Suite": "noble"
+  },
+  {
+   "Package": "libapksig-java",
+   "Version": "31.0.2-1ubuntu1",
+   "Architecture": "all",
+   "Filename": "pool/universe/a/android-platform-tools-apksig/libapksig-java_31.0.2-1ubuntu1_all.deb",
+   "Size": "406398",
+   "SHA256": "35a70af2666f09402034dc5d154ddbc84819e58b0f8ac60b311594bc5f7ecfc1",
+   "Installed-Size": "459",
+   "Source": "android-platform-tools-apksig",
+   "Section": "universe/java",
+   "Suite": "noble"
+  },
+  {
+   "Package": "libbsd0",
+   "Version": "0.12.1-1build1.1",
+   "Architecture": "arm64",
+   "Filename": "pool/main/libb/libbsd/libbsd0_0.12.1-1build1.1_arm64.deb",
+   "Size": "40970",
+   "SHA256": "cdf9ff601244e64482584d9d9b98aa54a573c081ab5956227c737307196c1ce3",
+   "Installed-Size": "179",
+   "Source": "libbsd",
+   "Section": "libs",
+   "Suite": "noble-updates"
+  },
+  {
+   "Package": "libjpeg-turbo8",
+   "Version": "2.1.5-2ubuntu2",
+   "Architecture": "arm64",
+   "Filename": "pool/main/libj/libjpeg-turbo/libjpeg-turbo8_2.1.5-2ubuntu2_arm64.deb",
+   "Size": "162812",
+   "SHA256": "119ddd97c19d970c5e21b97cff353afef138b05f1a3bd9e2c01b814dd193adce",
+   "Installed-Size": "450",
+   "Source": "libjpeg-turbo",
+   "Section": "libs",
+   "Suite": "noble"
+  },
+  {
+   "Package": "libjpeg8",
+   "Version": "8c-2ubuntu11",
+   "Architecture": "arm64",
+   "Filename": "pool/main/libj/libjpeg8-empty/libjpeg8_8c-2ubuntu11_arm64.deb",
+   "Size": "2148",
+   "SHA256": "6b4bc8f09e565284f72c99bb8f37365b6a49843f80b64bd2b0755ea0622523a4",
+   "Installed-Size": "9",
+   "Source": "libjpeg8-empty",
+   "Section": "libs",
+   "Suite": "noble"
+  },
+  {
+   "Package": "liblcms2-2",
+   "Version": "2.14-2ubuntu0.1",
+   "Architecture": "arm64",
+   "Filename": "pool/main/l/lcms2/liblcms2-2_2.14-2ubuntu0.1_arm64.deb",
+   "Size": "161362",
+   "SHA256": "76ac150c4e043772ad2c3218674c3a00b61dff07a4f3548809c9f51da787dd12",
+   "Installed-Size": "431",
+   "Source": "lcms2",
+   "Section": "libs",
+   "Suite": "noble-updates"
+  },
+  {
+   "Package": "libnspr4",
+   "Version": "2:4.35-1.1build1",
+   "Architecture": "arm64",
+   "Filename": "pool/main/n/nspr/libnspr4_4.35-1.1build1_arm64.deb",
+   "Size": "114244",
+   "SHA256": "0bd5994126c41aa05aa380954a3cb2ae56a0a8ebe368a0e01a411fdcc0cb9c68",
+   "Installed-Size": "425",
+   "Source": "nspr",
+   "Section": "libs",
+   "Suite": "noble"
+  },
+  {
+   "Package": "libnss3",
+   "Version": "2:3.98-1ubuntu0.3",
+   "Architecture": "arm64",
+   "Filename": "pool/main/n/nss/libnss3_3.98-1ubuntu0.3_arm64.deb",
+   "Size": "1407408",
+   "SHA256": "dbdcb63bf349baea2c8dcbd28166ca2b659bed428e5712dbd667dfc068abfe1a",
+   "Installed-Size": "4070",
+   "Source": "nss",
+   "Section": "libs",
+   "Suite": "noble-updates"
+  },
+  {
+   "Package": "libpcsclite1",
+   "Version": "2.0.3-1build1",
+   "Architecture": "arm64",
+   "Filename": "pool/main/p/pcsc-lite/libpcsclite1_2.0.3-1build1_arm64.deb",
+   "Size": "21806",
+   "SHA256": "5b107b3dc85fa6f3b051c63b4cbbd064d13543e9881dd777653f0e48c3d85d51",
+   "Installed-Size": "84",
+   "Source": "pcsc-lite",
+   "Section": "libs",
+   "Suite": "noble"
+  },
+  {
+   "Package": "libsqlite3-0",
+   "Version": "3.45.1-1ubuntu2.8",
+   "Architecture": "arm64",
+   "Filename": "pool/main/s/sqlite3/libsqlite3-0_3.45.1-1ubuntu2.8_arm64.deb",
+   "Size": "690864",
+   "SHA256": "85925089ef6820a5b6ed80bb490d187465e49687c388333895680fda54e3ee06",
+   "Installed-Size": "1787",
+   "Source": "sqlite3",
+   "Section": "libs",
+   "Suite": "noble-updates"
+  },
+  {
+   "Package": "libzopfli1",
+   "Version": "1.0.3-2",
+   "Architecture": "arm64",
+   "Filename": "pool/universe/z/zopfli/libzopfli1_1.0.3-2_arm64.deb",
+   "Size": "105200",
+   "SHA256": "5dd68efa38f0a18b96299cfa4e1558f06e97bc03e0b7ed00f8fafaeccdfd7f11",
+   "Installed-Size": "342",
+   "Source": "zopfli",
+   "Section": "universe/libs",
+   "Suite": "noble"
+  },
+  {
+   "Package": "openjdk-21-jdk-headless",
+   "Version": "21.0.12.1+1-1~24.04.4",
+   "Architecture": "arm64",
+   "Filename": "pool/main/o/openjdk-21/openjdk-21-jdk-headless_21.0.12.1+1-1~24.04.4_arm64.deb",
+   "Size": "81925510",
+   "SHA256": "911cac7e785b089938df3e242854213af5183aad6e643cc335738de083b2850a",
+   "Installed-Size": "94427",
+   "Source": "openjdk-21",
+   "Section": "java",
+   "Suite": "noble-updates"
+  },
+  {
+   "Package": "openjdk-21-jre-headless",
+   "Version": "21.0.12.1+1-1~24.04.4",
+   "Architecture": "arm64",
+   "Filename": "pool/main/o/openjdk-21/openjdk-21-jre-headless_21.0.12.1+1-1~24.04.4_arm64.deb",
+   "Size": "45800134",
+   "SHA256": "c727cb036f0818578866deea1dc4ad85ddf0178635c3a606896b4f7ba946c273",
+   "Installed-Size": "199260",
+   "Source": "openjdk-21",
+   "Section": "java",
+   "Suite": "noble-updates"
+  },
+  {
+   "Package": "zipalign",
+   "Version": "1:10.0.0+r36-1ubuntu2",
+   "Architecture": "arm64",
+   "Filename": "pool/universe/a/android-platform-build/zipalign_10.0.0+r36-1ubuntu2_arm64.deb",
+   "Size": "20486",
+   "SHA256": "4da6cc35b87b3fe10855dc915bff1ba4d20fd2c6bcf691455cadb4c6f4ca314a",
+   "Installed-Size": "90",
+   "Source": "android-platform-build",
+   "Section": "universe/devel",
+   "Suite": "noble"
+  }
+ ],
+ "upstream": [
+  {
+   "kind": "deb-member",
+   "url": "https://ports.ubuntu.com/ubuntu-ports/pool/universe/a/android-platform-tools-apksig/apksigner_31.0.2-1ubuntu1_all.deb",
+   "sha256": "37a04ceb8c80b6956dd702b99d3a6b7cae1c0e8085d1334adc77b8f92a3117e6",
+   "members": {
+    "usr/share/java/apksigner-31.0.2.jar": "share/apksigner.jar",
+    "usr/share/doc/apksigner/copyright": "LICENSE.apksigner"
+   },
+   "license": "Apache-2.0",
+   "licenseFile": "LICENSE.apksigner",
+   "wrappers": {
+    "bin/apksigner": "exec java -cp /opt/dsha-ext/jdk21/share/apksigner.jar:/usr/share/java/apksig.jar com.android.apksigner.ApkSignerTool \"$@\""
+   }
+  }
+ ]
+}

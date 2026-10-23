@@ -1,0 +1,428 @@
+{
+ "schema": 1,
+ "base": {
+  "rootfsVersion": "10",
+  "toolsLockSha256": "5f75c41bb6a543143e4a05d78fc13f0abf54367c1f4454526a9266e119299c1e",
+  "statusSha256": "f4edc364d3d98514ae7567063645013b2e36f3eb3493ce0076fcc270e4b248b2"
+ },
+ "packs": [
+  {
+   "id": "dev-base",
+   "file": "dev-base.dshx",
+   "sha256": "f9a66d97eefff2b5826b9e9e6c30f8495a4904f0a64e73a45234aff7127de376",
+   "bytes": 118678688,
+   "installedBytes": 450123776,
+   "name": {
+    "zh": "开发基础包",
+    "en": "Developer base"
+   },
+   "summary": {
+    "zh": "gcc/g++、make、cmake、ninja、pkg-config、glibc 版 Python 3.12（含 venv/pip）、zip/jq/sqlite3 等",
+    "en": "gcc/g++, make, cmake, ninja, pkg-config, glibc Python 3.12 (venv/pip), zip/jq/sqlite3 and more"
+   },
+   "category": "lang",
+   "version": "12.10ubuntu1",
+   "requires": [],
+   "agpl": false,
+   "full": true,
+   "debs": 103,
+   "upstream": false,
+   "licenses": [
+    "Ubuntu (per-package copyright)"
+   ]
+  },
+  {
+   "id": "clang",
+   "file": "clang.dshx",
+   "sha256": "e83f22fd4d93c7739b49e8483536afff46c4172282118795dce44c70b958fe1f",
+   "bytes": 82420253,
+   "installedBytes": 395145802,
+   "name": {
+    "zh": "Clang/LLVM 18",
+    "en": "Clang/LLVM 18"
+   },
+   "summary": {
+    "zh": "clang/clang++、lld、clang-format、clang-tidy 与 LLVM 18 工具（Ubuntu noble）",
+    "en": "clang/clang++, lld, clang-format, clang-tidy and LLVM 18 tools (Ubuntu noble)"
+   },
+   "category": "lang",
+   "version": "18.1.3",
+   "requires": [
+    "dev-base"
+   ],
+   "agpl": false,
+   "full": false,
+   "debs": 19,
+   "upstream": true,
+   "licenses": [
+    "Apache-2.0 WITH LLVM-exception",
+    "Ubuntu (per-package copyright)"
+   ]
+  },
+  {
+   "id": "jdk21",
+   "file": "jdk21.dshx",
+   "sha256": "7aeb89c205b0826ac9b564ea3781ab29c010d5f3a40e82cbbb915d5e009fd2bf",
+   "bytes": 131717360,
+   "installedBytes": 311508718,
+   "name": {
+    "zh": "JDK 21 与 APK 签名",
+    "en": "JDK 21 and APK signing"
+   },
+   "summary": {
+    "zh": "OpenJDK 21（headless）、apksigner（Ubuntu 31.0.2 的 jar，免整套图形 JRE）、zipalign",
+    "en": "OpenJDK 21 (headless), apksigner (Ubuntu 31.0.2 jar, without the desktop JRE), zipalign"
+   },
+   "category": "lang",
+   "version": "21.0.12.1+1-1~24.04.4",
+   "requires": [],
+   "agpl": false,
+   "full": true,
+   "debs": 21,
+   "upstream": true,
+   "licenses": [
+    "Apache-2.0",
+    "Ubuntu (per-package copyright)"
+   ]
+  },
+  {
+   "id": "go",
+   "file": "go.dshx",
+   "sha256": "7e935f761ee7e1da976fd7a2d3b90d2ef486f6d2574b7e0e1c57bc4f1a86eca3",
+   "bytes": 66974103,
+   "installedBytes": 238670456,
+   "name": {
+    "zh": "Go",
+    "en": "Go"
+   },
+   "summary": {
+    "zh": "Go 官方 linux-arm64 构建",
+    "en": "Official Go linux-arm64 build"
+   },
+   "category": "lang",
+   "version": "1.27.3",
+   "requires": [
+    "dev-base"
+   ],
+   "agpl": false,
+   "full": false,
+   "debs": 0,
+   "upstream": true,
+   "licenses": [
+    "BSD-3-Clause"
+   ]
+  },
+  {
+   "id": "rust",
+   "file": "rust.dshx",
+   "sha256": "acc9d2eb03cd4b2d83e5e232452a586e238f254ca624c4ed93bfab7041c56f97",
+   "bytes": 171995897,
+   "installedBytes": 519584038,
+   "name": {
+    "zh": "Rust",
+    "en": "Rust"
+   },
+   "summary": {
+    "zh": "rustc + cargo + 标准库（官方 aarch64-unknown-linux-gnu）",
+    "en": "rustc + cargo + std (official aarch64-unknown-linux-gnu)"
+   },
+   "category": "lang",
+   "version": "1.99.1",
+   "requires": [
+    "dev-base"
+   ],
+   "agpl": false,
+   "full": false,
+   "debs": 0,
+   "upstream": true,
+   "licenses": [
+    "MIT OR Apache-2.0"
+   ]
+  },
+  {
+   "id": "android-build",
+   "file": "android-build.dshx",
+   "sha256": "daf3f681662a525104e9436f2cc5df1e2b24bc38740a9e140db43d162d060261",
+   "bytes": 41642664,
+   "installedBytes": 84169831,
+   "name": {
+    "zh": "Android 构建工具",
+    "en": "Android build tools"
+   },
+   "summary": {
+    "zh": "d8（Google R8 9.5.28 jar）、aapt（Ubuntu，v1；noble 无 arm64 aapt2）、android.jar（API 23）",
+    "en": "d8 (Google R8 9.5.28 jar), aapt (Ubuntu, v1; noble has no arm64 aapt2), android.jar (API 23)"
+   },
+   "category": "lang",
+   "version": "r8-9.5.28",
+   "requires": [
+    "jdk21"
+   ],
+   "agpl": false,
+   "full": false,
+   "debs": 8,
+   "upstream": true,
+   "licenses": [
+    "Apache-2.0 (bundled: BSD-3-Clause, MIT, LGPL-2.1, CDDL-1.1/GPL-2.0-CPE, EDL-1.0; see LICENSE.r8)",
+    "Ubuntu (per-package copyright)"
+   ]
+  },
+  {
+   "id": "kotlin",
+   "file": "kotlin.dshx",
+   "sha256": "843c9761576f18e1745f986f766e6d7a9cd11223efa7e1ece37a9e08551a2665",
+   "bytes": 89632368,
+   "installedBytes": 97397286,
+   "name": {
+    "zh": "Kotlin 编译器",
+    "en": "Kotlin compiler"
+   },
+   "summary": {
+    "zh": "JetBrains 官方 kotlin-compiler（JVM）",
+    "en": "Official JetBrains kotlin-compiler (JVM)"
+   },
+   "category": "lang",
+   "version": "2.4.21",
+   "requires": [
+    "jdk21"
+   ],
+   "agpl": false,
+   "full": false,
+   "debs": 0,
+   "upstream": true,
+   "licenses": [
+    "Apache-2.0"
+   ]
+  },
+  {
+   "id": "gradle",
+   "file": "gradle.dshx",
+   "sha256": "9ed08208a11482ea494a3ea3c1b29a435b0638afc8065e053a736dc5f313d9af",
+   "bytes": 151433800,
+   "installedBytes": 170459028,
+   "name": {
+    "zh": "Gradle",
+    "en": "Gradle"
+   },
+   "summary": {
+    "zh": "Gradle 官方二进制发行版",
+    "en": "Official Gradle binary distribution"
+   },
+   "category": "lang",
+   "version": "9.8.2",
+   "requires": [
+    "jdk21"
+   ],
+   "agpl": false,
+   "full": false,
+   "debs": 0,
+   "upstream": true,
+   "licenses": [
+    "Apache-2.0"
+   ]
+  },
+  {
+   "id": "maven",
+   "file": "maven.dshx",
+   "sha256": "c5cba1bed439779c183f14989b0526f1a506666497c3fa2fbb58e83e976dd571",
+   "bytes": 10076536,
+   "installedBytes": 13144064,
+   "name": {
+    "zh": "Maven",
+    "en": "Maven"
+   },
+   "summary": {
+    "zh": "Apache Maven（Ubuntu）",
+    "en": "Apache Maven (Ubuntu)"
+   },
+   "category": "lang",
+   "version": "3.8.7-2",
+   "requires": [
+    "jdk21"
+   ],
+   "agpl": false,
+   "full": false,
+   "debs": 32,
+   "upstream": false,
+   "licenses": [
+    "Ubuntu (per-package copyright)"
+   ]
+  },
+  {
+   "id": "ruby",
+   "file": "ruby.dshx",
+   "sha256": "0d7d226c37354c165d24a033d64fe453472f807b46ddc1f3b7d6d80ce73db940",
+   "bytes": 6884843,
+   "installedBytes": 38234112,
+   "name": {
+    "zh": "Ruby",
+    "en": "Ruby"
+   },
+   "summary": {
+    "zh": "Ruby 3.2 与 bundler",
+    "en": "Ruby 3.2 with bundler"
+   },
+   "category": "lang",
+   "version": "1:3.2~ubuntu1",
+   "requires": [],
+   "agpl": false,
+   "full": false,
+   "debs": 20,
+   "upstream": false,
+   "licenses": [
+    "Ubuntu (per-package copyright)"
+   ]
+  },
+  {
+   "id": "php",
+   "file": "php.dshx",
+   "sha256": "e5d5b263b04ff719483ba4f32b41366e0c9b81ee358426620975c7be72e77325",
+   "bytes": 15545254,
+   "installedBytes": 61233152,
+   "name": {
+    "zh": "PHP",
+    "en": "PHP"
+   },
+   "summary": {
+    "zh": "PHP 8.3 命令行",
+    "en": "PHP 8.3 CLI"
+   },
+   "category": "lang",
+   "version": "2:8.3+93ubuntu2",
+   "requires": [],
+   "agpl": false,
+   "full": false,
+   "debs": 16,
+   "upstream": false,
+   "licenses": [
+    "Ubuntu (per-package copyright)"
+   ]
+  },
+  {
+   "id": "media",
+   "file": "media.dshx",
+   "sha256": "79c8f94a72bb0af338122ebd168a6f738696da543faa6a21c51f982e777a1111",
+   "bytes": 137504108,
+   "installedBytes": 490825728,
+   "name": {
+    "zh": "音视频与图像",
+    "en": "Audio, video and images"
+   },
+   "summary": {
+    "zh": "FFmpeg、ImageMagick、SoX、MediaInfo、ExifTool",
+    "en": "FFmpeg, ImageMagick, SoX, MediaInfo, ExifTool"
+   },
+   "category": "media",
+   "version": "7:6.1.1-3ubuntu5",
+   "requires": [],
+   "agpl": false,
+   "full": false,
+   "debs": 218,
+   "upstream": false,
+   "licenses": [
+    "Ubuntu (per-package copyright)"
+   ]
+  },
+  {
+   "id": "documents",
+   "file": "documents.dshx",
+   "sha256": "61dffdf28fdc0c1b0a96a1f34082d02d890e4a81daed983ece54f39cf6dad824",
+   "bytes": 62881837,
+   "installedBytes": 326327296,
+   "name": {
+    "zh": "文档与 OCR",
+    "en": "Documents and OCR"
+   },
+   "summary": {
+    "zh": "Poppler、qpdf、Pandoc、Tesseract（英文 + 简体中文）",
+    "en": "Poppler, qpdf, Pandoc, Tesseract (English + Simplified Chinese)"
+   },
+   "category": "media",
+   "version": "24.02.0-1ubuntu9.11",
+   "requires": [],
+   "agpl": false,
+   "full": false,
+   "debs": 65,
+   "upstream": false,
+   "licenses": [
+    "Ubuntu (per-package copyright)"
+   ]
+  },
+  {
+   "id": "texlive",
+   "file": "texlive.dshx",
+   "sha256": "66a4f91c0d7341b9b98e2831fcd6f0c3963e8a31e4d6bb1ea0a516d9f0d5b80c",
+   "bytes": 250635967,
+   "installedBytes": 639214592,
+   "name": {
+    "zh": "TeX Live（精简，含中文）",
+    "en": "TeX Live (lite, with Chinese)"
+   },
+   "summary": {
+    "zh": "xelatex/pdflatex、LaTeX 常用宏包（base/recommended/extra）、ctex 中文支持与 Noto CJK 字体；不含文档包",
+    "en": "xelatex/pdflatex, LaTeX base/recommended/extra, ctex Chinese support and Noto CJK fonts; no -doc packages"
+   },
+   "category": "media",
+   "version": "2023.20240207-1",
+   "requires": [],
+   "agpl": false,
+   "full": false,
+   "debs": 69,
+   "upstream": false,
+   "licenses": [
+    "Ubuntu (per-package copyright)"
+   ]
+  },
+  {
+   "id": "ghostscript",
+   "file": "ghostscript.dshx",
+   "sha256": "12736bdb8a9280125d7f6aa106f84d3b01f4623613845892dc43eedf25ae88f4",
+   "bytes": 21804518,
+   "installedBytes": 70211584,
+   "name": {
+    "zh": "Ghostscript（AGPL）",
+    "en": "Ghostscript (AGPL)"
+   },
+   "summary": {
+    "zh": "PostScript/PDF 解释器；AGPL-3.0，单独成包",
+    "en": "PostScript/PDF interpreter; AGPL-3.0, separate pack"
+   },
+   "category": "media",
+   "version": "10.02.1~dfsg1-0ubuntu7.10",
+   "requires": [],
+   "agpl": true,
+   "full": false,
+   "debs": 42,
+   "upstream": false,
+   "licenses": [
+    "Ubuntu (per-package copyright)"
+   ]
+  },
+  {
+   "id": "devtools",
+   "file": "devtools.dshx",
+   "sha256": "6188582635a7070423e7ad14e469298c141075736877ceb3007bb93db42497fb",
+   "bytes": 78795782,
+   "installedBytes": 300870656,
+   "name": {
+    "zh": "调试与开发工具",
+    "en": "Debugging and dev tools"
+   },
+   "summary": {
+    "zh": "gdb、strace、autotools、ripgrep、fd、tmux、htop、rsync、git-lfs、tree",
+    "en": "gdb, strace, autotools, ripgrep, fd, tmux, htop, rsync, git-lfs, tree"
+   },
+   "category": "devtools",
+   "version": "15.1-1ubuntu1~24.04.1",
+   "requires": [],
+   "agpl": false,
+   "full": false,
+   "debs": 84,
+   "upstream": false,
+   "licenses": [
+    "Ubuntu (per-package copyright)"
+   ]
+  }
+ ],
+ "packsSha256": "2a9d3eed9d1036423324be44aa5961f8110b0e3ebb35e28d7f3e338311d6cb70"
+}

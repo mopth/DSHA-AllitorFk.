@@ -34,8 +34,9 @@
 
 - proot（Termux 分支）为 GPL-2.0。标准与兼容资产保留 COPYING；API 23 构建及源码差异见 `tools/build-low-proot.py`。完整声明位于 `assets/licenses/proot-COPYING.txt`。
 - proroot v1.2.8 为上游专有许可。DSHA 分发上游原始二进制，不声称可重编、审计源码或任意修改后再分发；许可证与来源见随包声明。不能用容器 root 身份推断 Android root 权限。
-- bxroot **0.2.4** 源码为 MIT，固定来源 `https://github.com/qiannianhuanxiang/bxroot`、提交 `d5f9ac30d05f8fc4302465037b1195e3080f3a60`；原始许可全文为 `assets/licenses/bxroot-MIT.txt`。本地变更、构建工具链、源包/补丁和每个原生文件的摘要见 `tools/bxroot/lock.json`，不是未修改的上游发行二进制。AllitorFk 原样随包 fix4（e6420cd）的预编译产物，本仓库未重编。
+- bxroot **0.2.4** 源码为 MIT，固定来源 `https://github.com/qiannianhuanxiang/bxroot`、提交 `d5f9ac30d05f8fc4302465037b1195e3080f3a60`；原始许可全文为 `assets/licenses/bxroot-MIT.txt`。本地变更、构建工具链、源包/补丁和每个原生文件的摘要见 `tools/bxroot/lock.json`，不是未修改的上游发行二进制。AllitorFk 原样随包 fix4（提交 e6420cd，未公开；公开的是补丁 patches/dsha-fix4-dsh0.2.1-rc.2.patch）的预编译产物，本仓库未重编。官方 feat/bxroot-runtime 分支（13b2750b）另有一套 bxroot（上游提交 8803dcc5、5 个 .so、无锁文件/源码证明），AllitorFk 未采用其二进制，只采用其“三振切回 proot”行为。
 - bxroot launcher 与 ulx 为静态 ELF；bxroot 自有源码的 MIT 不改变其中静态工具链运行库的许可。glibc 的 LGPL-2.1-or-later 全文和实际 sysroot 包 copyright 分别随 `assets/licenses/bxroot-glibc-COPYING.LIB.txt`、`bxroot-glibc-copyright.txt` 提供；GCC 包 copyright 为 `bxroot-gcc-copyright.txt`，GPL-3.0 全文及 `GCC-RUNTIME-EXCEPTION-3.1.txt` 同时提供。对应 glibc 源获取入口为 `https://archive.ubuntu.com/ubuntu/pool/main/g/glibc/glibc_2.39-0ubuntu8.dsc`。
+- proroot/bxroot 为实验引擎：连续 3 次**明确**启动失败（鉴权前进程以已知退出码退出）自动切回 proot；超时、看门狗、退出码未知等不确定结果不计数，也不触发切换。
 - bxroot 是兼容运行时，不是安全沙箱或 Android root；最低内核要求（Linux 4.11+）与 APK 的 minSdk 是不同门槛。
 - Windows 重编、Linux 重编与手机执行是不同证据；不能从一种宿主成功推导全部平台通过。
 
@@ -134,3 +135,16 @@
 | `node_modules/argparse` | 2.0.1 | Python-2.0 | https://registry.npmjs.org/argparse/-/argparse-2.0.1.tgz |
 
 GPL、MPL、LGPL 等组件的具体再分发义务应按相应包和修改范围核对。源码入口与许可副本不等于已证明所有上游二进制可逐字节重现。
+
+## AllitorFk 离线扩展包（扩展中心）
+
+扩展包由 `tools/resolve-extensions.py` 锁定版本（`tools/extensions/locks/*.lock.json`，每个 deb 记录 sha256），由 `tools/build-extensions.py` 可复现地打包，不进 git；Full 版 APK 内置 `dev-base` 与 `jdk21`，标准版/低版本在扩展中心从文件导入。
+
+- **Ubuntu 24.04（noble，arm64）软件包**：各包许可以包内 `/usr/share/doc/<包>/copyright` 为准（GPL-2.0/GPL-3.0/LGPL/BSD/MIT 等）。启用后每个扩展的源码获取清单写入 `/opt/dsha-ext/licenses/<扩展>/SOURCES.json`，发布时附 `sources-<扩展>.json`：列出每个源码包名、版本与 `https://launchpad.net/ubuntu/+source/<名>/<版本>`。对 GPL 组件，AllitorFk 承诺自分发之日起三年内应请求提供对应源码副本（书面要约）。
+- **ghostscript**：AGPL-3.0-or-later，单独成包（`ghostscript`），扩展中心标注 AGPL 并在启用前确认；其它扩展不依赖它。
+- **unrar / unrar-nonfree**：非自由许可，明确排除（`tools/extensions/packs.json` 的 deny 列表，解析阶段发现即失败）。
+- **上游工具链（安装到 `/opt/dsha-ext/<扩展>`）**：Go（BSD-3-Clause，go.dev 官方 linux-arm64 包）、Rust rustc/cargo/rust-std（MIT OR Apache-2.0，static.rust-lang.org 官方组件）、Kotlin 编译器（Apache-2.0，JetBrains GitHub 发布）、Gradle（Apache-2.0，services.gradle.org 官方发布）、apksigner（Apache-2.0，取自 Ubuntu `apksigner` deb 的 jar，配合 `libapksig-java`）。每个归档的 URL 与 sha256 锁定在对应 lock 文件，许可文件随包放在 `/opt/dsha-ext/<扩展>/` 与 licenses 目录。
+- **d8**（`android-build` 扩展）：Google R8 9.5.28 的 `r8-9.5.28.jar`，取自 Google Maven（dl.google.com，sha256 锁定），主体 Apache-2.0，jar 内附带组件另有 BSD-3-Clause、MIT、LGPL-2.1、CDDL-1.1/GPL-2.0-with-Classpath-exception、EDL-1.0 等许可；原文随包放在 `/opt/dsha-ext/android-build/LICENSE.r8`。同包的 aapt（v1）与 android.jar（API 23）为 Ubuntu deb（Apache-2.0）。
+- **clang-format / clang-tidy**（`clang` 扩展）：取自 Ubuntu `clang-format-18` / `clang-tidy-18` deb 内的 ELF（Apache-2.0 WITH LLVM-exception，deb 的 URL 与 sha256 锁定），copyright 随包；其余 clang/lld/llvm 走 apt。
+- **texlive**：TeX Live 2023（Ubuntu deb，LPPL/GPL/公共领域等混合，见各包 copyright），Noto CJK 字体为 SIL OFL-1.1。`dsha-python3-external` 是本仓库生成的无文件标记包（只声明 Provides: python3），用于满足 texlive-latex-extra 辅助脚本对 python3 的依赖而不覆盖 DSHA 自带的 /usr/bin/python3。
+- 扩展包格式、安装器与扩展中心界面均为本仓库独立实现，未复制任何第三方（含 Kxxy）代码。

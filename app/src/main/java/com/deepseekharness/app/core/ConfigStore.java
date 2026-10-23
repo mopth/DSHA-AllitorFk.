@@ -330,7 +330,23 @@ public class ConfigStore {
 
   public void setContainerRuntime(com.deepseekharness.app.runtime.RuntimeEngine engine) {
     if (engine == null) throw new IllegalArgumentException("RUNTIME_ENGINE");
-    prefs.edit().putString(Constants.KEY_CONTAINER_RUNTIME, engine.id).apply();
+    // 换引擎（含三振自动切回）后重新计数。
+    prefs
+        .edit()
+        .putString(Constants.KEY_CONTAINER_RUNTIME, engine.id)
+        .putInt(KEY_ENGINE_STRIKES, 0)
+        .apply();
+  }
+
+  private static final String KEY_ENGINE_STRIKES = "engine_definite_strikes";
+
+  /** 当前实验引擎连续“明确”启动失败次数（超时/不确定不计），见 WebRuntimeFallback.nextStrikes。 */
+  public int getEngineStrikes() {
+    return integer(KEY_ENGINE_STRIKES, 0);
+  }
+
+  public void setEngineStrikes(int strikes) {
+    prefs.edit().putInt(KEY_ENGINE_STRIKES, Math.max(0, strikes)).commit();
   }
 
   /** 首次安装同样默认稳定 proot；只由用户显式选择启用 proroot。 */

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ext_center">扩展中心（离线开发工具包）</string>
+    <string name="ext_center_hint">语言与编译链、媒体与文档、开发工具；全部离线，按 sha256 校验后用 dpkg/apt 安装，可随时移除。</string>
+</resources>

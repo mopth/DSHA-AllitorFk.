@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ext_center">Extensions (offline dev packs)</string>
+    <string name="ext_center_hint">Languages, media and dev tools. Fully offline, sha256-verified, installed and removed with dpkg/apt.</string>
+</resources>

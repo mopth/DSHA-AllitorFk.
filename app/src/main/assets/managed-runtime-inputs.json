@@ -353,6 +353,36 @@
       "executable": false
     },
     {
+      "asset": "app-integration/ext-catalog.json",
+      "target": "root/dsha-app-integration/ext-catalog.json",
+      "executable": false
+    },
+    {
+      "asset": "app-integration/ext/dshx.js",
+      "target": "root/dsha-app-integration/ext/dshx.js",
+      "executable": false
+    },
+    {
+      "asset": "app-integration/ext/manager.js",
+      "target": "root/dsha-app-integration/ext/manager.js",
+      "executable": false
+    },
+    {
+      "asset": "app-integration/ext/routes.js",
+      "target": "root/dsha-app-integration/ext/routes.js",
+      "executable": false
+    },
+    {
+      "asset": "app-integration/ext/cli.mjs",
+      "target": "root/dsha-app-integration/ext/cli.mjs",
+      "executable": false
+    },
+    {
+      "asset": "app-integration/ext/extensions.html",
+      "target": "root/dsha-app-integration/ext/extensions.html",
+      "executable": false
+    },
+    {
       "asset": "plugin-capabilities.py",
       "target": "root/.dsh/plugin-capabilities.py",
       "executable": false

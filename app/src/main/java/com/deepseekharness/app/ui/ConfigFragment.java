@@ -104,6 +104,9 @@ public class ConfigFragment extends Fragment {
     CompoundButton lan = v.findViewById(R.id.config_lan_mode);
     CompoundButton overlay = v.findViewById(R.id.config_overlay_stream);
     Button save = v.findViewById(R.id.config_save);
+    v.findViewById(R.id.config_extensions)
+        .setOnClickListener(
+            b -> startActivity(new android.content.Intent(requireContext(), ExtensionsActivity.class)));
 
     // 高级项折叠
     View advBody = v.findViewById(R.id.config_adv_body);

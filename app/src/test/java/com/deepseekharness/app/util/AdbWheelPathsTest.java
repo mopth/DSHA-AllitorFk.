@@ -192,7 +192,9 @@ public class AdbWheelPathsTest {
           "/sdcard/Documents/dshdata",
           "../sdcard/dshdata",
           "/data/user/0/other.app/files/data",
-          new File(data.getParentFile(), "other-app").getPath()
+          // A sibling app data dir. The host temp dir is not under /data/, so the sibling path is
+          // spelled as it exists on Android instead of deriving it from java.io.tmpdir.
+          "/data/data/other-app/files/data"
         }) {
       fs.links.put(link, target);
       assertThrows(target, IOException.class, () -> bind(fs, data));

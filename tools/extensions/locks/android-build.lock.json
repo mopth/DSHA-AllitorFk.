@@ -1,0 +1,145 @@
+{
+ "format": 1,
+ "id": "android-build",
+ "base": {
+  "rootfsVersion": "10",
+  "toolsLockSha256": "5f75c41bb6a543143e4a05d78fc13f0abf54367c1f4454526a9266e119299c1e",
+  "statusSha256": "f4edc364d3d98514ae7567063645013b2e36f3eb3493ce0076fcc270e4b248b2"
+ },
+ "sources": [
+  {
+   "suite": "noble",
+   "inReleaseSha256": "cdb2f31d809f589719a53c6ad15f255b27569c4059542ada282aaa21b8e164b0",
+   "date": "Thu, 25 Apr 2024 15:10:33 UTC"
+  },
+  {
+   "suite": "noble-updates",
+   "inReleaseSha256": "4fcba3fb02086679f7e86677e320b92e0d076a8c02e30dc0abbbe06b67640db7",
+   "date": "Fri, 23 Oct 2026 20:23:43 UTC"
+  },
+  {
+   "suite": "noble-security",
+   "inReleaseSha256": "e56daa3c9903f06da8161b4f0e61a747aab215647f4bfabbecd5655631200f09",
+   "date": "Fri, 23 Oct 2026 13:38:44 UTC"
+  }
+ ],
+ "requires": [
+  "jdk21"
+ ],
+ "seeds": [
+  "aapt",
+  "android-sdk-platform-23"
+ ],
+ "packages": [
+  {
+   "Package": "aapt",
+   "Version": "1:14~beta1-2build3",
+   "Architecture": "arm64",
+   "Filename": "pool/universe/a/android-platform-frameworks-base/aapt_14~beta1-2build3_arm64.deb",
+   "Size": "35710",
+   "SHA256": "3170f05acd0ed5256d18920f872b9a6c60e6a99b00998e4232d15bd13b028e72",
+   "Installed-Size": "126",
+   "Source": "android-platform-frameworks-base",
+   "Section": "universe/devel",
+   "Suite": "noble"
+  },
+  {
+   "Package": "android-libaapt",
+   "Version": "1:14~beta1-2build3",
+   "Architecture": "arm64",
+   "Filename": "pool/universe/a/android-platform-frameworks-base/android-libaapt_14~beta1-2build3_arm64.deb",
+   "Size": "888474",
+   "SHA256": "4a603f7e254026653ee3832545c97215eed329e4e754dec4d870b15cfab20455",
+   "Installed-Size": "3138",
+   "Source": "android-platform-frameworks-base",
+   "Section": "universe/devel",
+   "Suite": "noble"
+  },
+  {
+   "Package": "android-libandroidfw",
+   "Version": "1:14~beta1-2build3",
+   "Architecture": "arm64",
+   "Filename": "pool/universe/a/android-platform-frameworks-base/android-libandroidfw_14~beta1-2build3_arm64.deb",
+   "Size": "174086",
+   "SHA256": "83552b8caa2bb6e11e3e6d82a116ae8884eeae56adb5bf2bac9c0df2d72b102e",
+   "Installed-Size": "493",
+   "Source": "android-platform-frameworks-base",
+   "Section": "universe/libs",
+   "Suite": "noble"
+  },
+  {
+   "Package": "android-sdk-platform-23",
+   "Version": "6.0.1+r72-6ubuntu1",
+   "Architecture": "all",
+   "Filename": "pool/universe/a/android-framework-23/android-sdk-platform-23_6.0.1+r72-6ubuntu1_all.deb",
+   "Size": "9712038",
+   "SHA256": "5c362479c0b93c488f6fee3eceed4319276715b55cef7a64c281f5a07a26a4dc",
+   "Installed-Size": "38873",
+   "Source": "android-framework-23",
+   "Section": "universe/devel",
+   "Suite": "noble"
+  },
+  {
+   "Package": "libandroid-23-java",
+   "Version": "6.0.1+r72-6ubuntu1",
+   "Architecture": "all",
+   "Filename": "pool/universe/a/android-framework-23/libandroid-23-java_6.0.1+r72-6ubuntu1_all.deb",
+   "Size": "13601226",
+   "SHA256": "c1fa0d74aff0e0f39c4d7b77c4ba42b119c7e044845cdd57afc117bf09441feb",
+   "Installed-Size": "15369",
+   "Source": "android-framework-23",
+   "Section": "universe/java",
+   "Suite": "noble"
+  },
+  {
+   "Package": "libandroid-uiautomator-23-java",
+   "Version": "6.0.1+r72-6ubuntu1",
+   "Architecture": "all",
+   "Filename": "pool/universe/a/android-framework-23/libandroid-uiautomator-23-java_6.0.1+r72-6ubuntu1_all.deb",
+   "Size": "17568",
+   "SHA256": "5de17287771e8787ae18604018a06d8b0b14d9fe07f7a5c1c52b22ba2572b6d4",
+   "Installed-Size": "63",
+   "Source": "android-framework-23",
+   "Section": "universe/java",
+   "Suite": "noble"
+  },
+  {
+   "Package": "libpng16-16t64",
+   "Version": "1.6.43-5ubuntu0.7",
+   "Architecture": "arm64",
+   "Filename": "pool/main/libp/libpng1.6/libpng16-16t64_1.6.43-5ubuntu0.7_arm64.deb",
+   "Size": "186982",
+   "SHA256": "6e724abe81e94ff73d9b28b545a13329c0b7e4ea6fd8022ecbcd2b3492d0117d",
+   "Installed-Size": "370",
+   "Source": "libpng1.6",
+   "Section": "libs",
+   "Suite": "noble-updates"
+  },
+  {
+   "Package": "libprotobuf32t64",
+   "Version": "3.21.12-8.2ubuntu0.4",
+   "Architecture": "arm64",
+   "Filename": "pool/main/p/protobuf/libprotobuf32t64_3.21.12-8.2ubuntu0.4_arm64.deb",
+   "Size": "858976",
+   "SHA256": "ff59200db84971b2499b8d80dbaa09ea83ea7e2647dc7025a327a1ab9f6fcb2c",
+   "Installed-Size": "3042",
+   "Source": "protobuf",
+   "Section": "libs",
+   "Suite": "noble-updates"
+  }
+ ],
+ "upstream": [
+  {
+   "kind": "jar",
+   "url": "https://dl.google.com/dl/android/maven2/com/android/tools/r8/9.5.28/r8-9.5.28.jar",
+   "sha256": "38a9ffaaebbd17d1514e3ecbff5a85b989bb13c551b9e224c7409514eea84ff5",
+   "dest": "share/r8.jar",
+   "license": "Apache-2.0 (bundled: BSD-3-Clause, MIT, LGPL-2.1, CDDL-1.1/GPL-2.0-CPE, EDL-1.0; see LICENSE.r8)",
+   "licenseMember": "LICENSE",
+   "licenseFile": "LICENSE.r8",
+   "wrappers": {
+    "bin/d8": "exec java -cp /opt/dsha-ext/android-build/share/r8.jar com.android.tools.r8.D8 \"$@\""
+   }
+  }
+ ]
+}

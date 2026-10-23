@@ -58,6 +58,7 @@
         android:theme="@style/Theme.DeepseekHarness">
 
         <activity android:name=".ui.BrowserOriginRestoreActivity" android:exported="false" />
+        <activity android:name=".ui.ExtensionsActivity" android:exported="false" android:label="@string/ext_center" />
         <activity android:name=".ui.CommunityActivity" android:exported="false" />
         <activity android:name=".ui.OnboardingPrepareActivity" android:exported="false" />
 

@@ -1,6 +1,7 @@
 import { writeFileSync, renameSync, unlinkSync, readFileSync } from 'node:fs';
 import { confirmedIdle } from './activity.js';
 import { runtimePlugins } from './runtime-plugins.js';
+import { registerExtensionRoutes } from './ext/routes.js';
 export const inject = ['agents', 'sessions', 'sessionProjections'];
 export function apply(ctx) {
   ctx.inject(['webServer','connection'], scoped => {
@@ -13,6 +14,7 @@ export function apply(ctx) {
         'content-security-policy':"default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src http://127.0.0.1:*; base-uri 'none'; frame-ancestors 'none'"});
       res.end(req.method === 'HEAD' ? undefined : page);
     }}), 'dsha-browser-origin-restore');
+    scoped.effect(() => registerExtensionRoutes(scoped), 'dsha-extensions');
   });
   const generation = process.env.DSHA_WEB_GENERATION;
   if (!generation) return;

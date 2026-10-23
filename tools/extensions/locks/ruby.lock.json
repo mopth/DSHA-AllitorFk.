@@ -1,0 +1,278 @@
+{
+ "format": 1,
+ "id": "ruby",
+ "base": {
+  "rootfsVersion": "10",
+  "toolsLockSha256": "5f75c41bb6a543143e4a05d78fc13f0abf54367c1f4454526a9266e119299c1e",
+  "statusSha256": "f4edc364d3d98514ae7567063645013b2e36f3eb3493ce0076fcc270e4b248b2"
+ },
+ "sources": [
+  {
+   "suite": "noble",
+   "inReleaseSha256": "cdb2f31d809f589719a53c6ad15f255b27569c4059542ada282aaa21b8e164b0",
+   "date": "Thu, 25 Apr 2024 15:10:33 UTC"
+  },
+  {
+   "suite": "noble-updates",
+   "inReleaseSha256": "4fcba3fb02086679f7e86677e320b92e0d076a8c02e30dc0abbbe06b67640db7",
+   "date": "Fri, 23 Oct 2026 20:23:43 UTC"
+  },
+  {
+   "suite": "noble-security",
+   "inReleaseSha256": "e56daa3c9903f06da8161b4f0e61a747aab215647f4bfabbecd5655631200f09",
+   "date": "Fri, 23 Oct 2026 13:38:44 UTC"
+  }
+ ],
+ "requires": [],
+ "seeds": [
+  "ruby",
+  "ruby-bundler"
+ ],
+ "packages": [
+  {
+   "Package": "libbsd0",
+   "Version": "0.12.1-1build1.1",
+   "Architecture": "arm64",
+   "Filename": "pool/main/libb/libbsd/libbsd0_0.12.1-1build1.1_arm64.deb",
+   "Size": "40970",
+   "SHA256": "cdf9ff601244e64482584d9d9b98aa54a573c081ab5956227c737307196c1ce3",
+   "Installed-Size": "179",
+   "Source": "libbsd",
+   "Section": "libs",
+   "Suite": "noble-updates"
+  },
+  {
+   "Package": "libedit2",
+   "Version": "3.1-20230828-1build1",
+   "Architecture": "arm64",
+   "Filename": "pool/main/libe/libedit/libedit2_3.1-20230828-1build1_arm64.deb",
+   "Size": "97526",
+   "SHA256": "cf642fec16d86517e0e715520c3a7cdaee650e7ae8a4993f82d0e1e7a5883efb",
+   "Installed-Size": "302",
+   "Source": "libedit",
+   "Section": "libs",
+   "Suite": "noble"
+  },
+  {
+   "Package": "libncurses6",
+   "Version": "6.4+20240113-1ubuntu2.2",
+   "Architecture": "arm64",
+   "Filename": "pool/main/n/ncurses/libncurses6_6.4+20240113-1ubuntu2.2_arm64.deb",
+   "Size": "109620",
+   "SHA256": "46cd7885975573fc669d93f66f2453e014e6ccae4f568659febd49e5011630d4",
+   "Installed-Size": "499",
+   "Source": "ncurses",
+   "Section": "libs",
+   "Suite": "noble-updates"
+  },
+  {
+   "Package": "libncursesw6",
+   "Version": "6.4+20240113-1ubuntu2.2",
+   "Architecture": "arm64",
+   "Filename": "pool/main/n/ncurses/libncursesw6_6.4+20240113-1ubuntu2.2_arm64.deb",
+   "Size": "145566",
+   "SHA256": "70c7edddf49520a7d0e620ad7d82da8e4b8c2ba7bd8caf156d5666ea19836e94",
+   "Installed-Size": "569",
+   "Source": "ncurses",
+   "Section": "libs",
+   "Suite": "noble-updates",
+   "Replaces-Base": "6.4+20240113-1ubuntu2"
+  },
+  {
+   "Package": "libruby",
+   "Version": "1:3.2~ubuntu1",
+   "Architecture": "arm64",
+   "Filename": "pool/main/r/ruby-defaults/libruby_3.2~ubuntu1_arm64.deb",
+   "Size": "4694",
+   "SHA256": "c581fd1bd191c99992a5b2f6a6a624c0a9d7bfde19bc43d791ab1baf5f6957bc",
+   "Installed-Size": "12",
+   "Source": "ruby-defaults",
+   "Section": "libs",
+   "Suite": "noble"
+  },
+  {
+   "Package": "libruby3.2",
+   "Version": "3.2.3-1ubuntu0.24.04.8",
+   "Architecture": "arm64",
+   "Filename": "pool/main/r/ruby3.2/libruby3.2_3.2.3-1ubuntu0.24.04.8_arm64.deb",
+   "Size": "5331424",
+   "SHA256": "05ba2133bb54b7cd8e909e6a765e1c11f9a6c749c9e39df306eb2ddd8b7bf108",
+   "Installed-Size": "29778",
+   "Source": "ruby3.2",
+   "Section": "libs",
+   "Suite": "noble-updates"
+  },
+  {
+   "Package": "libtinfo6",
+   "Version": "6.4+20240113-1ubuntu2.2",
+   "Architecture": "arm64",
+   "Filename": "pool/main/n/ncurses/libtinfo6_6.4+20240113-1ubuntu2.2_arm64.deb",
+   "Size": "104652",
+   "SHA256": "00570dce13bd89b31e4f433001fb0a55436e57a76370afbae6c5ac491b3dd3e9",
+   "Installed-Size": "604",
+   "Source": "ncurses",
+   "Section": "libs",
+   "Suite": "noble-updates",
+   "Replaces-Base": "6.4+20240113-1ubuntu2"
+  },
+  {
+   "Package": "libyaml-0-2",
+   "Version": "0.2.5-1build1",
+   "Architecture": "arm64",
+   "Filename": "pool/main/liby/libyaml/libyaml-0-2_0.2.5-1build1_arm64.deb",
+   "Size": "51548",
+   "SHA256": "eb0f14172a5cedb68ccea3be266672c9059893341a82fad185f2548dd99b8371",
+   "Installed-Size": "147",
+   "Source": "libyaml",
+   "Section": "libs",
+   "Suite": "noble"
+  },
+  {
+   "Package": "ncurses-base",
+   "Version": "6.4+20240113-1ubuntu2.2",
+   "Architecture": "all",
+   "Filename": "pool/main/n/ncurses/ncurses-base_6.4+20240113-1ubuntu2.2_all.deb",
+   "Size": "25810",
+   "SHA256": "7a00fc1174fbc32ce68bfd2038ca4b8275dc2851f78e911180c0928534682b05",
+   "Installed-Size": "384",
+   "Source": "ncurses",
+   "Section": "utils",
+   "Suite": "noble-updates",
+   "Replaces-Base": "6.4+20240113-1ubuntu2"
+  },
+  {
+   "Package": "ncurses-bin",
+   "Version": "6.4+20240113-1ubuntu2.2",
+   "Architecture": "arm64",
+   "Filename": "pool/main/n/ncurses/ncurses-bin_6.4+20240113-1ubuntu2.2_arm64.deb",
+   "Size": "186194",
+   "SHA256": "3ffea795394f5aaa99c12809a186e514865a0935759e2e05aba8a93c29b54590",
+   "Installed-Size": "911",
+   "Source": "ncurses",
+   "Section": "utils",
+   "Suite": "noble-updates",
+   "Replaces-Base": "6.4+20240113-1ubuntu2"
+  },
+  {
+   "Package": "rake",
+   "Version": "13.0.6-3",
+   "Architecture": "all",
+   "Filename": "pool/main/r/rake/rake_13.0.6-3_all.deb",
+   "Size": "61584",
+   "SHA256": "2ebe2591a30542c28d6bc6c8be638ab61cc1295875f364385ade895b23f8492d",
+   "Installed-Size": "272",
+   "Section": "devel",
+   "Source": "rake",
+   "Suite": "noble"
+  },
+  {
+   "Package": "ruby",
+   "Version": "1:3.2~ubuntu1",
+   "Architecture": "arm64",
+   "Filename": "pool/main/r/ruby-defaults/ruby_3.2~ubuntu1_arm64.deb",
+   "Size": "3466",
+   "SHA256": "0084f83ac04d511929d6ee8269a2353facddb7546c9059082cbf4d64ba02ce9e",
+   "Installed-Size": "28",
+   "Source": "ruby-defaults",
+   "Section": "interpreters",
+   "Suite": "noble"
+  },
+  {
+   "Package": "ruby-bundler",
+   "Version": "2.4.20-1",
+   "Architecture": "all",
+   "Filename": "pool/universe/r/rubygems/ruby-bundler_2.4.20-1_all.deb",
+   "Size": "334170",
+   "SHA256": "8f195bcda5682b2c7bb6f8ec287ab239c585b1ffc29eab0259a5bfe26c68e0f3",
+   "Installed-Size": "1719",
+   "Source": "rubygems (3.4.20-1)",
+   "Section": "universe/ruby",
+   "Suite": "noble"
+  },
+  {
+   "Package": "ruby-net-telnet",
+   "Version": "0.2.0-1",
+   "Architecture": "all",
+   "Filename": "pool/main/r/ruby-net-telnet/ruby-net-telnet_0.2.0-1_all.deb",
+   "Size": "13308",
+   "SHA256": "ece1fdca00a6a9565a4e425e13cfb320b247280a71d44e11bfee28fd6a7df2b5",
+   "Installed-Size": "57",
+   "Section": "ruby",
+   "Source": "ruby-net-telnet",
+   "Suite": "noble"
+  },
+  {
+   "Package": "ruby-rubygems",
+   "Version": "3.4.20-1",
+   "Architecture": "all",
+   "Filename": "pool/main/r/rubygems/ruby-rubygems_3.4.20-1_all.deb",
+   "Size": "238488",
+   "SHA256": "9cb6041d902b74fd6e9373b24922e788bc2d1ed4360705ca6b53945d67b32087",
+   "Installed-Size": "1225",
+   "Source": "rubygems",
+   "Section": "ruby",
+   "Suite": "noble"
+  },
+  {
+   "Package": "ruby-sdbm",
+   "Version": "1.0.0-5build4",
+   "Architecture": "arm64",
+   "Filename": "pool/main/r/ruby-sdbm/ruby-sdbm_1.0.0-5build4_arm64.deb",
+   "Size": "15712",
+   "SHA256": "82eb8d57e6842f99b8b90446b317ab65bc09d79bdb0c4f41e03f7cebc2648c1b",
+   "Installed-Size": "90",
+   "Section": "ruby",
+   "Source": "ruby-sdbm",
+   "Suite": "noble"
+  },
+  {
+   "Package": "ruby-webrick",
+   "Version": "1.8.1-1ubuntu0.2",
+   "Architecture": "all",
+   "Filename": "pool/main/r/ruby-webrick/ruby-webrick_1.8.1-1ubuntu0.2_all.deb",
+   "Size": "52956",
+   "SHA256": "7275a9563e0cd328f6043fc0360886c522b253f280e309a1864549bea8f25d88",
+   "Installed-Size": "241",
+   "Section": "ruby",
+   "Source": "ruby-webrick",
+   "Suite": "noble-updates"
+  },
+  {
+   "Package": "ruby-xmlrpc",
+   "Version": "0.3.2-2",
+   "Architecture": "all",
+   "Filename": "pool/main/r/ruby-xmlrpc/ruby-xmlrpc_0.3.2-2_all.deb",
+   "Size": "24750",
+   "SHA256": "9690c5b65b147d22f2b90dbb694c5d2af81ffa68f1a58f094e2afb91f3b20c3c",
+   "Installed-Size": "104",
+   "Section": "ruby",
+   "Source": "ruby-xmlrpc",
+   "Suite": "noble"
+  },
+  {
+   "Package": "ruby3.2",
+   "Version": "3.2.3-1ubuntu0.24.04.8",
+   "Architecture": "arm64",
+   "Filename": "pool/main/r/ruby3.2/ruby3.2_3.2.3-1ubuntu0.24.04.8_arm64.deb",
+   "Size": "50750",
+   "SHA256": "33356f218a9897bd09f15cbf20703fcbc53c076fa033bd68635570c4c32fc05e",
+   "Installed-Size": "191",
+   "Section": "ruby",
+   "Source": "ruby3.2",
+   "Suite": "noble-updates"
+  },
+  {
+   "Package": "rubygems-integration",
+   "Version": "1.18",
+   "Architecture": "all",
+   "Filename": "pool/main/r/rubygems-integration/rubygems-integration_1.18_all.deb",
+   "Size": "5336",
+   "SHA256": "67b466d6297adeae37786a123ad029153961c4cbdcdd6cf50a6e6964e2d37342",
+   "Installed-Size": "26",
+   "Section": "ruby",
+   "Source": "rubygems-integration",
+   "Suite": "noble"
+  }
+ ],
+ "upstream": []
+}

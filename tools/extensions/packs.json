@@ -1,0 +1,562 @@
+{
+  "format": 1,
+  "comment": "DSHA 离线扩展包定义：Ubuntu noble arm64 deb 由 tools/resolve-extensions.py 在官方 rootfs 内用 apt 解析并锁定；上游通道只收官方 glibc 构建并钉 sha256。不得引用 Kxxy 代码或包池。",
+  "base": {
+    "rootfsVersion": "10",
+    "toolsLockSha256": "5f75c41bb6a543143e4a05d78fc13f0abf54367c1f4454526a9266e119299c1e",
+    "statusSha256": "f4edc364d3d98514ae7567063645013b2e36f3eb3493ce0076fcc270e4b248b2"
+  },
+  "apt": {
+    "mirror": "https://ports.ubuntu.com/ubuntu-ports",
+    "suites": [
+      "noble",
+      "noble-updates",
+      "noble-security"
+    ],
+    "components": [
+      "main",
+      "universe"
+    ],
+    "deny": [
+      "python3",
+      "python3-minimal",
+      "nodejs",
+      "unrar",
+      "unrar-nonfree",
+      "systemd",
+      "udev"
+    ],
+    "denySuffix": [
+      "-doc"
+    ]
+  },
+  "sourceDateEpoch": 1792800000,
+  "packs": [
+    {
+      "id": "dev-base",
+      "category": "lang",
+      "full": true,
+      "name": {
+        "zh": "开发基础包",
+        "en": "Developer base"
+      },
+      "summary": {
+        "zh": "gcc/g++、make、cmake、ninja、pkg-config、glibc 版 Python 3.12（含 venv/pip）、zip/jq/sqlite3 等",
+        "en": "gcc/g++, make, cmake, ninja, pkg-config, glibc Python 3.12 (venv/pip), zip/jq/sqlite3 and more"
+      },
+      "seeds": [
+        "build-essential",
+        "cmake",
+        "ninja-build",
+        "pkg-config",
+        "file",
+        "zip",
+        "unzip",
+        "jq",
+        "xz-utils",
+        "bzip2",
+        "zstd",
+        "patch",
+        "less",
+        "vim-tiny",
+        "sqlite3",
+        "python3.12",
+        "python3.12-venv",
+        "python3.12-dev"
+      ],
+      "smoke": [
+        "gcc --version",
+        "g++ --version",
+        "make --version",
+        "cmake --version",
+        "python3.12 --version",
+        "jq --version"
+      ]
+    },
+    {
+      "id": "clang",
+      "category": "lang",
+      "requires": [
+        "dev-base"
+      ],
+      "name": {
+        "zh": "Clang/LLVM 18",
+        "en": "Clang/LLVM 18"
+      },
+      "summary": {
+        "zh": "clang/clang++、lld、clang-format、clang-tidy 与 LLVM 18 工具（Ubuntu noble）",
+        "en": "clang/clang++, lld, clang-format, clang-tidy and LLVM 18 tools (Ubuntu noble)"
+      },
+      "seeds": [
+        "clang",
+        "lld",
+        "llvm"
+      ],
+      "smoke": [
+        "clang --version",
+        "clang++ --version",
+        "ld.lld --version",
+        "clang-format --version",
+        "clang-tidy --version",
+        "llvm-ar --version"
+      ],
+      "upstream": [
+        {
+          "kind": "deb-member",
+          "url": "https://ports.ubuntu.com/ubuntu-ports/pool/universe/l/llvm-toolchain-18/clang-format-18_18.1.3-1ubuntu1_arm64.deb",
+          "sha256": "0ae1062195516faf0f05b86375025a34e7f7a5fd62caeb0883964dbeae6651d1",
+          "members": {
+            "usr/lib/llvm-18/bin/clang-format": "bin/clang-format",
+            "usr/share/doc/clang-format-18/copyright": "LICENSE.clang-format"
+          },
+          "license": "Apache-2.0 WITH LLVM-exception",
+          "licenseFile": "LICENSE.clang-format"
+        },
+        {
+          "kind": "deb-member",
+          "url": "https://ports.ubuntu.com/ubuntu-ports/pool/universe/l/llvm-toolchain-18/clang-tidy-18_18.1.3-1ubuntu1_arm64.deb",
+          "sha256": "d8dc7a84b259f263c2dd419207b659268b3123a1e1fb532dea3a99ff4c7f3324",
+          "members": {
+            "usr/lib/llvm-18/bin/clang-tidy": "libexec/clang-tidy",
+            "usr/share/doc/clang-tidy-18/copyright": "LICENSE.clang-tidy"
+          },
+          "license": "Apache-2.0 WITH LLVM-exception",
+          "licenseFile": "LICENSE.clang-tidy",
+          "wrappers": {
+            "bin/clang-tidy": "exec /opt/dsha-ext/clang/libexec/clang-tidy --extra-arg-before=-resource-dir=/usr/lib/llvm-18/lib/clang/18 \"$@\""
+          }
+        }
+      ],
+      "comment": "clang-format/clang-tidy 的 Ubuntu deb 硬依赖 python3（只为辅助脚本），而基底 /usr/bin/python3 不能被替换：只取这两个 ELF（钉 sha256），库由 clang/llvm 的 apt 依赖提供。",
+      "bins": [
+        "bin/clang-format",
+        "bin/clang-tidy"
+      ],
+      "version": "18.1.3"
+    },
+    {
+      "id": "jdk21",
+      "category": "lang",
+      "full": true,
+      "name": {
+        "zh": "JDK 21 与 APK 签名",
+        "en": "JDK 21 and APK signing"
+      },
+      "summary": {
+        "zh": "OpenJDK 21（headless）、apksigner（Ubuntu 31.0.2 的 jar，免整套图形 JRE）、zipalign",
+        "en": "OpenJDK 21 (headless), apksigner (Ubuntu 31.0.2 jar, without the desktop JRE), zipalign"
+      },
+      "seeds": [
+        "openjdk-21-jdk-headless",
+        "libapksig-java",
+        "zipalign"
+      ],
+      "smoke": [
+        "java -version",
+        "javac -version",
+        "apksigner --version",
+        "zipalign -h || test $? -le 2"
+      ],
+      "upstream": [
+        {
+          "kind": "deb-member",
+          "url": "https://ports.ubuntu.com/ubuntu-ports/pool/universe/a/android-platform-tools-apksig/apksigner_31.0.2-1ubuntu1_all.deb",
+          "sha256": "37a04ceb8c80b6956dd702b99d3a6b7cae1c0e8085d1334adc77b8f92a3117e6",
+          "members": {
+            "usr/share/java/apksigner-31.0.2.jar": "share/apksigner.jar",
+            "usr/share/doc/apksigner/copyright": "LICENSE.apksigner"
+          },
+          "license": "Apache-2.0",
+          "licenseFile": "LICENSE.apksigner",
+          "wrappers": {
+            "bin/apksigner": "exec java -cp /opt/dsha-ext/jdk21/share/apksigner.jar:/usr/share/java/apksig.jar com.android.apksigner.ApkSignerTool \"$@\""
+          }
+        }
+      ],
+      "bins": [
+        "bin/apksigner"
+      ]
+    },
+    {
+      "id": "go",
+      "category": "lang",
+      "requires": [
+        "dev-base"
+      ],
+      "name": {
+        "zh": "Go",
+        "en": "Go"
+      },
+      "summary": {
+        "zh": "Go 官方 linux-arm64 构建",
+        "en": "Official Go linux-arm64 build"
+      },
+      "upstream": [
+        {
+          "kind": "tar",
+          "url": "https://go.dev/dl/go1.27.3.linux-arm64.tar.gz",
+          "sha256": "a06e99309dbcbdca1a8ccd2282c3ee146e55930886e26b4f1193269587165f49",
+          "strip": "go/",
+          "license": "BSD-3-Clause",
+          "licenseFile": "LICENSE"
+        }
+      ],
+      "version": "1.27.3",
+      "bins": [
+        "bin/go",
+        "bin/gofmt"
+      ],
+      "smoke": [
+        "go version"
+      ]
+    },
+    {
+      "id": "rust",
+      "category": "lang",
+      "requires": [
+        "dev-base"
+      ],
+      "name": {
+        "zh": "Rust",
+        "en": "Rust"
+      },
+      "summary": {
+        "zh": "rustc + cargo + 标准库（官方 aarch64-unknown-linux-gnu）",
+        "en": "rustc + cargo + std (official aarch64-unknown-linux-gnu)"
+      },
+      "upstream": [
+        {
+          "kind": "rust-component",
+          "url": "https://static.rust-lang.org/dist/2026-10-15/rustc-1.99.1-aarch64-unknown-linux-gnu.tar.xz",
+          "sha256": "acdcdfe09ae1f103aa9a2b7f88903a9588bc2e99288af10e6fbf5514e2e49f25",
+          "license": "MIT OR Apache-2.0"
+        },
+        {
+          "kind": "rust-component",
+          "url": "https://static.rust-lang.org/dist/2026-10-15/cargo-1.99.1-aarch64-unknown-linux-gnu.tar.xz",
+          "sha256": "5156832e0c1254e9b49a79edabdc6d4c35f32f8fc1cf3ca700f268ff96087ab0",
+          "license": "MIT OR Apache-2.0"
+        },
+        {
+          "kind": "rust-component",
+          "url": "https://static.rust-lang.org/dist/2026-10-15/rust-std-1.99.1-aarch64-unknown-linux-gnu.tar.xz",
+          "sha256": "e25668477083d6a9ddb87b9beb9c00742225f38233ccb4bfba3afa7a07427f52",
+          "license": "MIT OR Apache-2.0"
+        }
+      ],
+      "version": "1.99.1",
+      "bins": [
+        "bin/rustc",
+        "bin/cargo"
+      ],
+      "smoke": [
+        "rustc --version",
+        "cargo --version"
+      ]
+    },
+    {
+      "id": "android-build",
+      "category": "lang",
+      "requires": [
+        "jdk21"
+      ],
+      "name": {
+        "zh": "Android 构建工具",
+        "en": "Android build tools"
+      },
+      "summary": {
+        "zh": "d8（Google R8 9.5.28 jar）、aapt（Ubuntu，v1；noble 无 arm64 aapt2）、android.jar（API 23）",
+        "en": "d8 (Google R8 9.5.28 jar), aapt (Ubuntu, v1; noble has no arm64 aapt2), android.jar (API 23)"
+      },
+      "seeds": [
+        "aapt",
+        "android-sdk-platform-23"
+      ],
+      "upstream": [
+        {
+          "kind": "jar",
+          "url": "https://dl.google.com/dl/android/maven2/com/android/tools/r8/9.5.28/r8-9.5.28.jar",
+          "sha256": "38a9ffaaebbd17d1514e3ecbff5a85b989bb13c551b9e224c7409514eea84ff5",
+          "dest": "share/r8.jar",
+          "license": "Apache-2.0 (bundled: BSD-3-Clause, MIT, LGPL-2.1, CDDL-1.1/GPL-2.0-CPE, EDL-1.0; see LICENSE.r8)",
+          "licenseMember": "LICENSE",
+          "licenseFile": "LICENSE.r8",
+          "wrappers": {
+            "bin/d8": "exec java -cp /opt/dsha-ext/android-build/share/r8.jar com.android.tools.r8.D8 \"$@\""
+          }
+        }
+      ],
+      "version": "r8-9.5.28",
+      "bins": [
+        "bin/d8"
+      ],
+      "smoke": [
+        "d8 --version",
+        "aapt version",
+        "test -f /usr/lib/android-sdk/platforms/android-23/android.jar"
+      ]
+    },
+    {
+      "id": "kotlin",
+      "category": "lang",
+      "requires": [
+        "jdk21"
+      ],
+      "name": {
+        "zh": "Kotlin 编译器",
+        "en": "Kotlin compiler"
+      },
+      "summary": {
+        "zh": "JetBrains 官方 kotlin-compiler（JVM）",
+        "en": "Official JetBrains kotlin-compiler (JVM)"
+      },
+      "upstream": [
+        {
+          "kind": "zip",
+          "url": "https://github.com/JetBrains/kotlin/releases/download/v2.4.21/kotlin-compiler-2.4.21.zip",
+          "sha256": "7cc140e76daf416a0424a5557f99afd7ca89ebd463ea1101261e3e01c33e75cd",
+          "strip": "kotlinc/",
+          "license": "Apache-2.0",
+          "licenseFile": "license/LICENSE.txt"
+        }
+      ],
+      "version": "2.4.21",
+      "bins": [
+        "bin/kotlinc",
+        "bin/kotlin"
+      ],
+      "smoke": [
+        "kotlinc -version"
+      ]
+    },
+    {
+      "id": "gradle",
+      "category": "lang",
+      "requires": [
+        "jdk21"
+      ],
+      "name": {
+        "zh": "Gradle",
+        "en": "Gradle"
+      },
+      "summary": {
+        "zh": "Gradle 官方二进制发行版",
+        "en": "Official Gradle binary distribution"
+      },
+      "upstream": [
+        {
+          "kind": "zip",
+          "url": "https://services.gradle.org/distributions/gradle-9.8.2-bin.zip",
+          "sha256": "21bd5da2de49b642904077f38c0efdc7778e92b3ed0889392dca61b97e389607",
+          "strip": "gradle-9.8.2/",
+          "license": "Apache-2.0",
+          "licenseFile": "LICENSE"
+        }
+      ],
+      "version": "9.8.2",
+      "bins": [
+        "bin/gradle"
+      ],
+      "smoke": [
+        "gradle --version --offline -q || gradle --version --offline"
+      ]
+    },
+    {
+      "id": "maven",
+      "category": "lang",
+      "requires": [
+        "jdk21"
+      ],
+      "name": {
+        "zh": "Maven",
+        "en": "Maven"
+      },
+      "summary": {
+        "zh": "Apache Maven（Ubuntu）",
+        "en": "Apache Maven (Ubuntu)"
+      },
+      "seeds": [
+        "maven"
+      ],
+      "smoke": [
+        "mvn -v"
+      ]
+    },
+    {
+      "id": "ruby",
+      "category": "lang",
+      "name": {
+        "zh": "Ruby",
+        "en": "Ruby"
+      },
+      "summary": {
+        "zh": "Ruby 3.2 与 bundler",
+        "en": "Ruby 3.2 with bundler"
+      },
+      "seeds": [
+        "ruby",
+        "ruby-bundler"
+      ],
+      "smoke": [
+        "ruby --version"
+      ]
+    },
+    {
+      "id": "php",
+      "category": "lang",
+      "name": {
+        "zh": "PHP",
+        "en": "PHP"
+      },
+      "summary": {
+        "zh": "PHP 8.3 命令行",
+        "en": "PHP 8.3 CLI"
+      },
+      "seeds": [
+        "php-cli"
+      ],
+      "smoke": [
+        "php --version"
+      ]
+    },
+    {
+      "id": "media",
+      "category": "media",
+      "name": {
+        "zh": "音视频与图像",
+        "en": "Audio, video and images"
+      },
+      "summary": {
+        "zh": "FFmpeg、ImageMagick、SoX、MediaInfo、ExifTool",
+        "en": "FFmpeg, ImageMagick, SoX, MediaInfo, ExifTool"
+      },
+      "seeds": [
+        "ffmpeg",
+        "imagemagick",
+        "sox",
+        "mediainfo",
+        "libimage-exiftool-perl"
+      ],
+      "smoke": [
+        "ffmpeg -version",
+        "convert -version",
+        "sox --version",
+        "mediainfo --version",
+        "exiftool -ver"
+      ]
+    },
+    {
+      "id": "documents",
+      "category": "media",
+      "name": {
+        "zh": "文档与 OCR",
+        "en": "Documents and OCR"
+      },
+      "summary": {
+        "zh": "Poppler、qpdf、Pandoc、Tesseract（英文 + 简体中文）",
+        "en": "Poppler, qpdf, Pandoc, Tesseract (English + Simplified Chinese)"
+      },
+      "seeds": [
+        "poppler-utils",
+        "qpdf",
+        "pandoc",
+        "tesseract-ocr",
+        "tesseract-ocr-eng",
+        "tesseract-ocr-chi-sim"
+      ],
+      "smoke": [
+        "pdftotext -v",
+        "qpdf --version",
+        "pandoc --version",
+        "tesseract --version"
+      ]
+    },
+    {
+      "id": "texlive",
+      "category": "media",
+      "name": {
+        "zh": "TeX Live（精简，含中文）",
+        "en": "TeX Live (lite, with Chinese)"
+      },
+      "summary": {
+        "zh": "xelatex/pdflatex、LaTeX 常用宏包（base/recommended/extra）、ctex 中文支持与 Noto CJK 字体；不含文档包",
+        "en": "xelatex/pdflatex, LaTeX base/recommended/extra, ctex Chinese support and Noto CJK fonts; no -doc packages"
+      },
+      "seeds": [
+        "texlive-latex-base",
+        "texlive-latex-recommended",
+        "texlive-latex-extra",
+        "texlive-xetex",
+        "texlive-lang-chinese",
+        "fonts-noto-cjk"
+      ],
+      "smoke": [
+        "xelatex --version",
+        "kpsewhich ctex.sty"
+      ],
+      "synthetic": [
+        {
+          "package": "dsha-python3-external",
+          "version": "1",
+          "provides": "python3",
+          "description": "Marker: /usr/bin/python3 comes from the DSHA runtime, not dpkg (texlive-latex-extra helper scripts only)."
+        }
+      ],
+      "comment": "texlive-latex-extra 只为辅助脚本（pythontex 等）硬依赖 python3；Ubuntu python3 会覆盖 DSHA 自带的 /usr/bin/python3，所以用无文件的 Provides 标记包代替。"
+    },
+    {
+      "id": "ghostscript",
+      "category": "media",
+      "name": {
+        "zh": "Ghostscript（AGPL）",
+        "en": "Ghostscript (AGPL)"
+      },
+      "summary": {
+        "zh": "PostScript/PDF 解释器；AGPL-3.0，单独成包",
+        "en": "PostScript/PDF interpreter; AGPL-3.0, separate pack"
+      },
+      "seeds": [
+        "ghostscript"
+      ],
+      "agpl": true,
+      "smoke": [
+        "gs --version"
+      ]
+    },
+    {
+      "id": "devtools",
+      "category": "devtools",
+      "name": {
+        "zh": "调试与开发工具",
+        "en": "Debugging and dev tools"
+      },
+      "summary": {
+        "zh": "gdb、strace、autotools、ripgrep、fd、tmux、htop、rsync、git-lfs、tree",
+        "en": "gdb, strace, autotools, ripgrep, fd, tmux, htop, rsync, git-lfs, tree"
+      },
+      "seeds": [
+        "gdb",
+        "strace",
+        "autoconf",
+        "automake",
+        "libtool",
+        "ripgrep",
+        "fd-find",
+        "tmux",
+        "htop",
+        "rsync",
+        "git-lfs",
+        "tree",
+        "socat",
+        "bc"
+      ],
+      "smoke": [
+        "gdb --version",
+        "strace -V",
+        "rg --version",
+        "tmux -V",
+        "autoconf --version"
+      ]
+    }
+  ]
+}

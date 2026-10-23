@@ -1,0 +1,419 @@
+{
+ "format": 1,
+ "id": "maven",
+ "base": {
+  "rootfsVersion": "10",
+  "toolsLockSha256": "5f75c41bb6a543143e4a05d78fc13f0abf54367c1f4454526a9266e119299c1e",
+  "statusSha256": "f4edc364d3d98514ae7567063645013b2e36f3eb3493ce0076fcc270e4b248b2"
+ },
+ "sources": [
+  {
+   "suite": "noble",
+   "inReleaseSha256": "cdb2f31d809f589719a53c6ad15f255b27569c4059542ada282aaa21b8e164b0",
+   "date": "Thu, 25 Apr 2024 15:10:33 UTC"
+  },
+  {
+   "suite": "noble-updates",
+   "inReleaseSha256": "4fcba3fb02086679f7e86677e320b92e0d076a8c02e30dc0abbbe06b67640db7",
+   "date": "Fri, 23 Oct 2026 20:23:43 UTC"
+  },
+  {
+   "suite": "noble-security",
+   "inReleaseSha256": "e56daa3c9903f06da8161b4f0e61a747aab215647f4bfabbecd5655631200f09",
+   "date": "Fri, 23 Oct 2026 13:38:44 UTC"
+  }
+ ],
+ "requires": [
+  "jdk21"
+ ],
+ "seeds": [
+  "maven"
+ ],
+ "packages": [
+  {
+   "Package": "libaopalliance-java",
+   "Version": "20070526-7",
+   "Architecture": "all",
+   "Filename": "pool/universe/liba/libaopalliance-java/libaopalliance-java_20070526-7_all.deb",
+   "Size": "8166",
+   "SHA256": "d48c890743d7fd1e16a066977af11cc1d062501f33489b406bd3faa86cfd4090",
+   "Installed-Size": "30",
+   "Section": "universe/libs",
+   "Source": "libaopalliance-java",
+   "Suite": "noble"
+  },
+  {
+   "Package": "libapache-pom-java",
+   "Version": "29-2",
+   "Architecture": "all",
+   "Filename": "pool/universe/a/apache-pom/libapache-pom-java_29-2_all.deb",
+   "Size": "5284",
+   "SHA256": "c36709c39a177beb93162d4ec8c8de6f818c6593768dd812b89f91e26f2a355b",
+   "Installed-Size": "43",
+   "Source": "apache-pom",
+   "Section": "universe/java",
+   "Suite": "noble"
+  },
+  {
+   "Package": "libatinject-jsr330-api-java",
+   "Version": "1.0+ds1-5",
+   "Architecture": "all",
+   "Filename": "pool/universe/a/atinject-jsr330/libatinject-jsr330-api-java_1.0+ds1-5_all.deb",
+   "Size": "5348",
+   "SHA256": "5e34eacd93dbd8e0a1aba1e4adf128a803a25f983540d327ef32ecfb0605fe89",
+   "Installed-Size": "24",
+   "Source": "atinject-jsr330",
+   "Section": "universe/java",
+   "Suite": "noble"
+  },
+  {
+   "Package": "libcdi-api-java",
+   "Version": "1.2-3",
+   "Architecture": "all",
+   "Filename": "pool/universe/c/cdi-api/libcdi-api-java_1.2-3_all.deb",
+   "Size": "54304",
+   "SHA256": "1e0d17841170b02877e6c5fd23a8e7d5af2608b2e33863dfc527370a4cdb601b",
+   "Installed-Size": "92",
+   "Source": "cdi-api",
+   "Section": "universe/java",
+   "Suite": "noble"
+  },
+  {
+   "Package": "libcommons-cli-java",
+   "Version": "1.6.0-1",
+   "Architecture": "all",
+   "Filename": "pool/universe/libc/libcommons-cli-java/libcommons-cli-java_1.6.0-1_all.deb",
+   "Size": "59890",
+   "SHA256": "9a13c19d573c0c88c6d6084ee23176a72d735331d2b6456b25713932db32f692",
+   "Installed-Size": "85",
+   "Section": "universe/libs",
+   "Source": "libcommons-cli-java",
+   "Suite": "noble"
+  },
+  {
+   "Package": "libcommons-io-java",
+   "Version": "2.11.0-2",
+   "Architecture": "all",
+   "Filename": "pool/universe/c/commons-io/libcommons-io-java_2.11.0-2_all.deb",
+   "Size": "297288",
+   "SHA256": "f2dea028386deb96a89aa99bb5cd6284e645bc3b479c525e8130fee5cf5cbe59",
+   "Installed-Size": "364",
+   "Source": "commons-io",
+   "Section": "universe/libs",
+   "Suite": "noble"
+  },
+  {
+   "Package": "libcommons-lang3-java",
+   "Version": "3.14.0-1",
+   "Architecture": "all",
+   "Filename": "pool/universe/libc/libcommons-lang3-java/libcommons-lang3-java_3.14.0-1_all.deb",
+   "Size": "586282",
+   "SHA256": "7ce89966efba0afd182f1c46da8a4064b404ba661a94b47dbd1d294849b42fc2",
+   "Installed-Size": "699",
+   "Section": "universe/java",
+   "Source": "libcommons-lang3-java",
+   "Suite": "noble"
+  },
+  {
+   "Package": "libcommons-parent-java",
+   "Version": "56-1",
+   "Architecture": "all",
+   "Filename": "pool/universe/c/commons-parent/libcommons-parent-java_56-1_all.deb",
+   "Size": "10672",
+   "SHA256": "0cff26e2a894abfe3a3bcefd0325d0344e459906a0fef10054b5a21a21076e9e",
+   "Installed-Size": "85",
+   "Source": "commons-parent",
+   "Section": "universe/java",
+   "Suite": "noble"
+  },
+  {
+   "Package": "liberror-prone-java",
+   "Version": "2.18.0-1",
+   "Architecture": "all",
+   "Filename": "pool/universe/e/error-prone-java/liberror-prone-java_2.18.0-1_all.deb",
+   "Size": "22484",
+   "SHA256": "a1dcc5b74e2e760f01f9babeb131b38f40721aab88b8621d619881b5cb43fed9",
+   "Installed-Size": "95",
+   "Source": "error-prone-java",
+   "Section": "universe/java",
+   "Suite": "noble"
+  },
+  {
+   "Package": "libgeronimo-annotation-1.3-spec-java",
+   "Version": "1.3-1",
+   "Architecture": "all",
+   "Filename": "pool/universe/g/geronimo-annotation-1.3-spec/libgeronimo-annotation-1.3-spec-java_1.3-1_all.deb",
+   "Size": "11180",
+   "SHA256": "dd5d8451710c7657cc3f2bce9513c4c2128ca7cab751cc3e8c22306f7020cf0e",
+   "Installed-Size": "40",
+   "Source": "geronimo-annotation-1.3-spec",
+   "Section": "universe/java",
+   "Suite": "noble"
+  },
+  {
+   "Package": "libgeronimo-interceptor-3.0-spec-java",
+   "Version": "1.0.1-4fakesync",
+   "Architecture": "all",
+   "Filename": "pool/universe/g/geronimo-interceptor-3.0-spec/libgeronimo-interceptor-3.0-spec-java_1.0.1-4fakesync_all.deb",
+   "Size": "8616",
+   "SHA256": "86aa8a92dbee3adffefce3258ab9fe66956a1ea3e580c908509e9d37deabd48e",
+   "Installed-Size": "34",
+   "Source": "geronimo-interceptor-3.0-spec",
+   "Section": "universe/java",
+   "Suite": "noble"
+  },
+  {
+   "Package": "libguava-java",
+   "Version": "32.0.1-1",
+   "Architecture": "all",
+   "Filename": "pool/universe/g/guava-libraries/libguava-java_32.0.1-1_all.deb",
+   "Size": "2692240",
+   "SHA256": "785a761e87a9d5608ca1ab88a894ece3db233e9c9fd9c37670100f6ad9d7f8cb",
+   "Installed-Size": "2982",
+   "Source": "guava-libraries",
+   "Section": "universe/java",
+   "Suite": "noble"
+  },
+  {
+   "Package": "libguice-java",
+   "Version": "4.2.3-2",
+   "Architecture": "all",
+   "Filename": "pool/universe/g/guice/libguice-java_4.2.3-2_all.deb",
+   "Size": "1434140",
+   "SHA256": "092fe5ecb617640c3d4ca79112cae78f522af1ff0fcad50083028df0d6774a0c",
+   "Installed-Size": "1703",
+   "Source": "guice",
+   "Section": "universe/java",
+   "Suite": "noble"
+  },
+  {
+   "Package": "libjansi-java",
+   "Version": "2.4.1-2",
+   "Architecture": "all",
+   "Filename": "pool/universe/j/jansi/libjansi-java_2.4.1-2_all.deb",
+   "Size": "82998",
+   "SHA256": "22e0cda0b090637ea6ad4bfe06b2fb2a2a01d2bcc626f26030c36618b074e958",
+   "Installed-Size": "111",
+   "Source": "jansi",
+   "Section": "universe/java",
+   "Suite": "noble"
+  },
+  {
+   "Package": "libjsr305-java",
+   "Version": "0.1~+svn49-11",
+   "Architecture": "all",
+   "Filename": "pool/universe/libj/libjsr305-java/libjsr305-java_0.1~+svn49-11_all.deb",
+   "Size": "26976",
+   "SHA256": "4b85c3a48249d56499953d6372f2145e4447713dc80eb2d725165ce996cb9150",
+   "Installed-Size": "115",
+   "Section": "universe/java",
+   "Source": "libjsr305-java",
+   "Suite": "noble"
+  },
+  {
+   "Package": "libmaven-parent-java",
+   "Version": "35-1",
+   "Architecture": "all",
+   "Filename": "pool/universe/m/maven-parent/libmaven-parent-java_35-1_all.deb",
+   "Size": "5810",
+   "SHA256": "118fc3ab17017a77722cdb43937aee9848bbd50c811927eafccd889640cb01ee",
+   "Installed-Size": "69",
+   "Source": "maven-parent",
+   "Section": "universe/java",
+   "Suite": "noble"
+  },
+  {
+   "Package": "libmaven-resolver-java",
+   "Version": "1.6.3-1",
+   "Architecture": "all",
+   "Filename": "pool/universe/m/maven-resolver/libmaven-resolver-java_1.6.3-1_all.deb",
+   "Size": "543994",
+   "SHA256": "aaf05d595cbdb4c4bebb2dad9ef00ce1a0afd9494bb5004502ecc97c61c149a3",
+   "Installed-Size": "753",
+   "Source": "maven-resolver",
+   "Section": "universe/java",
+   "Suite": "noble"
+  },
+  {
+   "Package": "libmaven-shared-utils-java",
+   "Version": "3.3.4-1",
+   "Architecture": "all",
+   "Filename": "pool/universe/m/maven-shared-utils/libmaven-shared-utils-java_3.3.4-1_all.deb",
+   "Size": "136732",
+   "SHA256": "0306b54a897813d81f7c5460de17973ec31d6aa5890b713e504c75e6fd503cf6",
+   "Installed-Size": "173",
+   "Source": "maven-shared-utils",
+   "Section": "universe/java",
+   "Suite": "noble"
+  },
+  {
+   "Package": "libmaven3-core-java",
+   "Version": "3.8.7-2",
+   "Architecture": "all",
+   "Filename": "pool/universe/m/maven/libmaven3-core-java_3.8.7-2_all.deb",
+   "Size": "1565486",
+   "SHA256": "a9a22a3fd483b6e6a00e505378e9b3c4796ab802c48607ecbe33d54e428c5615",
+   "Installed-Size": "1950",
+   "Source": "maven",
+   "Section": "universe/java",
+   "Suite": "noble"
+  },
+  {
+   "Package": "libplexus-cipher-java",
+   "Version": "2.0-1",
+   "Architecture": "all",
+   "Filename": "pool/universe/p/plexus-cipher/libplexus-cipher-java_2.0-1_all.deb",
+   "Size": "14702",
+   "SHA256": "4eac57cbce50ed3acb2cea763e02a129d74de8d002d8ff404806d03dcb5ef6fb",
+   "Installed-Size": "43",
+   "Source": "plexus-cipher",
+   "Section": "universe/java",
+   "Suite": "noble"
+  },
+  {
+   "Package": "libplexus-classworlds-java",
+   "Version": "2.7.0-1",
+   "Architecture": "all",
+   "Filename": "pool/universe/p/plexus-classworlds/libplexus-classworlds-java_2.7.0-1_all.deb",
+   "Size": "50038",
+   "SHA256": "0a9fce327248e5f98a883ffe541425b1a6e0c1346b3a1e63331324f5f902bfb4",
+   "Installed-Size": "78",
+   "Source": "plexus-classworlds",
+   "Section": "universe/libs",
+   "Suite": "noble"
+  },
+  {
+   "Package": "libplexus-component-annotations-java",
+   "Version": "2.1.1-1",
+   "Architecture": "all",
+   "Filename": "pool/universe/p/plexus-containers/libplexus-component-annotations-java_2.1.1-1_all.deb",
+   "Size": "6550",
+   "SHA256": "b43935bd74efb799ab70b5f5206f6ef2862d287c28362bc17811857cf52d1834",
+   "Installed-Size": "33",
+   "Source": "plexus-containers",
+   "Section": "universe/java",
+   "Suite": "noble"
+  },
+  {
+   "Package": "libplexus-interpolation-java",
+   "Version": "1.26-1",
+   "Architecture": "all",
+   "Filename": "pool/universe/p/plexus-interpolation/libplexus-interpolation-java_1.26-1_all.deb",
+   "Size": "76828",
+   "SHA256": "8bbe8d3f02b403d24fe0255209701cbb60095d61e2144eee58844e5441239eb8",
+   "Installed-Size": "109",
+   "Source": "plexus-interpolation",
+   "Section": "universe/libs",
+   "Suite": "noble"
+  },
+  {
+   "Package": "libplexus-sec-dispatcher-java",
+   "Version": "2.0-3",
+   "Architecture": "all",
+   "Filename": "pool/universe/p/plexus-sec-dispatcher/libplexus-sec-dispatcher-java_2.0-3_all.deb",
+   "Size": "28122",
+   "SHA256": "c82af0384ed521e1de6542ae28469c5a7379c83debbaa2f5218484b089ed95b3",
+   "Installed-Size": "59",
+   "Source": "plexus-sec-dispatcher",
+   "Section": "universe/java",
+   "Suite": "noble"
+  },
+  {
+   "Package": "libplexus-utils2-java",
+   "Version": "3.4.2-1",
+   "Architecture": "all",
+   "Filename": "pool/universe/p/plexus-utils2/libplexus-utils2-java_3.4.2-1_all.deb",
+   "Size": "256428",
+   "SHA256": "b323171e35c333c695e8fa1a4a4f4e00e2241a5c83d14b1fe40ecc58b91abeae",
+   "Installed-Size": "302",
+   "Source": "plexus-utils2",
+   "Section": "universe/java",
+   "Suite": "noble"
+  },
+  {
+   "Package": "libsisu-inject-java",
+   "Version": "0.3.4-2",
+   "Architecture": "all",
+   "Filename": "pool/universe/s/sisu-inject/libsisu-inject-java_0.3.4-2_all.deb",
+   "Size": "346848",
+   "SHA256": "c7f6f52153bb2d5c296db9b15d92ad84bd44bf2fcb34c08fb848913c8c204d02",
+   "Installed-Size": "412",
+   "Source": "sisu-inject",
+   "Section": "universe/java",
+   "Suite": "noble"
+  },
+  {
+   "Package": "libsisu-plexus-java",
+   "Version": "0.3.4-3",
+   "Architecture": "all",
+   "Filename": "pool/universe/s/sisu-plexus/libsisu-plexus-java_0.3.4-3_all.deb",
+   "Size": "180992",
+   "SHA256": "2eccc578c7b5e511692ec5aed3188a04198439bc636c2d386a54956fe5c8c8d6",
+   "Installed-Size": "245",
+   "Source": "sisu-plexus",
+   "Section": "universe/java",
+   "Suite": "noble"
+  },
+  {
+   "Package": "libslf4j-java",
+   "Version": "1.7.32-1",
+   "Architecture": "all",
+   "Filename": "pool/universe/libs/libslf4j-java/libslf4j-java_1.7.32-1_all.deb",
+   "Size": "140954",
+   "SHA256": "963b9764cfaa16ebd851dd8625193ad25d1b32767a6eafb73f6125d081cb5bf3",
+   "Installed-Size": "281",
+   "Section": "universe/libs",
+   "Source": "libslf4j-java",
+   "Suite": "noble"
+  },
+  {
+   "Package": "libwagon-file-java",
+   "Version": "3.5.3-1",
+   "Architecture": "all",
+   "Filename": "pool/universe/w/wagon/libwagon-file-java_3.5.3-1_all.deb",
+   "Size": "7918",
+   "SHA256": "a254a5bb4f26308027f9b50082443879b672fcbf6762799858efea5d87992abc",
+   "Installed-Size": "32",
+   "Source": "wagon",
+   "Section": "universe/java",
+   "Suite": "noble"
+  },
+  {
+   "Package": "libwagon-http-shaded-java",
+   "Version": "3.5.3-1",
+   "Architecture": "all",
+   "Filename": "pool/universe/w/wagon/libwagon-http-shaded-java_3.5.3-1_all.deb",
+   "Size": "1332296",
+   "SHA256": "ebbe3be0dafe25d25cb50f2bf5e772521c1fa60ec335361349cb54bf570e4691",
+   "Installed-Size": "1574",
+   "Source": "wagon",
+   "Section": "universe/java",
+   "Suite": "noble"
+  },
+  {
+   "Package": "libwagon-provider-api-java",
+   "Version": "3.5.3-1",
+   "Architecture": "all",
+   "Filename": "pool/universe/w/wagon/libwagon-provider-api-java_3.5.3-1_all.deb",
+   "Size": "47918",
+   "SHA256": "cf6f52a4ad66ca4f4b322be8a4d43bc5df1bdc1c9f0708b0dcf2a0f57a0f7d47",
+   "Installed-Size": "97",
+   "Source": "wagon",
+   "Section": "universe/java",
+   "Suite": "noble"
+  },
+  {
+   "Package": "maven",
+   "Version": "3.8.7-2",
+   "Architecture": "all",
+   "Filename": "pool/universe/m/maven/maven_3.8.7-2_all.deb",
+   "Size": "18302",
+   "SHA256": "47e801bb91c50d00bfed2067dfcb4909e5e913b7cd8c97aafc5eb785348f4e16",
+   "Installed-Size": "124",
+   "Section": "universe/java",
+   "Source": "maven",
+   "Suite": "noble"
+  }
+ ],
+ "upstream": []
+}

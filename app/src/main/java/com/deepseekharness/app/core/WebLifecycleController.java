@@ -1067,6 +1067,8 @@ final class WebLifecycleController {
                   if (!current() || authenticated()) return;
                   if (!state.recovery.failed(generation)) {
                     if (!publishAuthenticatedRun(lifecycle, run, url)) return;
+                    // 拿到鉴权链接 = 明确启动成功：清零实验引擎的连续明确失败计数。
+                    if (config.getEngineStrikes() != 0) config.setEngineStrikes(0);
                     if (ports.preferred == 0 || ports.fallback()) {
                       config.rememberFallbackWebPort(ports.preferred, run.port);
                       reportStatus(
@@ -1130,6 +1132,11 @@ final class WebLifecycleController {
                       state.diagnostics.hasExplicitStartupFailure(generation)
                           || state.diagnostics.snapshot().issues.keySet().stream()
                               .anyMatch(name -> !name.isEmpty());
+                  countEngineStrike(
+                      generation,
+                      runtimeName,
+                      com.deepseekharness.app.util.WebRuntimeFallback.exitOutcome(
+                          hadAuth, namedFailure, lifecycle.isCurrent(generation), exitCode));
                   if (com.deepseekharness.app.util.WebRuntimeFallback.shouldRetry(
                       runtimeName,
                       compatible,
@@ -1702,6 +1709,36 @@ final class WebLifecycleController {
               com.deepseekharness.app.HarnessService.finishVisibleStart(ctx, protection);
           }
         });
+  }
+
+  /**
+   * 三振切回（官方 feat/bxroot-runtime 956c0fd2 的思路，按 fix4 规则收紧）：只有明确失败计数；
+   * 超时、看门狗、退出码未知等不确定结果不计也不清零，绝不因不确定结果自动换引擎。
+   */
+  private void countEngineStrike(
+      long generation,
+      String runtimeName,
+      com.deepseekharness.app.util.WebRuntimeFallback.StartOutcome outcome) {
+    if (outcome != com.deepseekharness.app.util.WebRuntimeFallback.StartOutcome.DEFINITE_FAILURE)
+      return;
+    // 只对用户当前选择的引擎计数；冷安装回退等临时引擎不算。
+    String selected = config.getContainerRuntime().id;
+    if (!selected.equals(runtimeName)) return;
+    int strikes =
+        com.deepseekharness.app.util.WebRuntimeFallback.nextStrikes(
+            config.getEngineStrikes(), runtimeName, outcome);
+    config.setEngineStrikes(strikes);
+    if (!com.deepseekharness.app.util.WebRuntimeFallback.shouldForceProot(strikes, runtimeName))
+      return;
+    config.setContainerRuntime(com.deepseekharness.app.runtime.RuntimeEngine.PROOT);
+    String notice =
+        com.deepseekharness.app.util.UiText.choose(
+            runtimeName + " 连续 3 次明确启动失败，已自动切回 proot；如需继续实验可在「配置」页重新选择",
+            runtimeName
+                + " failed to start 3 times in a row; switched back to proot automatically. Re-select it in Settings if you want to keep trying");
+    Log.w("DSHA", notice);
+    state.diagnostics.message(generation, notice);
+    DiagnosticLog.record(ctx, "ENGINE_FORCED_PROOT", runtimeName);
   }
 
   private void recordWebFailure(long generation, String reason) {

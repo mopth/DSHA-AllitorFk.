@@ -1,0 +1,225 @@
+{
+ "format": 1,
+ "id": "php",
+ "base": {
+  "rootfsVersion": "10",
+  "toolsLockSha256": "5f75c41bb6a543143e4a05d78fc13f0abf54367c1f4454526a9266e119299c1e",
+  "statusSha256": "f4edc364d3d98514ae7567063645013b2e36f3eb3493ce0076fcc270e4b248b2"
+ },
+ "sources": [
+  {
+   "suite": "noble",
+   "inReleaseSha256": "cdb2f31d809f589719a53c6ad15f255b27569c4059542ada282aaa21b8e164b0",
+   "date": "Thu, 25 Apr 2024 15:10:33 UTC"
+  },
+  {
+   "suite": "noble-updates",
+   "inReleaseSha256": "4fcba3fb02086679f7e86677e320b92e0d076a8c02e30dc0abbbe06b67640db7",
+   "date": "Fri, 23 Oct 2026 20:23:43 UTC"
+  },
+  {
+   "suite": "noble-security",
+   "inReleaseSha256": "e56daa3c9903f06da8161b4f0e61a747aab215647f4bfabbecd5655631200f09",
+   "date": "Fri, 23 Oct 2026 13:38:44 UTC"
+  }
+ ],
+ "requires": [],
+ "seeds": [
+  "php-cli"
+ ],
+ "packages": [
+  {
+   "Package": "libargon2-1",
+   "Version": "0~20190702+dfsg-4build1",
+   "Architecture": "arm64",
+   "Filename": "pool/main/a/argon2/libargon2-1_0~20190702+dfsg-4build1_arm64.deb",
+   "Size": "20456",
+   "SHA256": "3914bb94008149aae3874d14185f9a2e0e3a87cdb284702a85818fd6c33b8685",
+   "Installed-Size": "88",
+   "Source": "argon2",
+   "Section": "libs",
+   "Suite": "noble"
+  },
+  {
+   "Package": "libbsd0",
+   "Version": "0.12.1-1build1.1",
+   "Architecture": "arm64",
+   "Filename": "pool/main/libb/libbsd/libbsd0_0.12.1-1build1.1_arm64.deb",
+   "Size": "40970",
+   "SHA256": "cdf9ff601244e64482584d9d9b98aa54a573c081ab5956227c737307196c1ce3",
+   "Installed-Size": "179",
+   "Source": "libbsd",
+   "Section": "libs",
+   "Suite": "noble-updates"
+  },
+  {
+   "Package": "libedit2",
+   "Version": "3.1-20230828-1build1",
+   "Architecture": "arm64",
+   "Filename": "pool/main/libe/libedit/libedit2_3.1-20230828-1build1_arm64.deb",
+   "Size": "97526",
+   "SHA256": "cf642fec16d86517e0e715520c3a7cdaee650e7ae8a4993f82d0e1e7a5883efb",
+   "Installed-Size": "302",
+   "Source": "libedit",
+   "Section": "libs",
+   "Suite": "noble"
+  },
+  {
+   "Package": "libicu74",
+   "Version": "74.2-1ubuntu3.1",
+   "Architecture": "arm64",
+   "Filename": "pool/main/i/icu/libicu74_74.2-1ubuntu3.1_arm64.deb",
+   "Size": "10806898",
+   "SHA256": "48f93acf50dcf237a8d58ce366730a28438ce52d3f06d7a2a88b51261dd791f7",
+   "Installed-Size": "36201",
+   "Source": "icu",
+   "Section": "libs",
+   "Suite": "noble-updates"
+  },
+  {
+   "Package": "libsodium23",
+   "Version": "1.0.18-1ubuntu0.24.04.1",
+   "Architecture": "arm64",
+   "Filename": "pool/main/libs/libsodium/libsodium23_1.0.18-1ubuntu0.24.04.1_arm64.deb",
+   "Size": "119490",
+   "SHA256": "78471032060f3edfd539a01cb69a9ce8560a15e1d9efcd93ac7854731e9d679c",
+   "Installed-Size": "313",
+   "Source": "libsodium",
+   "Section": "libs",
+   "Suite": "noble-updates"
+  },
+  {
+   "Package": "libxml2",
+   "Version": "2.9.14+dfsg-1.3ubuntu3.10",
+   "Architecture": "arm64",
+   "Filename": "pool/main/libx/libxml2/libxml2_2.9.14+dfsg-1.3ubuntu3.10_arm64.deb",
+   "Size": "735876",
+   "SHA256": "a80d5bb7f41abae8cf3bd822672f732bd91eef8f2fabdadec3beab02acd1ca01",
+   "Installed-Size": "2211",
+   "Section": "libs",
+   "Source": "libxml2",
+   "Suite": "noble-updates"
+  },
+  {
+   "Package": "media-types",
+   "Version": "10.1.0",
+   "Architecture": "all",
+   "Filename": "pool/main/m/media-types/media-types_10.1.0_all.deb",
+   "Size": "27474",
+   "SHA256": "31bfb7eec55ab6d34a50ba995150e1498d4cb897714085d8025e330d3b529747",
+   "Installed-Size": "93",
+   "Section": "net",
+   "Source": "media-types",
+   "Suite": "noble"
+  },
+  {
+   "Package": "php-cli",
+   "Version": "2:8.3+93ubuntu2",
+   "Architecture": "all",
+   "Filename": "pool/main/p/php-defaults/php-cli_8.3+93ubuntu2_all.deb",
+   "Size": "4584",
+   "SHA256": "bf4be1fbc1e8e931878c1ea70bb8a996cd8dd3d202ce171ec7b219c197b52d02",
+   "Installed-Size": "22",
+   "Source": "php-defaults (93ubuntu2)",
+   "Section": "php",
+   "Suite": "noble"
+  },
+  {
+   "Package": "php-common",
+   "Version": "2:93ubuntu2",
+   "Architecture": "all",
+   "Filename": "pool/main/p/php-defaults/php-common_93ubuntu2_all.deb",
+   "Size": "13910",
+   "SHA256": "39b15c407700e81ddd62580736feba31b187ffff56f6835dac5fa8f847c42529",
+   "Installed-Size": "71",
+   "Source": "php-defaults (93ubuntu2)",
+   "Section": "php",
+   "Suite": "noble"
+  },
+  {
+   "Package": "php8.3-cli",
+   "Version": "8.3.6-0ubuntu0.24.04.13",
+   "Architecture": "arm64",
+   "Filename": "pool/main/p/php8.3/php8.3-cli_8.3.6-0ubuntu0.24.04.13_arm64.deb",
+   "Size": "1886646",
+   "SHA256": "c4dc98d3c3363cb6c1866128a9738765090145e11255429009169fd24b5d7e6a",
+   "Installed-Size": "5823",
+   "Source": "php8.3",
+   "Section": "php",
+   "Suite": "noble-updates"
+  },
+  {
+   "Package": "php8.3-common",
+   "Version": "8.3.6-0ubuntu0.24.04.13",
+   "Architecture": "arm64",
+   "Filename": "pool/main/p/php8.3/php8.3-common_8.3.6-0ubuntu0.24.04.13_arm64.deb",
+   "Size": "746372",
+   "SHA256": "fe1ed840f1cd1554367dd12c28d1056351d2ee84476b607ebe162ae8ebea55aa",
+   "Installed-Size": "9936",
+   "Source": "php8.3",
+   "Section": "php",
+   "Suite": "noble-updates"
+  },
+  {
+   "Package": "php8.3-opcache",
+   "Version": "8.3.6-0ubuntu0.24.04.13",
+   "Architecture": "arm64",
+   "Filename": "pool/main/p/php8.3/php8.3-opcache_8.3.6-0ubuntu0.24.04.13_arm64.deb",
+   "Size": "581442",
+   "SHA256": "0bcddfdb540d751539a78e7e9fa863ab23d0a76be5297770913ae4a5740b5b63",
+   "Installed-Size": "2016",
+   "Source": "php8.3",
+   "Section": "php",
+   "Suite": "noble-updates"
+  },
+  {
+   "Package": "php8.3-readline",
+   "Version": "8.3.6-0ubuntu0.24.04.13",
+   "Architecture": "arm64",
+   "Filename": "pool/main/p/php8.3/php8.3-readline_8.3.6-0ubuntu0.24.04.13_arm64.deb",
+   "Size": "13322",
+   "SHA256": "61348830e17d249222f701ffd7d39ce57bb4b0ba34177da2843b6a669c4e013c",
+   "Installed-Size": "96",
+   "Source": "php8.3",
+   "Section": "php",
+   "Suite": "noble-updates"
+  },
+  {
+   "Package": "psmisc",
+   "Version": "23.7-1build1",
+   "Architecture": "arm64",
+   "Filename": "pool/main/p/psmisc/psmisc_23.7-1build1_arm64.deb",
+   "Size": "178424",
+   "SHA256": "74086ce0601cc29c6c4c3c200c48fc4bacc619cf4bc074d895d6e3f9fd36fc6b",
+   "Installed-Size": "844",
+   "Section": "admin",
+   "Source": "psmisc",
+   "Suite": "noble"
+  },
+  {
+   "Package": "tzdata",
+   "Version": "2026e-0ubuntu0.24.04.1",
+   "Architecture": "all",
+   "Filename": "pool/main/t/tzdata/tzdata_2026e-0ubuntu0.24.04.1_all.deb",
+   "Size": "282136",
+   "SHA256": "2f6794a7f31753fc947d9ac02ff03ea46510f34864f9d132a93d7b105e3c4447",
+   "Installed-Size": "1389",
+   "Section": "libs",
+   "Source": "tzdata",
+   "Suite": "noble-updates"
+  },
+  {
+   "Package": "ucf",
+   "Version": "3.0043+nmu1",
+   "Architecture": "all",
+   "Filename": "pool/main/u/ucf/ucf_3.0043+nmu1_all.deb",
+   "Size": "56522",
+   "SHA256": "397e541af11db776ed7facf1674ee37b56e7de51348c9f077d7a283912c4b458",
+   "Installed-Size": "214",
+   "Section": "utils",
+   "Source": "ucf",
+   "Suite": "noble"
+  }
+ ],
+ "upstream": []
+}

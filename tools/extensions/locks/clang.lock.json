@@ -1,0 +1,291 @@
+{
+ "format": 1,
+ "id": "clang",
+ "base": {
+  "rootfsVersion": "10",
+  "toolsLockSha256": "5f75c41bb6a543143e4a05d78fc13f0abf54367c1f4454526a9266e119299c1e",
+  "statusSha256": "f4edc364d3d98514ae7567063645013b2e36f3eb3493ce0076fcc270e4b248b2"
+ },
+ "sources": [
+  {
+   "suite": "noble",
+   "inReleaseSha256": "cdb2f31d809f589719a53c6ad15f255b27569c4059542ada282aaa21b8e164b0",
+   "date": "Thu, 25 Apr 2024 15:10:33 UTC"
+  },
+  {
+   "suite": "noble-updates",
+   "inReleaseSha256": "4fcba3fb02086679f7e86677e320b92e0d076a8c02e30dc0abbbe06b67640db7",
+   "date": "Fri, 23 Oct 2026 20:23:43 UTC"
+  },
+  {
+   "suite": "noble-security",
+   "inReleaseSha256": "e56daa3c9903f06da8161b4f0e61a747aab215647f4bfabbecd5655631200f09",
+   "date": "Fri, 23 Oct 2026 13:38:44 UTC"
+  }
+ ],
+ "requires": [
+  "dev-base"
+ ],
+ "seeds": [
+  "clang",
+  "lld",
+  "llvm"
+ ],
+ "packages": [
+  {
+   "Package": "clang",
+   "Version": "1:18.0-59~exp2",
+   "Architecture": "arm64",
+   "Filename": "pool/universe/l/llvm-defaults/clang_18.0-59~exp2_arm64.deb",
+   "Size": "5854",
+   "SHA256": "f351ba05afe32548884b3684b85e4000e0ebb071dbc08e75126fdbd46f64c0f3",
+   "Installed-Size": "20",
+   "Source": "llvm-defaults (0.59~exp2)",
+   "Section": "universe/devel",
+   "Suite": "noble"
+  },
+  {
+   "Package": "clang-18",
+   "Version": "1:18.1.3-1ubuntu1",
+   "Architecture": "arm64",
+   "Filename": "pool/universe/l/llvm-toolchain-18/clang-18_18.1.3-1ubuntu1_arm64.deb",
+   "Size": "78398",
+   "SHA256": "e3a70e054d3c0d0841cd7d1555deeab82d75609d34438b1cfc1b187b0add7d77",
+   "Installed-Size": "371",
+   "Source": "llvm-toolchain-18",
+   "Section": "universe/devel",
+   "Suite": "noble-updates"
+  },
+  {
+   "Package": "libbsd0",
+   "Version": "0.12.1-1build1.1",
+   "Architecture": "arm64",
+   "Filename": "pool/main/libb/libbsd/libbsd0_0.12.1-1build1.1_arm64.deb",
+   "Size": "40970",
+   "SHA256": "cdf9ff601244e64482584d9d9b98aa54a573c081ab5956227c737307196c1ce3",
+   "Installed-Size": "179",
+   "Source": "libbsd",
+   "Section": "libs",
+   "Suite": "noble-updates"
+  },
+  {
+   "Package": "libclang-common-18-dev",
+   "Version": "1:18.1.3-1ubuntu1",
+   "Architecture": "arm64",
+   "Filename": "pool/universe/l/llvm-toolchain-18/libclang-common-18-dev_18.1.3-1ubuntu1_arm64.deb",
+   "Size": "735998",
+   "SHA256": "b9475c49e5613ce2f98630a269864fb34651e3de275d40dffb2dbdc9863f7fb9",
+   "Installed-Size": "13246",
+   "Source": "llvm-toolchain-18",
+   "Section": "universe/libdevel",
+   "Suite": "noble-updates"
+  },
+  {
+   "Package": "libclang-cpp18",
+   "Version": "1:18.1.3-1ubuntu1",
+   "Architecture": "arm64",
+   "Filename": "pool/main/l/llvm-toolchain-18/libclang-cpp18_18.1.3-1ubuntu1_arm64.deb",
+   "Size": "13166642",
+   "SHA256": "f04cf0e22e25fb4706b2175a7c262c20caae8259b442816207fc68a142e63627",
+   "Installed-Size": "63779",
+   "Source": "llvm-toolchain-18",
+   "Section": "libs",
+   "Suite": "noble-updates"
+  },
+  {
+   "Package": "libclang1-18",
+   "Version": "1:18.1.3-1ubuntu1",
+   "Architecture": "arm64",
+   "Filename": "pool/main/l/llvm-toolchain-18/libclang1-18_18.1.3-1ubuntu1_arm64.deb",
+   "Size": "7533024",
+   "SHA256": "11d80aca24ad71a7d659870941456b4884970d3326afe640c571299f8a7f4e8e",
+   "Installed-Size": "33911",
+   "Source": "llvm-toolchain-18",
+   "Section": "libs",
+   "Suite": "noble-updates"
+  },
+  {
+   "Package": "libedit2",
+   "Version": "3.1-20230828-1build1",
+   "Architecture": "arm64",
+   "Filename": "pool/main/libe/libedit/libedit2_3.1-20230828-1build1_arm64.deb",
+   "Size": "97526",
+   "SHA256": "cf642fec16d86517e0e715520c3a7cdaee650e7ae8a4993f82d0e1e7a5883efb",
+   "Installed-Size": "302",
+   "Source": "libedit",
+   "Section": "libs",
+   "Suite": "noble"
+  },
+  {
+   "Package": "libgc1",
+   "Version": "1:8.2.6-1build1",
+   "Architecture": "arm64",
+   "Filename": "pool/main/libg/libgc/libgc1_8.2.6-1build1_arm64.deb",
+   "Size": "89052",
+   "SHA256": "487546cfdc5c09a86461d245b8a9c7d337e6b24c278d47854a36ca4a60f891a8",
+   "Installed-Size": "513",
+   "Source": "libgc",
+   "Section": "libs",
+   "Suite": "noble"
+  },
+  {
+   "Package": "libllvm18",
+   "Version": "1:18.1.3-1ubuntu1",
+   "Architecture": "arm64",
+   "Filename": "pool/main/l/llvm-toolchain-18/libllvm18_18.1.3-1ubuntu1_arm64.deb",
+   "Size": "26341296",
+   "SHA256": "9fdecc60d0528466bfbbc141aefd2788ab3bc5459a9ff9c9261fe067a3af3b5c",
+   "Installed-Size": "116457",
+   "Source": "llvm-toolchain-18",
+   "Section": "libs",
+   "Suite": "noble-updates"
+  },
+  {
+   "Package": "libobjc-13-dev",
+   "Version": "13.3.0-6ubuntu2~24.04.1",
+   "Architecture": "arm64",
+   "Filename": "pool/universe/g/gcc-13/libobjc-13-dev_13.3.0-6ubuntu2~24.04.1_arm64.deb",
+   "Size": "190244",
+   "SHA256": "28014209291d7d0a2971e72d6d26e2fd0892225b140a9163e6ec715d9d8e39c5",
+   "Installed-Size": "1442",
+   "Source": "gcc-13",
+   "Section": "universe/libdevel",
+   "Suite": "noble-updates"
+  },
+  {
+   "Package": "libobjc4",
+   "Version": "14.2.0-4ubuntu2~24.04.1",
+   "Architecture": "arm64",
+   "Filename": "pool/universe/g/gcc-14/libobjc4_14.2.0-4ubuntu2~24.04.1_arm64.deb",
+   "Size": "45498",
+   "SHA256": "e327102d58ea40c4ab4d370e25fbe40e51567854af42ccd56135f48b9bc43055",
+   "Installed-Size": "293",
+   "Source": "gcc-14",
+   "Section": "universe/libs",
+   "Suite": "noble-updates"
+  },
+  {
+   "Package": "libpfm4",
+   "Version": "4.13.0+git32-g0d4ed0e-1ubuntu0.1",
+   "Architecture": "arm64",
+   "Filename": "pool/universe/libp/libpfm4/libpfm4_4.13.0+git32-g0d4ed0e-1ubuntu0.1_arm64.deb",
+   "Size": "59242",
+   "SHA256": "4800c439420256e34807958ad35b41dbb08686a69257e810deb426625bd4b92a",
+   "Installed-Size": "394",
+   "Section": "universe/libs",
+   "Source": "libpfm4",
+   "Suite": "noble-updates"
+  },
+  {
+   "Package": "lld",
+   "Version": "1:18.0-59~exp2",
+   "Architecture": "arm64",
+   "Filename": "pool/universe/l/llvm-defaults/lld_18.0-59~exp2_arm64.deb",
+   "Size": "5494",
+   "SHA256": "f38c5c80831a557966b0cb42912665bbffc4856534ab2d8c834ecefe9ec37bf0",
+   "Installed-Size": "20",
+   "Source": "llvm-defaults (0.59~exp2)",
+   "Section": "universe/devel",
+   "Suite": "noble"
+  },
+  {
+   "Package": "lld-18",
+   "Version": "1:18.1.3-1ubuntu1",
+   "Architecture": "arm64",
+   "Filename": "pool/universe/l/llvm-toolchain-18/lld-18_18.1.3-1ubuntu1_arm64.deb",
+   "Size": "1316522",
+   "SHA256": "c33a2e048536e6d902a9f209d114d049b5becbedb94d11eb77f313cad95a830c",
+   "Installed-Size": "5076",
+   "Source": "llvm-toolchain-18",
+   "Section": "universe/devel",
+   "Suite": "noble-updates"
+  },
+  {
+   "Package": "llvm",
+   "Version": "1:18.0-59~exp2",
+   "Architecture": "arm64",
+   "Filename": "pool/universe/l/llvm-defaults/llvm_18.0-59~exp2_arm64.deb",
+   "Size": "4150",
+   "SHA256": "f923a26f0b9e91a3c6c075376c6e3e1b7fe543c99f32c88deec8332dec2c9ceb",
+   "Installed-Size": "110",
+   "Source": "llvm-defaults (0.59~exp2)",
+   "Section": "universe/devel",
+   "Suite": "noble"
+  },
+  {
+   "Package": "llvm-18",
+   "Version": "1:18.1.3-1ubuntu1",
+   "Architecture": "arm64",
+   "Filename": "pool/universe/l/llvm-toolchain-18/llvm-18_18.1.3-1ubuntu1_arm64.deb",
+   "Size": "24304298",
+   "SHA256": "1d9c87ff9fe17d0ee00703ec0f339ab687e2807b3508b51cf517e05281de104d",
+   "Installed-Size": "115469",
+   "Source": "llvm-toolchain-18",
+   "Section": "universe/devel",
+   "Suite": "noble-updates"
+  },
+  {
+   "Package": "llvm-18-linker-tools",
+   "Version": "1:18.1.3-1ubuntu1",
+   "Architecture": "arm64",
+   "Filename": "pool/universe/l/llvm-toolchain-18/llvm-18-linker-tools_18.1.3-1ubuntu1_arm64.deb",
+   "Size": "1234040",
+   "SHA256": "f043611a4de0370d5c1abff56b7666ed2db2f5e7be0380f71ae00753ddcba48d",
+   "Installed-Size": "4300",
+   "Source": "llvm-toolchain-18",
+   "Section": "universe/devel",
+   "Suite": "noble-updates"
+  },
+  {
+   "Package": "llvm-18-runtime",
+   "Version": "1:18.1.3-1ubuntu1",
+   "Architecture": "arm64",
+   "Filename": "pool/universe/l/llvm-toolchain-18/llvm-18-runtime_18.1.3-1ubuntu1_arm64.deb",
+   "Size": "520916",
+   "SHA256": "b2c829cec030a9bab4fd27b92303eb8491140ad91edf62d55d5b1f8f3d6ef100",
+   "Installed-Size": "1751",
+   "Source": "llvm-toolchain-18",
+   "Section": "universe/devel",
+   "Suite": "noble-updates"
+  },
+  {
+   "Package": "llvm-runtime",
+   "Version": "1:18.0-59~exp2",
+   "Architecture": "arm64",
+   "Filename": "pool/universe/l/llvm-defaults/llvm-runtime_18.0-59~exp2_arm64.deb",
+   "Size": "5498",
+   "SHA256": "63e76a2c3aa63652bcbc20ab2cd22c962e024200b30c8cd818c38d43857e9756",
+   "Installed-Size": "16",
+   "Source": "llvm-defaults (0.59~exp2)",
+   "Section": "universe/devel",
+   "Suite": "noble"
+  }
+ ],
+ "upstream": [
+  {
+   "kind": "deb-member",
+   "url": "https://ports.ubuntu.com/ubuntu-ports/pool/universe/l/llvm-toolchain-18/clang-format-18_18.1.3-1ubuntu1_arm64.deb",
+   "sha256": "0ae1062195516faf0f05b86375025a34e7f7a5fd62caeb0883964dbeae6651d1",
+   "members": {
+    "usr/lib/llvm-18/bin/clang-format": "bin/clang-format",
+    "usr/share/doc/clang-format-18/copyright": "LICENSE.clang-format"
+   },
+   "license": "Apache-2.0 WITH LLVM-exception",
+   "licenseFile": "LICENSE.clang-format"
+  },
+  {
+   "kind": "deb-member",
+   "url": "https://ports.ubuntu.com/ubuntu-ports/pool/universe/l/llvm-toolchain-18/clang-tidy-18_18.1.3-1ubuntu1_arm64.deb",
+   "sha256": "d8dc7a84b259f263c2dd419207b659268b3123a1e1fb532dea3a99ff4c7f3324",
+   "members": {
+    "usr/lib/llvm-18/bin/clang-tidy": "libexec/clang-tidy",
+    "usr/share/doc/clang-tidy-18/copyright": "LICENSE.clang-tidy"
+   },
+   "license": "Apache-2.0 WITH LLVM-exception",
+   "licenseFile": "LICENSE.clang-tidy",
+   "wrappers": {
+    "bin/clang-tidy": "exec /opt/dsha-ext/clang/libexec/clang-tidy --extra-arg-before=-resource-dir=/usr/lib/llvm-18/lib/clang/18 \"$@\""
+   }
+  }
+ ]
+}
