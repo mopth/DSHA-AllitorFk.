@@ -85,7 +85,7 @@ class AcceptanceTest(unittest.TestCase):
             raw=evidence/'sources.json';receipt=evidence/'manifest.json'
             raw.write_text(json.dumps(self.base),encoding='utf8')
             with self.assertRaises(ValueError):baseline_from_receipt(raw,root)
-            data={'status':'PASS_FOR_EXECUTED_SCOPE','apks':[{'flavor':f,'package':'dsh.android.client','certificateSha256':CERT} for f in ('standard','low')],
+            data={'status':'PASS_FOR_EXECUTED_SCOPE','apks':[{'flavor':f,'package':'dsha.AllitorFk_.dsh0_2_1_rc_2','certificateSha256':CERT} for f in ('standard','low')],
                   'sourceSnapshot':{'path':str(raw),'sha256':digest(raw)}}
             receipt.write_text(json.dumps(data),encoding='utf8')
             actual,provenance=baseline_from_receipt(receipt,root)
@@ -99,7 +99,7 @@ class AcceptanceTest(unittest.TestCase):
             receipt=root/'artifacts/deliveries/build158.json';receipt.parent.mkdir(parents=True)
             snapshot.write_text(json.dumps(self.base),encoding='utf8')
             receipt.write_text(json.dumps({'status':'PASS_FOR_EXECUTED_SCOPE',
-                'apks':[{'flavor':f,'package':'dsh.android.client','certificateSha256':CERT} for f in ('standard','low')],
+                'apks':[{'flavor':f,'package':'dsha.AllitorFk_.dsh0_2_1_rc_2','certificateSha256':CERT} for f in ('standard','low')],
                 'sourceSnapshot':{'path':str(snapshot),'sha256':digest(snapshot)}}),encoding='utf8')
             self.assertEqual(baseline_from_receipt(receipt,root)[0],self.base)
             external=root/'outside-snapshot.json';external.write_bytes(snapshot.read_bytes())

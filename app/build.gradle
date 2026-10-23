@@ -3,8 +3,11 @@ plugins {
 }
 
 // 两版共用功能和离线环境；只有 low 携带兼容旧 Android 的 Gecko 内核。
-// 文件名独立于可诊断版本名，保持当前用户下载入口不变。
-ext.dshaApkNameVersion = '0.2.1-rc.2'
+// AllitorFk：显示名 / APK 文件名 / Release 名的唯一来源（改名只改这一行）。
+// APK 文件 = <名>.apk，Low 版 = <名>-low.apk；applicationId 另见 defaultConfig，不随此变。
+ext.dshaReleaseName = 'dsha-AllitorFk.-dsh0.2.1-rc.2'
+if (!(dshaReleaseName ==~ /[A-Za-z0-9][A-Za-z0-9._-]{0,100}/))
+    throw new GradleException('dshaReleaseName 只能含字母数字和 ._-')
 def bundledTools = new groovy.json.JsonSlurper().parse(rootProject.file('tools/runtime-tools.lock.json'))
 if (bundledTools.schema != 1 || !(bundledTools.pnpm.version ==~ /[0-9]+\.[0-9]+\.[0-9]+/))
     throw new GradleException('随包工具身份格式错误')
@@ -47,13 +50,15 @@ android {
     ndkVersion '26.3.11579264'
 
     defaultConfig {
-        applicationId "dsh.android.client"
+        applicationId "dsha.AllitorFk_.dsh0_2_1_rc_2"
         minSdk 30
         targetSdk 37
         buildConfigField 'String', 'BUNDLED_PNPM_VERSION', '"' + bundledTools.pnpm.version + '"'
+        buildConfigField 'String', 'DISPLAY_NAME', '"' + dshaReleaseName + '"'
+        resValue 'string', 'app_name', dshaReleaseName
         versionCode 190
         // DSHA 修订号 + 固定的北京时间戳 + 内置 DSH 版本；同一交付重建不变。
-        versionName "0.2.1-rc.2-20261022.2100-dsh0.2.1-rc.2"
+        versionName "0.2.1-rc.2-20261022.2100-dsh0.2.1-rc.2-AllitorFk"
         testInstrumentationRunner project.findProperty('dsha.testRunner') ?: "com.deepseekharness.app.Rc13Instrumentation"
         ndk {
             abiFilters 'arm64-v8a'
@@ -76,12 +81,9 @@ android {
     }
 
     signingConfigs {
-        // 线上发布签名 = DSHA-ACTUAL-PUBLISH-KEY-debug.keystore（alias androiddebugkey，
-        // 证书 SHA-256 E7:E3:A3:1A:75:94:6F:26:69:19:4C:97:2B:3D:D0:C9:AE:A3:FC:7C:50:A8:B8:85:D2:DE:E7:10:B2:2A:53:F5）。
-        // v1.1.7 起线上包都是这把 debug keystore 签的（历史原因，勿换），
-        // Android 只允许同签名覆盖安装，换钥 = 逼用户卸载重装丢数据。
-        // 另一把 DSHA-release.keystore 只签增量更新清单，绝不混用。
-        // 正式任务必须明确提供历史发布证书；单测/debug 不依赖发布密钥。
+        // AllitorFk 签名身份以 ci/release-identity.json 的 certificateSha256 为准（不是官方 E7E3）。
+        // 私钥只放在仓库外（DSHA_KEYSTORE 等环境变量提供），绝不提交。
+        // Android 只允许同签名覆盖安装：身份一旦发布就不要换钥。
         publish {
             def ksPath = System.getenv("DSHA_KEYSTORE") ?: project.findProperty("dsha.keystore")
             if (ksPath != null && !ksPath.toString().isEmpty() && file(ksPath).exists()) {
@@ -94,7 +96,7 @@ android {
                         ?: project.findProperty("dsha.key.password")
                 if (!storePassword || !keyPassword)
                     throw new GradleException('必须明确提供发布密钥口令，不能使用隐式缺省值')
-                println "签名：已配置历史发布证书"
+                println "签名：已配置发布证书（须与 ci/release-identity.json 一致）"
             } else {
                 println "签名：未配置历史发布证书；正式 APK 打包将被阻止"
             }
@@ -162,14 +164,14 @@ def verifyPublishCertificate = tasks.register("verifyPublishCertificate") {
     doLast {
         def signing = android.signingConfigs.publish
         if (signing.storeFile == null || !signing.storeFile.isFile())
-            throw new GradleException("正式 APK 缺少历史 E7E3 发布密钥，停止打包")
+            throw new GradleException("正式 APK 缺少 release-identity.json 指定的发布密钥，停止打包")
         def store = java.security.KeyStore.getInstance(java.security.KeyStore.getDefaultType())
         signing.storeFile.withInputStream { store.load(it, signing.storePassword.toCharArray()) }
         def certificate = store.getCertificate(signing.keyAlias)
         def expected = new groovy.json.JsonSlurper().parse(rootProject.file('ci/release-identity.json')).certificateSha256
         if (certificate == null || java.security.MessageDigest.getInstance("SHA-256")
                 .digest(certificate.encoded).encodeHex().toString() != expected)
-            throw new GradleException("发布证书不是历史 E7E3，停止打包")
+            throw new GradleException("发布证书与 ci/release-identity.json 不符，停止打包")
     }
 }
 tasks.configureEach {
@@ -398,5 +400,19 @@ tasks.withType(Test).configureEach {
     if (frameworkDirectory) {
         systemProperty 'robolectric.offline', 'true'
         systemProperty 'robolectric.dependency.dir', frameworkDirectory
+    }
+}
+
+// AllitorFk：把 AGP 产物按 dshaReleaseName 另存一份（不改 AGP 原始输出）。
+['Standard', 'Low'].each { flavor ->
+    ['Debug', 'Release'].each { type ->
+        def copyTask = tasks.register("namedApk${flavor}${type}", Copy) {
+            from(layout.buildDirectory.dir("outputs/apk/${flavor.toLowerCase()}/${type.toLowerCase()}")) { include '*.apk' }
+            into(layout.buildDirectory.dir('outputs/allitorfk'))
+            rename { String ignored ->
+                dshaReleaseName + (flavor == 'Low' ? '-low' : '') + (type == 'Debug' ? '-debug' : '') + '.apk'
+            }
+        }
+        tasks.matching { it.name == "assemble${flavor}${type}" }.configureEach { finalizedBy(copyTask) }
     }
 }

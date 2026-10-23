@@ -42,7 +42,7 @@ function fixture() {
 async function test(name, body) { try { await body(); results.push({ name, status: 'PASS' }); } catch (error) { results.push({ name, status: 'FAIL', message: error.message, stack: error.stack }); } }
 await test('fixed authenticated endpoint returns only native data and a credential generation', async () => {
   const f = fixture(), descriptor = f.sdk.readConnection();
-  assert.equal(descriptor.applicationId, 'dsh.android.client'); assert.deepEqual(Object.keys(descriptor).sort(), ['applicationId', 'generation']);
+  assert.equal(descriptor.applicationId, 'dsha.AllitorFk_.dsh0_2_1_rc_2'); assert.deepEqual(Object.keys(descriptor).sort(), ['applicationId', 'generation']);
   const response = await f.query(); assert.equal(response.ok, true); assert.equal((await response.json()).result, 'native-payload');
   const wire = f.requests[0]; assert.equal(wire.hostname, '127.0.0.1'); assert.equal(wire.port, 3090); assert.equal(wire.path, '/app/native-policy');
   assert.equal(wire.method, 'GET'); assert.equal(wire.headers['X-Token'], f.token); assert.equal(wire.agent, false); assert(f.closes >= 4);

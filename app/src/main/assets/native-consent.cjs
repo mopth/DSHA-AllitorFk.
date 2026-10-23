@@ -33,7 +33,7 @@ function credential() {
   } finally { fs.closeSync(fd); }
 }
 function readConnection() {
-  return Object.freeze({ applicationId: 'dsh.android.client', generation: credential().generation });
+  return Object.freeze({ applicationId: 'dsha.AllitorFk_.dsh0_2_1_rc_2', generation: credential().generation });
 }
 function bridgeFetch(route, init = {}) {
   if (!['/device/consent', '/app/native-policy'].includes(route)

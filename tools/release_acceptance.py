@@ -6,7 +6,7 @@ from pathlib import Path
 from release_layout import ROOT, source_snapshot_path
 
 CONTRACT=Path(__file__).with_name('release-acceptance.json')
-CERT='e7e3a31a75946f2669194c972b3dd0c9aea3fc7c50a8b885d2dee710b22a53f5'
+CERT=json.loads((Path(__file__).resolve().parents[1]/'ci/release-identity.json').read_text(encoding='utf-8'))['certificateSha256']
 
 
 def digest(path):
@@ -21,7 +21,7 @@ def baseline_from_receipt(path, root=ROOT):
         raise ValueError('ACCEPTANCE_BASELINE_NOT_DELIVERED')
     apks=receipt.get('apks',[])
     if len(apks)!=2 or {a.get('flavor') for a in apks}!={'standard','low'} \
-            or any(a.get('certificateSha256')!=CERT or a.get('package')!='dsh.android.client' for a in apks):
+            or any(a.get('certificateSha256')!=CERT or a.get('package')!='dsha.AllitorFk_.dsh0_2_1_rc_2' for a in apks):
         raise ValueError('ACCEPTANCE_BASELINE_IDENTITY')
     source=receipt.get('sourceSnapshot',{})
     snapshot=source_snapshot_path(source.get('path',''), source.get('sha256'), root)

@@ -10,7 +10,16 @@ def _version(value):
         raise ValueError('DELIVERY_APK_NAME_VERSION')
     return value
 
+def release_name(root=ROOT):
+    """AllitorFk 单一命名常量 ext.dshaReleaseName；不存在时返回 None（旧布局）。"""
+    build = (Path(root) / 'app/build.gradle').read_text(encoding='utf-8')
+    match = re.search(r"ext\.dshaReleaseName\s*=\s*['\"]([^'\"]+)['\"]", build)
+    return _version(match[1]) if match else None
+
 def apk_name_version(root=ROOT):
+    named = release_name(root)
+    if named:
+        return named
     build = (Path(root) / 'app/build.gradle').read_text(encoding='utf-8')
     match = re.search(r"ext\.dshaApkNameVersion\s*=\s*['\"]([^'\"]+)['\"]", build)
     if not match:
@@ -22,6 +31,9 @@ def apk_name_version(root=ROOT):
 def apk_filename(flavor, root=ROOT):
     if flavor not in ('standard', 'low'):
         raise ValueError('DELIVERY_FLAVOR')
+    named = release_name(root)
+    if named:
+        return f'{named}{"-low" if flavor == "low" else ""}.apk'
     return f'dsha-{apk_name_version(root)}{"low" if flavor == "low" else ""}.apk'
 
 def apk_version_from_filename(name):
