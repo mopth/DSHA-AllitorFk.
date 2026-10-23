@@ -1,3 +1,23 @@
+<!-- AllitorFk banner: 以下横幅为本 fork 添加；横幅之下为上游 DSHA 原文，未改动。 -->
+# DSHA-AllitorFk. 🔧
+
+| [中文](README.md) | [English](README.en.md) | [AllitorFk 说明](allitorfk/README.md) | [MIT License](LICENSE) |
+|---|---|---|---|
+
+## ⬇️ 下载：尚未发布
+
+> 目前还没有任何 AllitorFk 安装包。发布后会在本仓库 Releases 页面提供 `dsha-AllitorFk.-dsh0.2.1-rc.2.apk`（标准版，安卓 11+）和 `dsha-AllitorFk.-dsh0.2.1-rc.2-low.apk`（低版本，安卓 6+），均为 arm64。
+
+> ⚠️ **声明：这是基于 [DSH-APP/DSHA](https://github.com/DSH-APP/DSHA) 的非官方修改版（fork），不是官方发布，未经上游作者审核，与上游作者无关。风险自负。**
+> - **基于版本**：官方 DSHA build190（`0.2.1-rc.2`），提交 `c750348a`。
+> - **计划内容**：加入 fix4 的 bxroot 引擎与冷安装自动回退（bxroot 失败时退回 proot）、Low 包（安卓 6+），以及参考 DSH-Kxxy 思路重新编写的内置离线扩展（未复制 Kxxy 代码）。
+> - **可与官方版共存**：包名 `dsha.AllitorFk_.dsh0_2_1_rc_2`，与官方不同；签名也与官方不同，因此**不能覆盖安装官方版，也不会替换官方版**，两者可以同时安装。
+> - **许可**：沿用上游 MIT 许可，原版权声明原样保留，见 [LICENSE](LICENSE)。本 fork 自己的资料都放在 [`allitorfk/`](allitorfk/README.md) 文件夹，上游文件位置不变。
+>
+> *Unofficial fork of DSH-APP/DSHA (build190, `c750348a`); not an official release, not reviewed by the upstream author. Not yet released. MIT license and original copyright retained.*
+
+---
+
 # DSHA
 
 <p align="center">
