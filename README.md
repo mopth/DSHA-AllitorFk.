@@ -1,3 +1,23 @@
+<!-- AllitorFk banner: 以下横幅为本 fork 添加；横幅之下为上游 DSHA 原文，未改动。 -->
+# DSHA-AllitorFk. 🔧
+
+| [中文](README.md) | [English](README.en.md) | [AllitorFk 说明](allitorfk/README.md) | [MIT License](LICENSE) |
+|---|---|---|---|
+
+## ⬇️ 下载：尚未发布
+
+> 目前还没有发布任何 AllitorFk 安装包（本地已能构建，尚未做真机验证）。发布后会在本仓库 Releases 页面提供三个 arm64 安装包：`dsha-AllitorFk.-dsh0.2.1-rc.2.apk`（标准版，安卓 11+）、`dsha-AllitorFk.-dsh0.2.1-rc.2-full.apk`（Full 版，安卓 11+，内置开发基础包与 JDK 21 两个离线扩展）、`dsha-AllitorFk.-dsh0.2.1-rc.2-low.apk`（低版本，安卓 6+）；其余离线扩展包（.dshx）作为 Release 附件提供。
+
+> ⚠️ **声明：这是基于 [DSH-APP/DSHA](https://github.com/DSH-APP/DSHA) 的非官方修改版（fork），不是官方发布，未经上游作者审核，与上游作者无关。风险自负。**
+> - **基于版本**：官方 DSHA build190（`0.2.1-rc.2`），提交 `c750348a`。
+> - **主要内容**：proot 仍是默认引擎，proroot、bxroot 可选；bxroot 来自 fix4，带冷安装自动回退（预检明确失败才退回 proot）；实验引擎连续 3 次明确启动失败自动切回 proot（超时或结果不明不计）；Low 包（安卓 6+）；参考 DSH-Kxxy 思路重新编写的离线扩展中心（16 个扩展包，Ubuntu 24.04 arm64 软件包 + 官方上游工具链，未复制 Kxxy 代码）。
+> - **可与官方版共存**：包名 `dsha.AllitorFk_.dsh0_2_1_rc_2`。包名与官方不同，所以是另一个应用，**不会覆盖或替换官方版**，两者可以同时安装。
+> - **许可**：沿用上游 MIT 许可，原版权声明原样保留，见 [LICENSE](LICENSE)。本 fork 自己的资料都放在 [`allitorfk/`](allitorfk/README.md) 文件夹，上游文件位置不变。
+>
+> *Unofficial fork of DSH-APP/DSHA (build190, `c750348a`); not an official release, not reviewed by the upstream author. Not yet released. MIT license and original copyright retained.*
+
+---
+
 # DSHA
 
 <p align="center">

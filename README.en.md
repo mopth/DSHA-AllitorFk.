@@ -1,3 +1,21 @@
+<!-- AllitorFk banner: added by this fork; everything below the banner is the unchanged upstream DSHA text. -->
+# DSHA-AllitorFk. 🔧
+
+| [中文](README.md) | [English](README.en.md) | [AllitorFk notes (中文)](allitorfk/README.md) | [MIT License](LICENSE) |
+|---|---|---|---|
+
+## ⬇️ Download: not released yet
+
+> No AllitorFk package has been published yet (it builds locally; no on-device testing yet). Once released, the Releases page of this repository will offer three arm64 packages: `dsha-AllitorFk.-dsh0.2.1-rc.2.apk` (standard, Android 11+), `dsha-AllitorFk.-dsh0.2.1-rc.2-full.apk` (Full, Android 11+, with the developer-base and JDK 21 offline extensions built in) and `dsha-AllitorFk.-dsh0.2.1-rc.2-low.apk` (low, Android 6+); the other offline extension packs (.dshx) will be release attachments.
+
+> ⚠️ **Disclaimer: this is an unofficial fork of [DSH-APP/DSHA](https://github.com/DSH-APP/DSHA). It is not an official release, has not been reviewed by the upstream author, and is not affiliated with them. Use at your own risk.**
+> - **Based on**: official DSHA build190 (`0.2.1-rc.2`), commit `c750348a`.
+> - **What it contains**: proot stays the default engine, proroot and bxroot are selectable; bxroot comes from fix4 with automatic cold-install fallback (bxroot → proot only on a definite precheck failure); an experimental engine that fails to start 3 times in a row with a definite failure is switched back to proot automatically (timeouts and unknown results never count); the Low package (Android 6+); and an offline extension center rewritten after the ideas of DSH-Kxxy (16 packs: Ubuntu 24.04 arm64 packages plus official upstream toolchains; no Kxxy code copied).
+> - **Coexists with the official app**: package name `dsha.AllitorFk_.dsh0_2_1_rc_2`. Because the package name differs, it is a separate app that **does not overwrite or replace the official install** — both can be installed side by side.
+> - **License**: upstream MIT license; the original copyright notice is kept unchanged, see [LICENSE](LICENSE). This fork's own material lives in [`allitorfk/`](allitorfk/README.md); upstream files stay where they are.
+
+---
+
 # DSHA
 
 <p align="center">
