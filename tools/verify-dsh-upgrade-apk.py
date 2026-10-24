@@ -15,7 +15,7 @@ from runtime_stable_patches import load_chains, apply as apply_stable_patches
 PREFIX = 'usr/local/lib/node_modules/@deepseek-ai/dsh'
 SIDEBAR_RIGHT = '@deepseek-ai/dsh-client-ui-sidebar-right/lib/client.js'
 SIDEBAR_RECIPE = 'sidebar-layout-recovery-patch.json'
-FRONTEND_ENTRY = '@deepseek-ai/dsh-web-frontend/dist/assets/index-CN7NIWNw.js'
+FRONTEND_ENTRY = '@deepseek-ai/dsh-web-frontend/dist/assets/index-BXV-oxvX.js'
 CONVERSATION = '@deepseek-ai/dsh-client-ui-conversation/lib/client.js'
 CONVERSATION_SPECIAL_INPUTS = ('lexical-claim-patch.json', 'conversation-materialized-patch.json')
 REVIEWED_OFFICIAL_CHAINS = {

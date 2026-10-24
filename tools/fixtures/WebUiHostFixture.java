@@ -23,14 +23,14 @@ public final class WebUiHostFixture {
         cancelled.rollback(inFlight);
         check(cancelled.canDeleteOwnedFiles()&&!cancelled.commit(inFlight),"cancelled copy releases and cannot commit late");
 
-        check("http://localhost:3081/auth?token=x%2F127.0.0.1#home".equals(
-                RecoveryLocalePolicy.toLocalhostUrl("http://127.0.0.1:3081/auth?token=x%2F127.0.0.1#home")),
+        check("http://localhost:3181/auth?token=x%2F127.0.0.1#home".equals(
+                RecoveryLocalePolicy.toLocalhostUrl("http://127.0.0.1:3181/auth?token=x%2F127.0.0.1#home")),
                 "only authority changes while preserving raw credential query bytes");
-        check(RecoveryLocalePolicy.sameOrigin("http://localhost:3081/","http://localhost:3081/chat?token=secret"),
+        check(RecoveryLocalePolicy.sameOrigin("http://localhost:3181/","http://localhost:3181/chat?token=secret"),
                 "same localhost authority is accepted");
-        check(!RecoveryLocalePolicy.sameOrigin("http://localhost:3081/","http://127.0.0.1:3081/chat"),
+        check(!RecoveryLocalePolicy.sameOrigin("http://localhost:3181/","http://127.0.0.1:3181/chat"),
                 "formal origin is rejected by emergency bridge");
-        check(!RecoveryLocalePolicy.sameOrigin("http://localhost:3081/","http://localhost:3082/chat"),
+        check(!RecoveryLocalePolicy.sameOrigin("http://localhost:3181/","http://localhost:3082/chat"),
                 "wrong local port is rejected");
         System.out.println("PASS WebUploadSessionBudget boundaries/cancellation; RecoveryLocalePolicy localhost authority/query");
     }

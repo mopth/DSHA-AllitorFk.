@@ -60,7 +60,7 @@ public class HostDataTransactionTest {
           new File(base, ID + "/candidate/" + root + "/data").toPath(), "new-" + root);
     }
     new DiskSettings(base)
-        .apply(new LinkedHashMap<>(Map.of("apiCipher", "old-cipher", "port", 3080)));
+        .apply(new LinkedHashMap<>(Map.of("apiCipher", "old-cipher", "port", 3180)));
     var fs = new JvmBackupFileSystem();
     Map<String, String> before = new LinkedHashMap<>();
     for (String root : List.of("sessions", "settings"))
@@ -70,7 +70,7 @@ public class HostDataTransactionTest {
         .prepare(
             List.of("sessions", "settings"),
             before,
-            new LinkedHashMap<>(Map.of("apiCipher", "new-cipher", "port", 3081)),
+            new LinkedHashMap<>(Map.of("apiCipher", "new-cipher", "port", 3181)),
             new BackupControl(null));
   }
 

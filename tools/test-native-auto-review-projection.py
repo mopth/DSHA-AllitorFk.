@@ -32,7 +32,7 @@ class NativeAutoReviewProjectionTest(unittest.TestCase):
         self.profile.parent.mkdir(parents=True)
         self.write_profile([])
         self.runtime = self.root / 'usr/local/lib/node_modules/@deepseek-ai/dsh/node_modules' / CANONICAL
-        self.package(self.runtime, CANONICAL, '0.2.1-rc.2')
+        self.package(self.runtime, CANONICAL, '0.2.1-rc.3')
         self.proof_path = self.root / 'root/.dsh/managed-package-proofs.json'
         self.proof_path.write_text(json.dumps({'version': 1, 'packages': {
             CANONICAL: _proof.package_content_proof(self.runtime)}}), encoding='utf-8')
@@ -105,7 +105,7 @@ class NativeAutoReviewProjectionTest(unittest.TestCase):
                 row = self.card(self.cli('refresh'))
                 self.assertEqual(bool(selected), row['enabled'])
                 self.assertTrue(row['available']); self.assertTrue(row['runtimeProvided'])
-                self.assertEqual('0.2.1-rc.2', row['version'])
+                self.assertEqual('0.2.1-rc.3', row['version'])
                 self.assertEqual(before, self.profile.read_bytes())
 
     def test_each_native_marker_wins_over_inconsistent_selected_aliases(self):
@@ -168,7 +168,7 @@ class NativeAutoReviewProjectionTest(unittest.TestCase):
         self.package(shadow, CANONICAL, '9.9.9')
         self.write_profile([CANONICAL], {CANONICAL: '9.9.9'})
         row = self.card(self.cli('refresh'))
-        self.assertTrue(row['runtimeProvided']); self.assertEqual('0.2.1-rc.2', row['version'])
+        self.assertTrue(row['runtimeProvided']); self.assertEqual('0.2.1-rc.3', row['version'])
         self.assertEqual('9.9.9', json.loads((shadow / 'package.json').read_text(encoding='utf-8'))['version'])
 
     def test_missing_or_unauthenticated_proof_cannot_classify_runtime_as_managed(self):

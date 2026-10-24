@@ -29,11 +29,11 @@
 | 原生插件管理 | `device-native-plugins.log`：18 条断言通过；实际 npm 安装后可检测，列表显示四项内置插件，启用、停用、再启用及删除通过 |
 | 新会话模型往返 | `alpha15-model-start.json`、`alpha15-model-complete.json`：真实官方模型创建并读回独立目录内的 `alpha15-check.txt`，内容为 `DSHA_ALPHA15_OK` |
 | 旧会话续聊 | `alpha15-old-verified.json`：已完成的旧会话经真实分支接口迁移后成功续聊；未完成轮次的分支请求被正确拒绝 |
-| 标准 WebView | `device-auth-accepted.log`：启动、Cookie 鉴权、停止重启、切换临时端口及切回 3080、后台返回后的页面就绪通过 |
+| 标准 WebView | `device-auth-accepted.log`：启动、Cookie 鉴权、停止重启、切换临时端口及切回 3180、后台返回后的页面就绪通过 |
 | 草稿与文件侧栏 | `alpha15-file-panel.json`、`alpha15-system-back.json`：文字和图片刷新后保留，文件侧栏进入手机可视区域，系统返回关闭详情并保留编辑器；截图为 `device-evidence/standard-file-panel.png` |
 | Gecko 143 | `device-gecko-accepted.log`：通过真实对话入口进入 Gecko，重新鉴权并显示交互页面；等启动遮罩与首次提示处理完成后截图，见 `device-evidence/gecko-stable-accepted.png` |
 | 诊断与 PTY | `device-diagnostic-pty.log`：16 条检查通过，真实工具检查、修复入口、PTY 输入和子进程回收通过 |
-| 桥接接口 | `device-bridge.log`：65 条断言通过，包括 shell 超时、退出码、输出上限、3090 绑定、token 门控、问答生命周期和清理 |
+| 桥接接口 | `device-bridge.log`：65 条断言通过，包括 shell 超时、退出码、输出上限、3190 绑定、token 门控、问答生命周期和清理 |
 
 临时模型凭据只用于验收，结束后恢复原配置；端口与 Gecko 开关也恢复原值。运行目录约 719 MiB，迁移前约 1.41 GiB；该值包含这台设备的数据，不是所有用户的固定占用。
 

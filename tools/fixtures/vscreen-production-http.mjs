@@ -23,7 +23,7 @@ const platformFs = { constants: { O_RDONLY: 0, O_NOFOLLOW: 0x20000 },
   lstatSync: file => info(file !== '/root/.dsh/.bridge_token'), openSync: () => 7,
   fstatSync: () => info(false), readSync: (_fd, bytes) => bytes.write(active.token), closeSync: () => {} };
 const transport = { request(options, accept) {
-  assert.equal(options.hostname, '127.0.0.1'); assert.equal(options.port, 3090);
+  assert.equal(options.hostname, '127.0.0.1'); assert.equal(options.port, 3190);
   return http.request({ ...options, port: server.address().port }, accept);
 } };
 const module = { exports: {} }, require = name => ({ 'node:fs': platformFs, 'node:http': transport })[name];

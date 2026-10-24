@@ -30,8 +30,8 @@ public final class BridgeConnectionDescriptor {
         || generation <= 0
         || port < 1
         || port > 65535
-        || port == 3090
-        || port == 3081
+        || port == 3190
+        || port == 3181
         || port == 3190
         || token == null
         || !token.matches("[A-Za-z0-9_-]{32,128}"))

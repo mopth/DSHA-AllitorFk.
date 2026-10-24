@@ -24,7 +24,7 @@ assert.equal(sha(hmrSource),'143b445f1b303be83d56f9e7d3992e1a4885850c08f1082065d
 assert.match(hmrSource,/executing = new AsyncLocalStorage\(\);/);
 assert.match(hmrSource,/if \(this\.executing\.getStore\(\)\) return Promise\.reject\(.*HMR transactions cannot be nested/);
 const recipe=JSON.parse(fs.readFileSync(path.join(source,'app/src/main/assets/config-editor-lock-order-patch.json')));
-assert.equal(recipe.module,moduleName);assert.equal(recipe.dshVersion,'0.2.1-rc.2');
+assert.equal(recipe.module,moduleName);assert.equal(recipe.dshVersion,'0.2.1-rc.3');
 assert.equal(sha(original),recipe.sourceSha256,'unknown upstream ConfigEditor must fail closed');
 let patched=original;
 for(const patch of recipe.patches){assert.equal(patched.split(patch.before).length,2);patched=patched.replace(patch.before,patch.after);}
@@ -72,7 +72,7 @@ async function fixture(Editor,{hmr=true}={}){
  function bundle(name,rows){const folder=path.join(dir,name);fs.mkdirSync(folder);fs.writeFileSync(path.join(folder,'package.json'),JSON.stringify({name,version:'1.0.0',dsh:{bundle:{patch:'cordis.patch.yml'}}}));fs.writeFileSync(path.join(folder,'cordis.patch.yml'),JSON.stringify([{insert:rows}]));fs.symlinkSync(folder,path.join(profileDir,'node_modules',name),process.platform==='win32'?'junction':'dir');}
  bundle('fixture-base-bundle',[{id:'fixture-config',name:pathToFileURL(configFile).href,config:{value:0}}]);
  bundle('fixture-toggle-bundle',[{id:'fixture-toggle',name:pathToFileURL(toggleFile).href}]);
- const installAnchor=path.join(dir,'installation.json');fs.writeFileSync(installAnchor,JSON.stringify({name:'@deepseek-ai/dsh',version:'0.2.1-rc.2'}));
+ const installAnchor=path.join(dir,'installation.json');fs.writeFileSync(installAnchor,JSON.stringify({name:'@deepseek-ai/dsh',version:'0.2.1-rc.3'}));
  const profile={name:'web',dir:profileDir,home:dir,patchPath:path.join(profileDir,'cordis.patch.yml'),overlays:[],startedBundles:['fixture-base-bundle'],installAnchor};
  fs.writeFileSync(path.join(profileDir,'package.json'),JSON.stringify({name:'lock-order-fixture',private:true,dsh:{profile:{bundles:['fixture-base-bundle']}}}));
  fs.writeFileSync(profile.patchPath,'[]\n');

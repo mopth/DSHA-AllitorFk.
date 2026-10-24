@@ -1,5 +1,5 @@
 {
-  "dshVersion": "0.2.1-rc.2",
+  "dshVersion": "0.2.1-rc.3",
   "module": "@deepseek-ai/dsh-config-editor/lib/index.js",
   "sourceSha256": "373e05c8250d25dda983ccf6e214a55e3792a211d1a7b883affcd66de47b5bf8",
   "patches": [

@@ -19,7 +19,7 @@ function current() {
     connection: crypto.createHash('sha256').update(instance + ':' + generation + ':' + token).digest('hex') };
 }
 function readConnection() {
-  return Object.freeze({ applicationId: 'dsha.AllitorFk_.dsh0_2_1_rc_2', generation: current().connection });
+  return Object.freeze({ applicationId: 'dsha.AllitorFk_.dsh0_2_1_rc_3', generation: current().connection });
 }
 function bridgeFetch(route, init = {}) {
   if (route !== '/device/consent' || Object.keys(init).some(key => !['signal', 'expectedConnectionGeneration'].includes(key)))

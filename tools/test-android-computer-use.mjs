@@ -77,7 +77,7 @@ try{
     ['android_long_press',{observationId:wireMetadata.observationId,x:4,y:6,ms:600},'long_press'],
     ['android_swipe',{observationId:wireMetadata.observationId,x1:4,y1:4,x2:4,y2:8,ms:300},null]]){
     const before=seenRequests.length;
-    const result=await call(name,args,signal,{...fakeNative,fetch(url,options){assert.equal(url.hostname,'127.0.0.1');assert.equal(url.port,'3090');return fetch('http://127.0.0.1:'+http.address().port+url.pathname+url.search,options);}});
+    const result=await call(name,args,signal,{...fakeNative,fetch(url,options){assert.equal(url.hostname,'127.0.0.1');assert.equal(url.port,'3190');return fetch('http://127.0.0.1:'+http.address().port+url.pathname+url.search,options);}});
     assert.equal(result.isError,false);assert.equal(seenRequests.length,before+1);
     const delivered=seenRequests.at(-1);assert.equal(delivered.token,'fixture-token');assert.equal(delivered.url.searchParams.get('observationId'),wireMetadata.observationId);assert.equal(delivered.url.searchParams.get('gesture'),gesture);
   }

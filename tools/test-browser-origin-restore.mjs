@@ -75,10 +75,10 @@ try {
     const get=id=>new Promise(resolve=>{const r=db.transaction('drafts','readonly').objectStore('drafts').get(id);r.onsuccess=()=>resolve(r.result);});
     const text=JSON.stringify({draft:'old text',view:'old-view',viewRequest:null});
     localStorage.setItem('dsh.conversation.blank',JSON.stringify({draft:'',view:'new-view',viewRequest:{view:'pending-view',focus:true}}));
-    const simple={version:1,source:'http://127.0.0.1:3080',rows:[{key:'dsh.conversation.blank',value:text}],images:[],parts:[],unknown:[]};
+    const simple={version:1,source:'http://127.0.0.1:3180',rows:[{key:'dsh.conversation.blank',value:text}],images:[],parts:[],unknown:[]};
     await DshaOriginState.restore(simple,[],localStorage,indexedDB);
     const merged=JSON.parse(localStorage.getItem('dsh.conversation.blank'));
-    const make=(id,name='old.png')=>({version:1,source:'http://127.0.0.1:3080',rows:[],images:[{id,revision:'saved',owner:'DSHA_IMAGE_DRAFT_V1',bytes:3,files:[{part:0,name,type:'image/png',lastModified:1,bytes:3}]}],parts:[3],partSha256:['a'.repeat(64)],unknown:[]});
+    const make=(id,name='old.png')=>({version:1,source:'http://127.0.0.1:3180',rows:[],images:[{id,revision:'saved',owner:'DSHA_IMAGE_DRAFT_V1',bytes:3,files:[{part:0,name,type:'image/png',lastModified:1,bytes:3}]}],parts:[3],partSha256:['a'.repeat(64)],unknown:[]});
     const blob=new Blob([new Uint8Array([1,2,3])],{type:'image/png'});
     localStorage.setItem('dsha.images.deleted:deleted',JSON.stringify({owner:'DSHA_IMAGE_DRAFT_V1',id:'deleted',revision:'saved',kind:'mobile-nav.session.delete'}));
     const deleted=await DshaOriginState.restore(make('deleted'),[blob],localStorage,indexedDB);
@@ -131,7 +131,7 @@ try {
     const {a,store,shell,root}=originOfficial;
     const before=JSON.parse(localStorage.getItem(row.key));
     root.unmount();shell.dispose();
-    const result=await DshaOriginState.restore({version:1,source:'http://127.0.0.1:3080',rows:[row],images:[],parts:[],unknown:[]},[],localStorage,indexedDB);
+    const result=await DshaOriginState.restore({version:1,source:'http://127.0.0.1:3180',rows:[row],images:[],parts:[],unknown:[]},[],localStorage,indexedDB);
     return {before,result,hydrated:a.readConversationDraft('rc2-chain'),reopened:a.createConversationStore().create('rc2-chain').getSnapshot()};
   },manifest.rows.find(row=>row.key==='dsh.conversation.rc2-chain'));
   assert.deepEqual(chain.before,{draft:{text:'',references:[]},view:null,viewRequest:null},'official mount must persist the real semantic empty object');
@@ -147,7 +147,7 @@ try {
     const run=async(target,rowOverride=row)=>{
       if(target===null)localStorage.removeItem(key);else localStorage.setItem(key,wrap(target));
       const before=localStorage.getItem(key);
-      const result=await DshaOriginState.restore({version:1,source:'http://127.0.0.1:3080',rows:[rowOverride],images:[],parts:[],unknown:[]},[],localStorage,indexedDB);
+      const result=await DshaOriginState.restore({version:1,source:'http://127.0.0.1:3180',rows:[rowOverride],images:[],parts:[],unknown:[]},[],localStorage,indexedDB);
       return {result,preserved:localStorage.getItem(key)===before,after:JSON.parse(localStorage.getItem(key))};
     };
     const empty=await run(a.resolveDraftInput(''));
@@ -171,7 +171,7 @@ try {
     const hydratedCommand=a.readConversationDraft('semantic-boundaries');
     const tooMany={text:'x'.repeat(4097),references:Array.from({length:4097},(_,offset)=>({...reference,offset,length:1,clipboardText:'x'}))};
     const widthKey='dsh.conversation.contentWidth';localStorage.setItem(widthKey,'1080');
-    const width=await DshaOriginState.restore({version:1,source:'http://127.0.0.1:3080',rows:[{key:widthKey,value:'920'}],images:[],parts:[],unknown:[]},[],localStorage,indexedDB);
+    const width=await DshaOriginState.restore({version:1,source:'http://127.0.0.1:3180',rows:[{key:widthKey,value:'920'}],images:[],parts:[],unknown:[]},[],localStorage,indexedDB);
     const snapshot=await DshaOriginState.capture(localStorage,indexedDB);
     return {empty,live,refs,command,whitespace,rejected,badSource,validRefs,validCommand,hydratedRefs,hydratedCommand,
       officialAcceptsReference:a.parseStoredDraft(referenceDraft)!==undefined,officialAcceptsCommand:a.parseStoredDraft(commandDraft)!==undefined,

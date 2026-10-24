@@ -30,7 +30,7 @@ class CapabilityTest(unittest.TestCase):
     def test_literals_are_evidence_dynamic_is_unknown_and_never_executed(self):
         with tempfile.TemporaryDirectory() as temp:
             root=Path(temp);pkg={'name':'test','version':'1.0.0','main':'index.js','scripts':{'install':'echo sk-secret'},'dsh':{'client':{'inject':['uiWorkspace']}}}
-            (root/'package.json').write_text(json.dumps(pkg));(root/'index.js').write_text("throw Error('must not execute'); export const inject=['agents','tools']; fetch('http://127.0.0.1:3090/app/device?token=secret'); fetch(computed);",encoding='utf8')
+            (root/'package.json').write_text(json.dumps(pkg));(root/'index.js').write_text("throw Error('must not execute'); export const inject=['agents','tools']; fetch('http://127.0.0.1:3190/app/device?token=secret'); fetch(computed);",encoding='utf8')
             report=module.analyze(root,pkg,candidate_sha='a'*64)
             self.assertEqual(['uiWorkspace'],report['clientInject']);self.assertEqual(['install'],report['scripts'])
             self.assertNotIn('sk-secret',json.dumps(report));self.assertNotIn('token=secret',json.dumps(report))

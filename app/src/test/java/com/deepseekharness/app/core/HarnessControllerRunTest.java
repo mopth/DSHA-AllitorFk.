@@ -14,8 +14,8 @@ public class HarnessControllerRunTest {
     WebLifecycleController.WebRun old = new WebLifecycleController.WebRun(first);
     assertTrue(
         WebLifecycleController.publishAuthenticatedRun(
-            gate, old, "http://127.0.0.1:3080/?token=first"));
-    assertEquals(3080, old.port);
+            gate, old, "http://127.0.0.1:3180/?token=first"));
+    assertEquals(3180, old.port);
     gate.beginStop();
     gate.finishStop(gate.generation());
     long second = gate.beginStart(false, true);
@@ -26,8 +26,8 @@ public class HarnessControllerRunTest {
     assertTrue(
         WebLifecycleController.publishAuthenticatedRun(
             gate, current, "http://127.0.0.1:4179/?token=current"));
-    assertEquals(3080, old.port);
-    assertEquals("http://127.0.0.1:3080/?token=first", old.authUrl);
+    assertEquals(3180, old.port);
+    assertEquals("http://127.0.0.1:3180/?token=first", old.authUrl);
     assertEquals(4179, current.port);
     assertEquals("http://127.0.0.1:4179/?token=current", current.authUrl);
   }

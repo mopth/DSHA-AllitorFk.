@@ -16,7 +16,7 @@ An unofficial fork of DSHA (deepseek-harness on Android) that installs alongside
 | Low | Android 6+（minSdk 23），arm64 | 约 368 MB |
 | 扩展包 / Extension packs（16 个 .dshx） | 在 App「扩展中心」一键下载或导入 | 每个 7–251 MB |
 
-> - **与官方共存**：包名 `dsha.AllitorFk_.dsh0_2_1_rc_2` 与官方不同，是另一个应用，不会覆盖官方 DSHA。
+> - **与官方共存**：包名 `dsha.AllitorFk_.dsh0_2_1_rc_3` 与官方不同，是另一个应用，不会覆盖官方 DSHA。
 > - **二选一**：Standard 与 Low 包名相同，同一时间只能装其中一个。
 > - **测试签名**：日后换用不同签名的版本需要先卸载，卸载会丢失数据，请先在 App 里备份。
 

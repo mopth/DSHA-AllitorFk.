@@ -12,7 +12,7 @@ export function completionNotice(reason) {
 async function bridge(operation, value) {
   const token = (await readFile('/root/.dsh/.bridge_token', 'utf8')).trim()
   if (!token) throw Error('bridge unavailable')
-  const response = await fetch('http://127.0.0.1:3090/app/tasks/' + operation
+  const response = await fetch('http://127.0.0.1:3190/app/tasks/' + operation
     + '?payload=' + encodeURIComponent(JSON.stringify(value)), {
     headers: { 'X-Token': token }, signal: AbortSignal.timeout(2000)
   })

@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "dshVersion": "0.2.1-rc.2",
+  "dshVersion": "0.2.1-rc.3",
   "module": "@deepseek-ai/dsh-api-remotes/lib/client.js",
-  "sourceSha256": "c7b54b5fb62a5aab19a95dfe2a282df536be868701fa0bde6121b81e2aec475a",
+  "sourceSha256": "f149235a96b9366b17f29dd466caff6fc5c299c136658b31855ff17c1bf112b6",
   "patches": [
     {
       "before": "const TYPERT_REMOTE$11 = createTypertRemoteInfo({\n\t\t\tpackage: \"@deepseek-ai/dsh-host-plugin-inventory\",\n\t\t\tmethods: { \"pluginInventory/list\": {",

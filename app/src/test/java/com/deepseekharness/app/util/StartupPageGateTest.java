@@ -52,7 +52,7 @@ public class StartupPageGateTest {
             9,
             url,
             gate.nonce(),
-            "http://127.0.0.1:3080/",
+            "http://127.0.0.1:3180/",
             "document-fixture",
             0,
             true,

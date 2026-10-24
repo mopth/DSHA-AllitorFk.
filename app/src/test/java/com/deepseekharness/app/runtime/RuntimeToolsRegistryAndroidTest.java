@@ -145,7 +145,7 @@ public final class RuntimeToolsRegistryAndroidTest {
     Context context = apkAssets(Map.of());
     JSONObject registry = RuntimeTools.readPatchRegistry(context);
     String version = registry.getString("dshVersion");
-    assertEquals("0.2.1-rc.2", version);
+    assertEquals("0.2.1-rc.3", version);
     assertEquals(version, Constants.DSH_VERSION);
     assertEquals("dsh-v" + version, Constants.DSH_RUNTIME_ID);
     try (var stream = context.getAssets().open("runtime-descriptor.json")) {
@@ -280,7 +280,7 @@ public final class RuntimeToolsRegistryAndroidTest {
             () ->
                 RuntimeTools.readPatchRegistry(
                     apkAssets(Map.of("runtime-patches.json", registry))));
-    assertEquals("PATCH_REGISTRY_VERSION: APK=0.2.1-rc.2 registry=0.2.0-rc.2", error.getMessage());
+    assertEquals("PATCH_REGISTRY_VERSION: APK=0.2.1-rc.3 registry=0.2.0-rc.2", error.getMessage());
   }
 
   @Test
@@ -308,7 +308,7 @@ public final class RuntimeToolsRegistryAndroidTest {
                 RuntimeTools.readPatchChains(
                     context, RuntimeTools.readPatchRegistry(context), Constants.DSH_VERSION));
     assertEquals(
-        "PATCH_REGISTRY_VERSION: recipe=" + first + " expected=0.2.1-rc.2 actual=0.2.0-rc.2",
+        "PATCH_REGISTRY_VERSION: recipe=" + first + " expected=0.2.1-rc.3 actual=0.2.0-rc.2",
         error.getMessage());
   }
 

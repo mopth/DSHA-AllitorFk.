@@ -10,15 +10,15 @@ The application runs DSH 0.2.1-rc.2. See [runtime engines](runtime-engines.md) a
 |---|---|---|
 | DSH Web backend | `127.0.0.1:<actual port for this run>` | Automatic/manual Web port in Configuration |
 | DeepSeek OAuth callback | `/oauth/callback` at the origin recorded when login starts; a temporary route on the current DSH WebServer, forwarded through the proxy for LAN access | Official account login state machine |
-| Android capability bridge | `127.0.0.1:3090`, with an additional attempt at `::1:3090` | `HttpShellService` |
-| LAN Web proxy | `0.0.0.0:3081` | LAN access switch in Configuration |
+| Android capability bridge | `127.0.0.1:3190`, with an additional attempt at `::1:3190` | `HttpShellService` |
+| LAN Web proxy | `0.0.0.0:3181` | LAN access switch in Configuration |
 | Wireless ADB pairing | Temporary port shown by Android's pairing dialog | Device capability authorization / ADB pairing page |
 | Wireless ADB connection | Android's wireless debugging page and discovery results | ADB connection management |
 | ADB server on another computer | Local TCP 5037 by default; part of the computer's ADB connection | Outside the DSH Web service |
 
-3081 and 3090 are reserved and cannot be selected as manual Web ports. `5555` is a historical ADB connection fallback, not a fixed port for modern Android wireless debugging. The computer's ADB server and the phone's adbd pairing/connection services are separate endpoints. See the [Android ADB architecture](https://developer.android.com/tools/adb#howadbworks) for the role of 5037.
+3181 and 3190 are reserved and cannot be selected as manual Web ports. `5555` is a historical ADB connection fallback, not a fixed port for modern Android wireless debugging. The computer's ADB server and the phone's adbd pairing/connection services are separate endpoints. See the [Android ADB architecture](https://developer.android.com/tools/adb#howadbworks) for the role of 5037.
 
-DSHA device scripts use the `adb_shell_wifi` TLS client; they do not pass the Web port to ADB. Changing a Web port neither completes ADB pairing nor turns a pairing port into a Web address. In [Constants.java](../../app/src/main/java/com/deepseekharness/app/util/Constants.java), `DSH_WEB_PORT=3080` remains for compatibility with old configuration; it does not mean the current default is a fixed listener on 3080.
+DSHA device scripts use the `adb_shell_wifi` TLS client; they do not pass the Web port to ADB. Changing a Web port neither completes ADB pairing nor turns a pairing port into a Web address. In [Constants.java](../../app/src/main/java/com/deepseekharness/app/util/Constants.java), `DSH_WEB_PORT=3180` remains for compatibility with old configuration; it does not mean the current default is a fixed listener on 3180.
 
 OAuth does not open a separate temporary listening port. The locked `@deepseek-ai/dsh-deepseek-account-platform` registers its callback through the current `webServer.register()` and places the origin recorded at login start into that attempt's `redirect_uri`. Stopping, restarting or changing the actual origin during login can invalidate the old callback address. Start a new login from the current page; do not rewrite the old callback port, replay its code or bypass state/PKCE. See the [dependency lock](../../tools/dsh-runtime/package-lock.json) and [real dynamic-port callback test](../../tools/test-deepseek-native-oauth.mjs). Plugin-list blocking and an invalid old callback are separate conditions; a connection-timeout screenshot alone cannot identify which occurred.
 
@@ -39,17 +39,17 @@ Implementation:
 - [WebPortPolicy.java](../../app/src/main/java/com/deepseekharness/app/util/WebPortPolicy.java): availability and authenticated-port checks.
 - [WebLifecycleController.java](../../app/src/main/java/com/deepseekharness/app/core/WebLifecycleController.java): selection, launch, and publication of this run's result.
 
-## Manual ports, legacy 3080, and fallback memory
+## Manual ports, legacy 3180, and fallback memory
 
-Manual mode accepts 1–65535 except 3081 and 3090. It stores a preference, not a guarantee that the port can listen. If the preferred port is occupied before launch, selection first tries the locally remembered successful fallback associated with that preference. If that is unavailable too, the selector returns `0` for dynamic listening. Success on a fallback does not overwrite the user's preferred value.
+Manual mode accepts 1–65535 except 3181 and 3190. It stores a preference, not a guarantee that the port can listen. If the preferred port is occupied before launch, selection first tries the locally remembered successful fallback associated with that preference. If that is unavailable too, the selector returns `0` for dynamic listening. Success on a fallback does not overwrite the user's preferred value.
 
 Old configuration without an explicit `web_port_mode` is interpreted as follows:
 
-- Legacy 3080, a missing/invalid value, or a reserved port becomes automatic mode.
+- Legacy 3180, a missing/invalid value, or a reserved port becomes automatic mode.
 - Any other valid legacy port remains manual.
 - A valid explicit `auto` or `fixed` is respected.
 
-An explicit new choice of `fixed` + 3080 is still allowed. Migrating the old default to automatic does not prohibit 3080. Save, stop Web normally, and start it again to apply the policy to a new listener. Editing the field does not move an already running page.
+An explicit new choice of `fixed` + 3180 is still allowed. Migrating the old default to automatic does not prohibit 3180. Save, stop Web normally, and start it again to apply the policy to a new listener. Editing the field does not move an already running page.
 
 ## Bind authentication to this run's actual port
 
@@ -89,15 +89,15 @@ Automatic `--port 0` and reuse of a still-available local successful port remain
 
 Portable `port` / `portMode` configuration can express a preference. Local fallback memory, old-origin lists, the current generation, and credentials do not thereby gain authority on another device. Restoring “manual 45678” means a preference, not availability or authentication. Recheck LAN, the capability bridge, and ADB under their own local rules. Do not put token-bearing URLs in public reports, command arguments, or synchronized configuration.
 
-## LAN listens on 3081 and forwards to the actual backend
+## LAN listens on 3181 and forwards to the actual backend
 
-After LAN is enabled, its proxy starts only with valid BrowserAuth for the current generation. It listens on `0.0.0.0:3081` and forwards to `127.0.0.1:<actual Web port for this run>`. A listener captures the backend port and generation together; late callbacks cannot mix snapshots. An enabled switch is not proof of successful binding. Network changes, OS local-network permission, and routing isolation may still prevent access.
+After LAN is enabled, its proxy starts only with valid BrowserAuth for the current generation. It listens on `0.0.0.0:3181` and forwards to `127.0.0.1:<actual Web port for this run>`. A listener captures the backend port and generation together; late callbacks cannot mix snapshots. An enabled switch is not proof of successful binding. Network changes, OS local-network permission, and routing isolation may still prevent access.
 
 LAN uses its own token/cookie and does not expose the DSH startup token or backend BrowserAuth to remote clients. The proxy authenticates internally using this run's in-memory BrowserAuth; stopping or changing generation invalidates old snapshots. Browser Host, Origin, Cookie, and related fields are rewritten for backend loopback semantics. Initial token-link redirection removes only the LAN token, preserving the path and other query parameters. Treat the complete LAN URL as sensitive.
 
-This is an HTTP proxy without TLS termination. Its use must match the network's trust boundary. Both HTTP and WebSocket pass authentication and current-generation checks. Only a verified 101 WebSocket handshake can open a bidirectional tunnel. Zero-length bodies, chunks/trailers, redirects, and long streams require their own framing; connection closure is not a universal boundary. Connection registration, short requests, long streams, and reverse pumps have separate limits; stopping closes this run's sockets. LAN Web access does not expose the 3090 Android capability bridge.
+This is an HTTP proxy without TLS termination. Its use must match the network's trust boundary. Both HTTP and WebSocket pass authentication and current-generation checks. Only a verified 101 WebSocket handshake can open a bidirectional tunnel. Zero-length bodies, chunks/trailers, redirects, and long streams require their own framing; connection closure is not a universal boundary. Connection registration, short requests, long streams, and reverse pumps have separate limits; stopping closes this run's sockets. LAN Web access does not expose the 3190 Android capability bridge.
 
-The F11 changes retain unknown backend port `0` as not ready, without a hidden 3080 fallback. New authentication for a different actual port in the same generation replaces the old proxy target. A business 401/403 affects that request without automatically destroying the whole BrowserAuth session. Interface/address changes retire old connections while retaining the current token and listener; a fast network replacement with the same interface/address may be unobservable. See [LAN](lan.md) for operation, address candidates, and the limits of host verification.
+The F11 changes retain unknown backend port `0` as not ready, without a hidden 3180 fallback. New authentication for a different actual port in the same generation replaces the old proxy target. A business 401/403 affects that request without automatically destroying the whole BrowserAuth session. Interface/address changes retire old connections while retaining the current token and listener; a fast network replacement with the same interface/address may be unobservable. See [LAN](lan.md) for operation, address candidates, and the limits of host verification.
 
 When strict recovery adopts the same active Web process, F12 reuses that recovery's verified cookie after the second kernel identity check and adoption. Publication again binds the current generation, exact URL, and actual port, without another exchange or the ordinary new-start `afterAuthenticated`. Disabling LAN starts no listener, and a bind failure does not revoke successful local adoption. See [strict LAN recovery](lan.md).
 
@@ -116,7 +116,7 @@ See [BrowserOriginRestore.java](../../app/src/main/java/com/deepseekharness/app/
 1. Read Main's current launch stage, actual port, and error; do not use an old bookmarked authentication URL.
 2. While waiting for authentication, inspect this run's output before calling the wait a port conflict.
 3. If a manual port is occupied, check whether a fallback succeeded; the preference remains saved.
-4. If local Web works but LAN fails, inspect its switch, local-network permission, actual 3081 bind, and current URL.
+4. If local Web works but LAN fails, inspect its switch, local-network permission, actual 3181 bind, and current URL.
 5. For ADB failure, use current wireless-debugging pairing/connection information instead of changing the Web port.
 6. For missing drafts, distinguish backend data from old-origin data and use explicit recovery.
 7. For lookup failures, read [DNS configuration](dns-configuration.md); changing a port does not repair external DNS.

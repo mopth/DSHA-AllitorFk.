@@ -12,7 +12,7 @@ function fixture(rejection, t, getService=()=>{throw Error('不应访问会话')
     async create(){throw Error('鉴权与正文检查前不得创建会话');}
     async resume(){throw Error('鉴权与正文检查前不得恢复会话');}
   }
-  const webServer={port:3080,register:route=>{
+  const webServer={port:3180,register:route=>{
     assert.equal(route.kind,'exact');assert.equal(route.path,'/api/mobile-nav.session.delete');
     assert.equal(handler,undefined);handler=route.handler;return ()=>{};
   }};
@@ -42,23 +42,23 @@ for(const value of ['null','[]','true','"x"','{bad'])
   test(`非法删除正文保持结构化错误：${value.slice(0,20)}`,async t=>{
     const f=fixture(undefined,t);let code,body;
     const req=Readable.from([value]);req.method='POST';
-    req.headers={host:'127.0.0.1:3080',origin:'http://127.0.0.1:3080'};
+    req.headers={host:'127.0.0.1:3180',origin:'http://127.0.0.1:3180'};
     await f.handler(req,{writeHead:status=>code=status,end:text=>body=JSON.parse(text)});
     assert.equal(code,400);assert.equal(body.error.code,'invalid-body');assert.equal(f.consulted,0);
   });
 
-for(const origin of [undefined,'','http://127.0.0.1:3080'])
+for(const origin of [undefined,'','http://127.0.0.1:3180'])
   test(`Host鉴权通过后允许同源或非浏览器请求：${origin??'无Origin'}`,async t=>{
     const f=fixture(undefined,t);let code,body;
-    const req=Readable.from(['null']);req.method='POST';req.headers={host:'127.0.0.1:3080',origin};
+    const req=Readable.from(['null']);req.method='POST';req.headers={host:'127.0.0.1:3180',origin};
     await f.handler(req,{writeHead:status=>code=status,end:text=>body=JSON.parse(text)});
     assert.equal(code,400);assert.equal(body.error.code,'invalid-body');assert.equal(f.checked,1);assert.equal(f.consulted,0);
   });
 
-for(const origin of ['http://evil.example','http://127.0.0.1:3081','null','invalid://'])
+for(const origin of ['http://evil.example','http://127.0.0.1:3181','null','invalid://'])
   test(`Origin拒绝跨域/畸形来源且不读取正文：${origin}`,async t=>{
     const f=fixture(undefined,t);let code,body;
-    const req={method:'POST',headers:{host:'127.0.0.1:3080',origin},setEncoding(){throw Error('不得读取正文');}};
+    const req={method:'POST',headers:{host:'127.0.0.1:3180',origin},setEncoding(){throw Error('不得读取正文');}};
     await f.handler(req,{writeHead:status=>code=status,end:text=>body=JSON.parse(text)});
     assert.equal(code,403);assert.equal(body.error.code,'cross-origin');assert.equal(f.checked,1);assert.equal(f.consulted,0);
   });
@@ -69,7 +69,7 @@ for(const [name,value,status,error] of [
   ['多字节超过1MiB','"'+'中'.repeat(349_526)+'"',413,'payload-too-large'],
 ]) test(`删除正文按真实字节限制：${name}`,async t=>{
   const f=fixture(undefined,t);let code,body;
-  const req=Readable.from([value]);req.method='POST';req.headers={host:'127.0.0.1:3080'};
+  const req=Readable.from([value]);req.method='POST';req.headers={host:'127.0.0.1:3180'};
   await f.handler(req,{writeHead:status=>code=status,end:text=>body=JSON.parse(text)});
   assert.equal(code,status);assert.equal(body.error.code,error);assert.equal(f.checked,1);assert.equal(f.consulted,0);
 });
@@ -79,7 +79,7 @@ test('删除入口的意外 Host 异常返回结构化500',async t=>{
     throw Error('unexpected Host service failure');
   });
   const req=Readable.from([JSON.stringify({sessionId:'fixture'})]);
-  req.method='POST';req.headers={host:'127.0.0.1:3080',origin:'http://127.0.0.1:3080'};
+  req.method='POST';req.headers={host:'127.0.0.1:3180',origin:'http://127.0.0.1:3180'};
   let code,body;
   await f.handler(req,{writeHead:status=>code=status,end:text=>body=JSON.parse(text)});
   assert.equal(code,500);assert.equal(body.error.code,'delete-failed');

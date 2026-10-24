@@ -73,7 +73,7 @@ const modulePath = name => require.resolve(name);
 const moduleSource = name => {const file=modulePath(name);namedProof?.observe(file);return readFileSync(file,'utf8');};
 function applyRecipe(text,name){
   const recipe=JSON.parse(readFileSync('app/src/main/assets/'+name,'utf8'));
-  assert.equal(recipe.dshVersion,'0.2.1-rc.2');
+  assert.equal(recipe.dshVersion,'0.2.1-rc.3');
   for(const {before,after}of recipe.patches){assert.equal(text.split(before).length-1,1,name+' source anchor');text=text.replace(before,after);}
   return text;
 }

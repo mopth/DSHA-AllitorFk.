@@ -19,19 +19,19 @@ public final class Constants {
 
   // ================= 端口契约（框架不变式，见 AGENTS.md） =================
   /** WebUI 默认端口 */
-  public static final int DSH_WEB_PORT = 3080;
+  public static final int DSH_WEB_PORT = 3180;
 
   /** App 能力桥（agent 调 Android）端口 */
-  public static final int SHELL_BRIDGE_PORT = 3090;
+  public static final int SHELL_BRIDGE_PORT = 3190;
 
   /** 局域网反向代理端口 */
-  public static final int LAN_BRIDGE_PORT = 3081;
+  public static final int LAN_BRIDGE_PORT = 3181;
 
   /** ADB 传统连接端口（兜底，非可靠路径） */
   public static final int ADB_DEFAULT_CONNECT_PORT = 5555;
 
   // ================= 通知 ID（全局唯一，禁止重复） =================
-  /** 危险命令确认通知（3090 桥） */
+  /** 危险命令确认通知（3190 桥） */
   public static final int NOTIF_SHELL_CONFIRM = NotificationIds.SHELL_CONFIRM;
 
   // ================= dsh 版本（采用最新 @deepseek-ai/dsh） =================
@@ -39,7 +39,7 @@ public final class Constants {
    * 当前 APK 内置 dsh 版本（不是远端 latest 标签）。
    * 对应上游 deepseek-ai/deepseek-harness 仓库。
    */
-  public static final String DSH_VERSION = "0.2.1-rc.2";
+  public static final String DSH_VERSION = "0.2.1-rc.3";
 
   public static final String DSH_RUNTIME_ID = "dsh-v" + DSH_VERSION;
 

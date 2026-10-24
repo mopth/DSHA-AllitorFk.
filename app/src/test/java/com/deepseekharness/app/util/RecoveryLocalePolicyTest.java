@@ -7,23 +7,23 @@ public class RecoveryLocalePolicyTest {
   @Test
   public void convertsOnlyFormalLoopbackAuthorityAndPreservesRawQuery() {
     assertEquals(
-        "http://localhost:3081/auth?token=x%2F127.0.0.1#home",
-        RecoveryLocalePolicy.toLocalhostUrl("http://127.0.0.1:3081/auth?token=x%2F127.0.0.1#home"));
-    assertNull(RecoveryLocalePolicy.toLocalhostUrl("http://127.0.0.1:3081@evil.test/auth"));
-    assertNull(RecoveryLocalePolicy.toLocalhostUrl("http://localhost:3081/auth"));
+        "http://localhost:3181/auth?token=x%2F127.0.0.1#home",
+        RecoveryLocalePolicy.toLocalhostUrl("http://127.0.0.1:3181/auth?token=x%2F127.0.0.1#home"));
+    assertNull(RecoveryLocalePolicy.toLocalhostUrl("http://127.0.0.1:3181@evil.test/auth"));
+    assertNull(RecoveryLocalePolicy.toLocalhostUrl("http://localhost:3181/auth"));
     // An @ after the slash belongs to the path; only authority userinfo is rejected.
     assertEquals(
-        "http://localhost:3081/auth@evil.test",
-        RecoveryLocalePolicy.toLocalhostUrl("http://127.0.0.1:3081/auth@evil.test"));
+        "http://localhost:3181/auth@evil.test",
+        RecoveryLocalePolicy.toLocalhostUrl("http://127.0.0.1:3181/auth@evil.test"));
   }
 
   @Test
   public void emergencyLocaleBridgeIsExactLocalhostAuthority() {
-    String base = "http://localhost:3081/";
-    assertTrue(RecoveryLocalePolicy.sameOrigin(base, "http://localhost:3081/chat?token=secret"));
-    assertFalse(RecoveryLocalePolicy.sameOrigin(base, "http://127.0.0.1:3081/chat"));
+    String base = "http://localhost:3181/";
+    assertTrue(RecoveryLocalePolicy.sameOrigin(base, "http://localhost:3181/chat?token=secret"));
+    assertFalse(RecoveryLocalePolicy.sameOrigin(base, "http://127.0.0.1:3181/chat"));
     assertFalse(RecoveryLocalePolicy.sameOrigin(base, "http://localhost:3082/chat"));
-    assertFalse(RecoveryLocalePolicy.sameOrigin(base, "http://localhost:3081@evil.test/chat"));
+    assertFalse(RecoveryLocalePolicy.sameOrigin(base, "http://localhost:3181@evil.test/chat"));
     assertTrue(RecoveryLocalePolicy.supportedLanguage("zh"));
     assertTrue(RecoveryLocalePolicy.supportedLanguage("en"));
     assertFalse(RecoveryLocalePolicy.supportedLanguage("fr"));
@@ -37,33 +37,33 @@ public class RecoveryLocalePolicyTest {
   public void formalEmergencyLaunchResolvesTheSameOriginForBothBrowserKernels() {
     var launch =
         RecoveryLocalePolicy.launch(
-            "http://127.0.0.1:3081/", "http://127.0.0.1:3081/?token=keep%2Fraw");
+            "http://127.0.0.1:3181/", "http://127.0.0.1:3181/?token=keep%2Fraw");
     assertNotNull(launch);
-    assertEquals("http://localhost:3081/", launch.origin);
-    assertEquals("http://localhost:3081/?token=keep%2Fraw", launch.authUrl);
+    assertEquals("http://localhost:3181/", launch.origin);
+    assertEquals("http://localhost:3181/?token=keep%2Fraw", launch.authUrl);
     assertNull(
-        RecoveryLocalePolicy.launch("http://127.0.0.1:3081/", "http://127.0.0.1:3082/?token=x"));
+        RecoveryLocalePolicy.launch("http://127.0.0.1:3181/", "http://127.0.0.1:3082/?token=x"));
     assertNull(
-        RecoveryLocalePolicy.launch("http://localhost:3081/", "http://localhost:3081/?token=x"));
+        RecoveryLocalePolicy.launch("http://localhost:3181/", "http://localhost:3181/?token=x"));
   }
 
   @Test
   public void oldWebViewFinishedPageLanguageBridgeStaysOnEmergencyOrigin() {
-    String base = "http://localhost:3081/";
+    String base = "http://localhost:3181/";
     assertTrue(
         RecoveryLocalePolicy.needsFinishedPageLanguageBridge(
-            base, "http://localhost:3081/chat", false));
+            base, "http://localhost:3181/chat", false));
     assertFalse(
         RecoveryLocalePolicy.needsFinishedPageLanguageBridge(
-            base, "http://localhost:3081/chat", true));
+            base, "http://localhost:3181/chat", true));
     assertFalse(
         RecoveryLocalePolicy.needsFinishedPageLanguageBridge(
-            base, "http://127.0.0.1:3081/chat", false));
+            base, "http://127.0.0.1:3181/chat", false));
     assertFalse(
         RecoveryLocalePolicy.needsFinishedPageLanguageBridge(
             base, "http://localhost:3082/chat", false));
     assertFalse(
         RecoveryLocalePolicy.needsFinishedPageLanguageBridge(
-            base, "http://localhost:3081@evil.test/chat", false));
+            base, "http://localhost:3181@evil.test/chat", false));
   }
 }

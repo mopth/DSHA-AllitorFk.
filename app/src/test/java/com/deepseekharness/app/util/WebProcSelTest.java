@@ -27,7 +27,7 @@ public class WebProcSelTest {
             + directory
             + "libproroot-runtime.so /data/data/com.dsh.client/files/linux/ubuntu/usr/local/bin/node ";
     String command =
-        prefix + "/usr/local/lib/node_modules/@deepseek-ai/dsh/lib/bin.js web --port 3080";
+        prefix + "/usr/local/lib/node_modules/@deepseek-ai/dsh/lib/bin.js web --port 3180";
     assertTrue(WebProcSel.looksLikeWeb(command));
     assertTrue(WebProcSel.maySignalWeb(command.replace(' ', '\0') + '\0'));
     String shell =
@@ -39,7 +39,7 @@ public class WebProcSelTest {
                 .replace(' ', '\0')
             + "export DSH_HOME=/root/.dsh && export DSHA_STARTUP_PROFILE='web' && "
             + "export DSHA_WEB_GENERATION=7 && echo $$ > /root/.dsha-web.pid 2>/dev/null; "
-            + "[ ! -e /root/.dsha-stopped ] || exit 0; exec dsh web --no-open --host 127.0.0.1 --port 3080\0";
+            + "[ ! -e /root/.dsha-stopped ] || exit 0; exec dsh web --no-open --host 127.0.0.1 --port 3180\0";
     // The managed pre-exec shell keeps the barrier; only the actual node can be signalled.
     assertTrue(WebProcSel.looksLikeWeb(shell));
     assertFalse(WebProcSel.maySignalWeb(shell));
@@ -89,7 +89,7 @@ public class WebProcSelTest {
             + " "
             + root
             + "/usr/local/bin/node ";
-    String web = prefix + "/usr/local/lib/node_modules/@deepseek-ai/dsh/lib/bin.js web --port 3080";
+    String web = prefix + "/usr/local/lib/node_modules/@deepseek-ai/dsh/lib/bin.js web --port 3180";
     assertTrue(WebProcSel.looksLikeWeb(web));
     assertTrue(WebProcSel.maySignalWeb(web.replace(' ', '\0') + '\0'));
     String trial = prefix + "/usr/local/bin/dsh --profile dsha-recovery-ce608c6a2f1b4e67 --port 0";
@@ -109,7 +109,7 @@ public class WebProcSelTest {
                 .replace(' ', '\0')
             + "export DSH_HOME=/root/.dsh && export DSHA_STARTUP_PROFILE='web' && "
             + "export DSHA_WEB_GENERATION=7 && echo $$ > /root/.dsha-web.pid 2>/dev/null; "
-            + "[ ! -e /root/.dsha-stopped ] || exit 0; exec dsh web --no-open --host 127.0.0.1 --port 3080\0";
+            + "[ ! -e /root/.dsha-stopped ] || exit 0; exec dsh web --no-open --host 127.0.0.1 --port 3180\0";
     assertTrue(WebProcSel.looksLikeWeb(shell));
     assertFalse(WebProcSel.maySignalWeb(shell));
     for (String unsafe :
@@ -157,7 +157,7 @@ public class WebProcSelTest {
 
   @Test
   public void recognizesOnlyProrootNodeWebPayload() {
-    String command = BRIDGE + "/usr/local/bin/dsh web --no-open --host 127.0.0.1 --port 3080";
+    String command = BRIDGE + "/usr/local/bin/dsh web --no-open --host 127.0.0.1 --port 3180";
     assertTrue(WebProcSel.looksLikeWeb(command));
     assertTrue(WebProcSel.looksLikeWeb(command.replace(' ', '\0') + '\0'));
     assertTrue(
@@ -261,7 +261,7 @@ public class WebProcSelTest {
   @Test
   public void ownPreExecShellKeepsBarrierButCannotBeSignalledByText() {
     String command =
-        "export DSH_HOME=/root/.dsh && export DSHA_STARTUP_PROFILE='web' && export DSHA_WEB_GENERATION=7 && echo $$ > /root/.dsha-web.pid 2>/dev/null; [ ! -e /root/.dsha-stopped ] || exit 0; exec dsh web --no-open --host 127.0.0.1 --port 3080";
+        "export DSH_HOME=/root/.dsh && export DSHA_STARTUP_PROFILE='web' && export DSHA_WEB_GENERATION=7 && echo $$ > /root/.dsha-web.pid 2>/dev/null; [ ! -e /root/.dsha-stopped ] || exit 0; exec dsh web --no-open --host 127.0.0.1 --port 3180";
     String proc = "/bin/bash\0-c\0" + command + "\0";
     assertTrue(WebProcSel.looksLikeWeb(proc));
     assertFalse(WebProcSel.maySignalWeb(proc));
@@ -299,8 +299,8 @@ public class WebProcSelTest {
 
   @Test
   public void portHexIsFourDigitUpperHex() {
-    assertEquals("0C08", WebProcSel.portHex(3080));
-    assertEquals("0C12", WebProcSel.portHex(3090));
+    assertEquals("0C6C", WebProcSel.portHex(3180));
+    assertEquals("0C76", WebProcSel.portHex(3190));
     assertEquals("15B3", WebProcSel.portHex(5555));
   }
 
@@ -318,7 +318,7 @@ public class WebProcSelTest {
   @Test
   public void recoveryProfileStillStopsOnlyDirectWebNode() {
     String command =
-        "node /usr/local/lib/node_modules/@deepseek-ai/dsh/lib/bin.js --profile dsha-recovery-0123456789abcdef --no-open --host 127.0.0.1 --port 3080";
+        "node /usr/local/lib/node_modules/@deepseek-ai/dsh/lib/bin.js --profile dsha-recovery-0123456789abcdef --no-open --host 127.0.0.1 --port 3180";
     assertTrue(WebProcSel.maySignalWeb(command));
     assertTrue(WebProcSel.looksLikeWeb(command));
     assertEquals("dsha-recovery-0123456789abcdef", WebProcSel.trialProfile(command));
@@ -337,11 +337,11 @@ public class WebProcSelTest {
    */
   @Test
   public void neverMistakesBxrootLauncherForWeb() {
-    String rootfs = "/data/user/0/dsha.AllitorFk_.dsh0_2_1_rc_2/files/linux/ubuntu";
+    String rootfs = "/data/user/0/dsha.AllitorFk_.dsh0_2_1_rc_3/files/linux/ubuntu";
     String[][] forms = {
       {"libbxroot.so", "-r", rootfs, "--link2symlink", "/bin/bash", "-c", "echo 'dsh web'"},
       {"libbxroot.so", "-r", rootfs, "--link2symlink", "/bin/bash", "-c", "dsh plugin list"},
-      {"libbxroot.so", "-r", rootfs, "-0", "-w", "/root", "/bin/bash", "-c", "exec dsh web --port 3090"},
+      {"libbxroot.so", "-r", rootfs, "-0", "-w", "/root", "/bin/bash", "-c", "exec dsh web --port 3190"},
       {"/data/app/x/lib/arm64/libbxroot.so", "-w", "/root", "/bin/bash", "-c", "exec /usr/local/bin/dsh web"},
       {"libbxroot-runtime.so", "-r", rootfs, "/usr/local/bin/dsh", "web"},
     };

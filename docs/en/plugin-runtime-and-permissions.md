@@ -34,7 +34,7 @@ The actual Node Host uses asynchronous filesystem operations from the [managed P
 | Profile/bundle | Profile `dsh.profile.bundles`, `link:` dependencies, and combined bundle-patch lines | Consumed by the registrar and DSH loader together; a profile is not an entry in the plugin list |
 | Cordis and client | `inject`, `apply`, effect/dispose, `dsh.client.platform: web`, and injection | The locked upstream supplies the API; declaring Web support does not guarantee that a native WebView bridge exists |
 | MCP stdio | Independent computer-use/vscreen server commands and timeouts | `failOnStartupError:true`, `reconnect.enabled:false`; startup failure does not silently switch channels |
-| Port 3090 bridge | `X-Token`, protocol 3, current capabilities, and endpoints | Local integration protocol; authentication and device capability checks remain independent; see [bridge and files](bridge-and-files.md) |
+| Port 3190 bridge | `X-Token`, protocol 3, current capabilities, and endpoints | Local integration protocol; authentication and device capability checks remain independent; see [bridge and files](bridge-and-files.md) |
 | Activity summary file | `/root/.dsha-web-activity.json` | Internal read-only state, not an installation inventory or public control API |
 | Destructive-operation policy | Schema 1 and local consent identity | Strict validation; failure returns `DSHA_DESTRUCTIVE_BLOCKED`; no arbitrary-code sandbox |
 | Dynamic Cordis/HMR/Plugin Manager RPC | Internal events and services of the locked upstream | Verify against matching runtime inputs; internal events are not all stable DSHA protocols |

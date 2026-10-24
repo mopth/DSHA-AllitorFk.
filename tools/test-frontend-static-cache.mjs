@@ -1,5 +1,5 @@
 // 冷启动回归：外壳静态资源必须可复用，索引必须永不缓存。
-// 补丁前 3080 对 dist 资产只回 content-type + 200，浏览器每次冷启动都要重下并
+// 补丁前 3180 对 dist 资产只回 content-type + 200，浏览器每次冷启动都要重下并
 // 重新 gzip；补丁后同一份字节用 304 复用，而渲染索引仍然不缓存。
 // 显式参数：`node tools/test-frontend-static-cache.mjs <runtime 根或模块文件>`；
 // 不给参数时按 CI 夹具选择当前 raw 运行时。
@@ -28,7 +28,7 @@ async function moduleFile() {
 const recipe = JSON.parse(
     fs.readFileSync(path.join(root, 'app/src/main/assets/frontend-static-cache-patch.json'), 'utf8'));
 assert.equal(recipe.module, '@deepseek-ai/dsh-host-frontend-static/lib/index.js');
-assert.equal(recipe.dshVersion, '0.2.1-rc.2');
+assert.equal(recipe.dshVersion, '0.2.1-rc.3');
 const file = await moduleFile();
 const original = fs.readFileSync(file, 'utf8');
 

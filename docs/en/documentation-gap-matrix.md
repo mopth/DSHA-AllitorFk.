@@ -27,8 +27,8 @@ The report's 33/29 documents, 79 broken references, 56 targets, old versions, an
 | 15 Backup/restore | [Backup/restore](backup-and-restore.md), [v5](backup-format-v5.md) | User flow and corrected re-export password wording; new exports are password-free, old originals still authenticate |
 | 16 Automatic backup/retention | [Backup/restore](backup-and-restore.md) | Three schedules, deferral while busy, three normal copies; separate from one-click/manual workspace scope |
 | 17 Data maintenance/format/rebuild | [Maintenance](install-and-maintenance.md), [data architecture](runtime-data-plugin-architecture.md) | Erasure retired; external workspaces only lose private references; unknown originals retained |
-| 18 LAN | [LAN](lan.md), [ports](ports-and-networking.md) | Plain HTTP, 3081, current token/cookie, failure classification; host regression is not Wi-Fi evidence |
-| 19 Bridge 3090 | [Bridge/files](bridge-and-files.md) | Protocol 3, 33 exact routes plus two prefixes, X-Token, request budgets/errors; runtime help remains the capability entry |
+| 18 LAN | [LAN](lan.md), [ports](ports-and-networking.md) | Plain HTTP, 3181, current token/cookie, failure classification; host regression is not Wi-Fi evidence |
+| 19 Bridge 3190 | [Bridge/files](bridge-and-files.md) | Protocol 3, 33 exact routes plus two prefixes, X-Token, request budgets/errors; runtime help remains the capability entry |
 | 20 Sharing/DocumentsProvider | [Bridge/files](bridge-and-files.md), [Web files](web-file-sharing.md) | Stable IDs, anchor/link/FD, 32 MiB/2 GiB, and chooser completion boundaries |
 | 21 Independent recovery DSH | [Recovery](emergency-recovery.md) | Separate root, five tools, native write confirmation, read-only readiness and exit; no dependency on the production rootfs |
 | 22 Startup gates/recovery | [Diagnostics](startup-and-diagnostics.md), [maintenance](install-and-maintenance.md) | First request, three readiness layers, recovery ladder; UNKNOWN does not jump to clearing the environment |
@@ -52,7 +52,7 @@ Numbers below refer to report sections 6.1 and 6.5. A withdrawn allegation is no
 | 6.1 #5 | A glossary is demand-driven, not a mandatory gap; domain guidance explains the current choice. |
 | 6.1 #6 | Check `agent-skills` and publication visibility against the final stage. Directory existence and attachment inclusion differ; an old shallow clone does not prove present absence. |
 | 6.1 #7–8, #9 | Old Standard/Low pages and v1.1.6 defaults are historical; present browser/engine pages own current rules. |
-| 6.1 #10, #14–15, #18, #20 | Current AGENTS/plugins are synchronized by maintainers. Old directory counts, frozen dependencies, mobile versions, and fixed-3080 statements are not present facts. |
+| 6.1 #10, #14–15, #18, #20 | Current AGENTS/plugins are synchronized by maintainers. Old directory counts, frozen dependencies, mobile versions, and fixed-3180 statements are not present facts. |
 | 6.1 #13 | Installation documents actual component probes, log budgets, and integrity scope, without promising unimplemented certificate/npm checks or complete logs. |
 | 6.1 #16, #21 | Restart prompts and explicit selection among candidates require interaction clarification; do not infer promised automatic restart or an in-app attachment picker. |
 | 6.1 #17 | Disabling official core components may prevent page startup. Recovery uses native plugin management/explicit maintenance; undeletable does not mean impossible to disable. |

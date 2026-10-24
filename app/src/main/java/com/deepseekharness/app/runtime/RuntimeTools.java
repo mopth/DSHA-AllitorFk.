@@ -454,7 +454,7 @@ final class RuntimeTools {
     try {
       File pkg = new File(rootfs, "usr/local/lib/node_modules/@deepseek-ai/dsh/package.json");
       String version = fileObject(pkg).getString("version");
-      if ("0.2.1-rc.2".equals(version)) {
+      if ("0.2.1-rc.3".equals(version)) {
         // This upstream generation writes through the Host mirror for every client.
         // Retire the old text replacement only for the signed, byte-exact implementation.
         var contract = assetObject(context, "lan-settings-upstream-contract.json");

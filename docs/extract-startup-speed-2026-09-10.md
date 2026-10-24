@@ -11,7 +11,7 @@
 
 `BackupManager.runDataTask` 现在依次停止 Web、关闭持久 PTY 和简易终端、等待短任务退出，再原子取得运行时维护屏障。proroot 的普通 HUP 不能可靠结束 guest；PTY 维护回收核验 UID、PID、启动时刻与独立会话，保留组长至 guest 退出，最后结束启动器。proot 继续使用其 SIGQUIT 清理协议。未知状态保留工作凭据与原环境。
 
-未完成鉴权的 3090 预连接不占用环境工作凭据。显式重建失败后的重试保持完整重建意图；维护页仅在状态变化时刷新文字。
+未完成鉴权的 3190 预连接不占用环境工作凭据。显式重建失败后的重试保持完整重建意图；维护页仅在状态变化时刷新文字。
 
 完整重建后的实际网页启动还暴露了冷环境专有故障：`node-addon-native-custom-loader` 首次复制扩展时执行 `linkSync(temp, destination)` 后删除 temp，`--link2symlink` 下产生悬空缓存；Cordis 第一次取得内部加载器失败，随后错误地从安装目录解析个人 profile 的插件。配置与源码都还在，但所有内置插件报找不到包。统一容器环境现设置 `NARB_DISABLE_NATIVE_CACHE=1`，直接加载已验证的随包扩展；普通 shell、插件和 PTY 共用。安装校验新增 Cordis 内部加载器首次初始化检查，不能再只验证扩展文件存在。
 

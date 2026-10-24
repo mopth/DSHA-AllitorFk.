@@ -12,7 +12,7 @@ import org.junit.Test;
 
 public class ExtensionReleaseLinksTest {
   private static final String BASE =
-      "https://github.com/mopth/DSHA-AllitorFk./releases/download/dsha-AllitorFk.-dsh0.2.1-rc.2/";
+      "https://github.com/mopth/DSHA-AllitorFk./releases/download/dsha-AllitorFk.-dsh0.2.1-rc.3/";
 
   @Test
   public void allowsOnlyPinnedReleaseDshxAssets() {
@@ -27,7 +27,7 @@ public class ExtensionReleaseLinksTest {
       "",
       BASE + "dev-base.dshx?x=1",
       BASE + "dev-base.dshx#f",
-      BASE + "DSHA-AllitorFk.-dsh0.2.1-rc.2.apk",
+      BASE + "DSHA-AllitorFk.-dsh0.2.1-rc.3.apk",
       BASE + "Dev-Base.dshx",
       BASE + "../x.dshx",
       "https://github.com/mopth/DSHA-AllitorFk./releases/download/../x/dev-base.dshx",

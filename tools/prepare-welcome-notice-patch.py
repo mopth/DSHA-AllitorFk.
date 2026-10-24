@@ -9,7 +9,7 @@ from source_text import write_text, matches_text
 ROOT = Path(__file__).resolve().parents[1]
 ASSETS = ROOT / 'app/src/main/assets'
 MODULE = '@deepseek-ai/dsh-client-ui-settings-models/lib/client.js'
-VERSION = '0.2.1-rc.2'
+VERSION = '0.2.1-rc.3'
 SOURCE_SHA256 = '190498e15358bcd3fe6810fe6368023a20b0403e3ea493bc979eca9bdb593b28'
 
 

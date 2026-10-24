@@ -12,7 +12,7 @@ import com.deepseekharness.app.util.WebSessionProof;
 import org.junit.Test;
 
 public class WebPageIdentityTest {
-  private static final String URL = "http://127.0.0.1:3080/?dsh-session=fixed";
+  private static final String URL = "http://127.0.0.1:3180/?dsh-session=fixed";
 
   private static WebRun ready(WebLifecycle gate) {
     WebRun run = new WebRun(gate.beginStart(false, false));

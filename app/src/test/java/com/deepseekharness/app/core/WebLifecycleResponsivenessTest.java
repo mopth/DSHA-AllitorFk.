@@ -114,7 +114,7 @@ public final class WebLifecycleResponsivenessTest {
       var m = new LinkedHashMap<String, Object>();
       m.put("version", 1L);
       m.put("baseVersion", "10");
-      m.put("dshVersion", "0.2.1-rc.2");
+      m.put("dshVersion", "0.2.1-rc.3");
       m.put("launcherContract", "TEST");
       m.put("launcherInputs", Map.of());
       m.put("bridgeProtocol", 1L);

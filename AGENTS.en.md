@@ -55,11 +55,11 @@ app/src/main/java/com/deepseekharness/app/
 
 | Class | Responsibility |
 |---|---|
-| `HttpShellService` | **3090 bridge**, historically about 105 KB and the largest class: 24 `/exec` / `/app/*` endpoints, token-gated |
+| `HttpShellService` | **3190 bridge**, historically about 105 KB and the largest class: 24 `/exec` / `/app/*` endpoints, token-gated |
 | `DshaAccessibilityService` | `uiDump / uiTap / uiTapText / uiInput / uiKey / uiSwipe / uiScreenshot` and virtual-screen forwarding |
 | `DeviceBridgeService` | ADB/Shizuku/Root channel selection and keepalive |
 | `DeviceShellExecutor` / `DeviceAppInventory` / `DeviceSense` | Device commands (util allowlist), app inventory, sensors/location/flashlight |
-| `LanProxyService` / `LanAuth` | LAN proxy `:3081`, fail-closed token authentication |
+| `LanProxyService` / `LanAuth` | LAN proxy `:3181`, fail-closed token authentication |
 | `OverlayController` / `OverlayLines` | Streaming overlay: lyric-like AI output and command approval |
 | `HarnessService` / `WebPreviewActivity` | Foreground service/watchdog and embedded Web preview (WebView/Gecko) |
 | `PtySession` | Termux terminal-emulator JNI wrapper for a real PTY |
@@ -157,7 +157,7 @@ Read the [security model](docs/en/security-model.md) first. Essential boundaries
 
 ### Web, bridge, and terminal
 
-- Main Web starts through the current managed dsh wrapper and fixed packaged entry with the common RuntimeTools environment. Default automatic port is `--port 0`, with actual port recorded after authentication. Explicit manual settings follow current selection policy. See [runtime mechanisms](docs/en/runtime-data-plugin-architecture.md), rather than copying an old fixed 3080 command. Execute proot from nativeLibraryDir, not filesDir as a W^X workaround.
+- Main Web starts through the current managed dsh wrapper and fixed packaged entry with the common RuntimeTools environment. Default automatic port is `--port 0`, with actual port recorded after authentication. Explicit manual settings follow current selection policy. See [runtime mechanisms](docs/en/runtime-data-plugin-architecture.md), rather than copying an old fixed 3180 command. Execute proot from nativeLibraryDir, not filesDir as a W^X workaround.
 - In the inspected previous snapshot, `WebPortPolicy.choose` selected fixed/local-backup/dynamic ports before startup. Backup memory is local only and does not migrate. That snapshot did not wire production `retryBindRace`; helper/tests alone did not establish automatic bind-race retry. Authentication, keepalive, and LAN use the actual port, never a port-inferred PID. Check the maintained [port page](docs/en/ports-and-networking.md) and final receipt for subsequent changes.
 - Waiting for Web authentication has no forced termination deadline (60 seconds is a notice). Stop/maintenance share `WebProcessManager` PID and birth-identity checks.
 - Feature-detect bridge protocol via `/app/version` (`BRIDGE_PROTOCOL=2`); plugins use `>=`, not `==`. Command query-string budgets must accommodate existing 8192-character commands.

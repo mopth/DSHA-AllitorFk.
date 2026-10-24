@@ -27,7 +27,7 @@
 | 15 备份恢复 | [备份恢复](backup-and-restore.md)、[v5格式](backup-format-v5.md) | 补用户流程，纠正旧重导出密码叙述；新导出无密码，旧件读取仍认证 |
 | 16 自动备份/保留 | [备份恢复](backup-and-restore.md) | 三计划、闲时延后、三份正常副本；与手动一键工作区范围分开 |
 | 17 数据维护/格式化/重建 | [安装维护](install-and-maintenance.md)、[数据架构](runtime-data-plugin-architecture.md) | 擦除能力退休；外置仅断私有引用，未知原件保留 |
-| 18 LAN | [LAN](lan.md)、[端口](ports-and-networking.md) | 补HTTP明文、3081、本轮token/cookie及失败分类；主机回归不作真实Wi-Fi证明 |
+| 18 LAN | [LAN](lan.md)、[端口](ports-and-networking.md) | 补HTTP明文、3181、本轮token/cookie及失败分类；主机回归不作真实Wi-Fi证明 |
 | 19 3090桥 | [桥和文件](bridge-and-files.md) | 补协议3、33精确路由+2前缀、X-Token、请求预算和错误；运行时help仍是能力入口 |
 | 20 文件共享/DocumentsProvider | [桥和文件](bridge-and-files.md)、[Web文件](web-file-sharing.md) | 补稳定ID、anchor/链接/FD、32MiB/2GiB与选择器完成边界 |
 | 21 独立应急DSH | [应急](emergency-recovery.md) | 补独立根/五工具/原生写入确认/只读就绪和退出；不借正式rootfs救援 |

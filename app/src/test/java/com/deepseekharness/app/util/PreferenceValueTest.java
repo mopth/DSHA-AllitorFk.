@@ -6,8 +6,8 @@ import static org.junit.Assert.*;
 public class PreferenceValueTest {
   @Test
   public void legacyNumericPortAndCountersAreReadable() {
-    assertEquals("3080", PreferenceValue.text(3080, "fallback"));
-    assertEquals(3080, PreferenceValue.integer("3080", 0));
+    assertEquals("3180", PreferenceValue.text(3180, "fallback"));
+    assertEquals(3180, PreferenceValue.integer("3180", 0));
     assertEquals(5, PreferenceValue.integer(5L, 0));
     assertEquals(7, PreferenceValue.integer(2147483648L, 7));
     assertEquals(9, PreferenceValue.integer("broken", 9));

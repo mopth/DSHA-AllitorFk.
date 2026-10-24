@@ -5,7 +5,7 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 
 public class PreviewPageSessionTest {
-  private static final String URL = "http://127.0.0.1:3080/auth?token=fixture";
+  private static final String URL = "http://127.0.0.1:3180/auth?token=fixture";
 
   @Test
   public void sameUrlNewGenerationRefreshesOnce() {
@@ -61,7 +61,7 @@ public class PreviewPageSessionTest {
     page.claim(new PreviewPageSession.Identity(4, "run", URL));
     assertFalse(
         page.isCurrent(
-            new PreviewPageSession.Identity(4, "run", "http://127.0.0.1:3080/auth?token=new")));
+            new PreviewPageSession.Identity(4, "run", "http://127.0.0.1:3180/auth?token=new")));
     assertFalse(
         page.isCurrent(
             new PreviewPageSession.Identity(4, "run", "http://127.0.0.1:3982/auth?token=fixture")));

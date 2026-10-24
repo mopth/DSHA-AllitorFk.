@@ -279,7 +279,7 @@ public final class LayoutPreviewActivity extends AppCompatActivity {
     } else if (scene.equals("fragment_workspace")) {
       text(R.id.workspace_backup_status, "最近成功备份：今天 14:26\n全量备份 · 2.1 MiB");
     } else if (scene.equals("fragment_config")) {
-      text(R.id.config_port, "3080");
+      text(R.id.config_port, "3180");
     } else if (scene.equals("activity_diagnostics")) {
       text(R.id.diagnostic_status, "检查完成，报告保留在本机。");
       text(R.id.diagnostic_report, "版本：rc1.4（布局样例）\nPython：可用\n证书：可用\nNode：可用\n\n此处只使用独立的显示样例。");

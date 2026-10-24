@@ -203,11 +203,11 @@ class NotificationClickable(unittest.TestCase):
         self.assertIn('ForegroundActivity.current()', body)
 
 class BridgeCredentialProtection(unittest.TestCase):
-    """3090 桥不得把凭据导出/读取到公共目录。
+    """3190 桥不得把凭据导出/读取到公共目录。
 
     真机实测过的攻击链：/app/export?path=/root/.dsh/.bridge_token
     → 文件落到 /sdcard/Download/DSHA/（任何 App 可读）
-    → 同机任意应用拿到桥 token → 完全接管 3090 桥。
+    → 同机任意应用拿到桥 token → 完全接管 3190 桥。
     """
 
     def setUp(self):
@@ -300,7 +300,7 @@ class CatalogCoverage(unittest.TestCase):
             self.assertIn(needed, zh, "缺少英文译文：" + needed)
 
     def test_plugin_notification_strings_stay_translated(self):
-        # 官方插件 dsh-task-notifier 硬编码中文，经 3090 桥进入通知，必须有译文
+        # 官方插件 dsh-task-notifier 硬编码中文，经 3190 桥进入通知，必须有译文
         zh = {item['zh']: item.get('en', '') for item in self.messages}
         for needed in ['DSHA · 任务完成', '智能体已结束任务，点击查看结果',
                        'DSHA · 已达到输出上限', 'DSHA · 任务已停止',

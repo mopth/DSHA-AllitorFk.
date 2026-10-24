@@ -115,7 +115,7 @@ Manager `decorate()` 不会把成功的旧观察重新标成当前 Core 的成�
 
 [VirtualScreenPeerProof][peer] 在同一 socket 上交换随机数，证明绑定应用、端口和完整出生身份。
 请求证明还绑定 method、target 和正文摘要；原始秘密不作为 Core HTTP 头发送。
-宿主 3090 bridge 的 `X-Token` 是另一层鉴权，不能替代 Core 的连接证明。
+宿主 3190 bridge 的 `X-Token` 是另一层鉴权，不能替代 Core 的连接证明。
 
 ## 5. 采集、缩图与“用户实际看过”
 

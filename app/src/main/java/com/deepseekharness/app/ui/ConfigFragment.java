@@ -345,7 +345,7 @@ public class ConfigFragment extends Fragment {
     }
   }
 
-  /** LAN 开关真正生效：开启时若 dsh 已鉴权则启动 3081 代理，关闭时停掉监听。 */
+  /** LAN 开关真正生效：开启时若 dsh 已鉴权则启动 3181 代理，关闭时停掉监听。 */
   private void applyLanMode(ConfigStore c, boolean on) {
     try {
       if (!on) {

@@ -135,7 +135,7 @@ def main():
         raise RuntimeError('TEST_ASSERTIONS_REQUIRE_UNOPTIMIZED_PYTHON')
     source = args.source_root.resolve()
     assets = source / 'app/src/main/assets'
-    chains, _ = runtime_stable_patches.load_chains(assets, '0.2.1-rc.2')
+    chains, _ = runtime_stable_patches.load_chains(assets, '0.2.1-rc.3')
     selected = json.loads((source / 'app/build/test-runtimes/current.json').read_text(encoding='utf-8'))
     raw = Path(selected['raw']) / 'node_modules'
     historical_bytes = (source / 'tools/fixtures/plugin-bundle-proof-workers-v1-patch.json').read_bytes()

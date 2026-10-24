@@ -70,7 +70,7 @@ public class WebTransferPolicyTest {
 
   @Test
   public void downloadsCannotReadAnotherServiceOrLocalPath() {
-    String base = "http://127.0.0.1:3080/";
+    String base = "http://127.0.0.1:3180/";
     assertTrue(WebPreviewPolicy.pageDownload(base, base + "file.zip"));
     assertTrue(WebPreviewPolicy.pageDownload(base, "blob:" + base + "id"));
     assertTrue(WebPreviewPolicy.pageDownload(base, "data:text/plain;base64,YQ=="));
@@ -79,8 +79,8 @@ public class WebTransferPolicyTest {
           "file:///private",
           "content://private/key",
           "blob:http://example.com/id",
-          "blob:http://127.0.0.1:3090/id",
-          "http://127.0.0.1:3090/"
+          "blob:http://127.0.0.1:3190/id",
+          "http://127.0.0.1:3190/"
         }) assertFalse(WebPreviewPolicy.pageDownload(base, bad));
   }
 }

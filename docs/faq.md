@@ -4,7 +4,7 @@
 
 ## 和官方 DSHA 能同时装吗？
 
-能。包名 `dsha.AllitorFk_.dsh0_2_1_rc_2` 与官方 `dsh.android.client` 不同，是另一个应用，不会覆盖或替换官方版。能共存靠的是包名不同，与签名无关。
+能。包名 `dsha.AllitorFk_.dsh0_2_1_rc_3` 与官方 `dsh.android.client` 不同，是另一个应用，不会覆盖或替换官方版。能共存靠的是包名不同，与签名无关。
 
 ## Standard 和 Low 能一起装吗？
 

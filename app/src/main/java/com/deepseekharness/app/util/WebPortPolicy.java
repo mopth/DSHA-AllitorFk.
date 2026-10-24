@@ -61,7 +61,7 @@ public final class WebPortPolicy {
   }
 
   public static boolean reserved(int port) {
-    return port == 3081 || port == 3090;
+    return port == 3181 || port == 3190;
   }
 
   public static boolean available(int port) throws IOException {

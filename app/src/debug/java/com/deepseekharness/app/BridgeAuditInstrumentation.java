@@ -186,7 +186,7 @@ public final class BridgeAuditInstrumentation extends Instrumentation {
   }
 
   private void bindingCases() throws Exception {
-    report("真实 3090：占用端口 → 撤销假就绪 → 释放端口 → 同实例恢复监听");
+    report("真实 3190：占用端口 → 撤销假就绪 → 释放端口 → 同实例恢复监听");
     // 若端口已被真实服务占用，bind 会失败并退出，不驱逐服务或轮换其 token。
     try (ServerSocket occupied = new ServerSocket()) {
       occupied.setReuseAddress(true);
@@ -208,7 +208,7 @@ public final class BridgeAuditInstrumentation extends Instrumentation {
     awaitReady();
     check(HttpShellService.bindError().isEmpty(), "重试成功清除旧失败状态");
     check(
-        Compat.readAll(new File(fixture.base, ".bridge_status")).startsWith("ok port=3090"),
+        Compat.readAll(new File(fixture.base, ".bridge_status")).startsWith("ok port=3190"),
         "恢复后状态为真实绑定成功");
     check("[UNAUTHORIZED]".equals(health("audit_wrong_token")), "错误 token 仍被拒绝");
     check("OK".equals(health(fixtureToken)), "恢复后正确 token 可以访问健康端点");
@@ -240,7 +240,7 @@ public final class BridgeAuditInstrumentation extends Instrumentation {
     awaitReady();
     check("OK".equals(health(fixtureToken)), "主动停止后还可再次启动与处理请求");
     passed.add(
-        "HttpShellService: occupied 3090 recovery, diagnostics, token gate, owner isolation, socket cleanup");
+        "HttpShellService: occupied 3190 recovery, diagnostics, token gate, owner isolation, socket cleanup");
   }
 
   private int activeClients() {

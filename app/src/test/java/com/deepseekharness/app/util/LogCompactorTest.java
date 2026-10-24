@@ -6,8 +6,8 @@ import org.junit.Test;
 public class LogCompactorTest {
   @Test
   public void repeatsPreserveTimeRangeAndDifferentNumbers() {
-    String a = "10-07 01:02:03 [BRIDGE_BIND] port 3090 unavailable";
-    String b = "10-07 01:02:04 [BRIDGE_BIND] port 3090 unavailable";
+    String a = "10-07 01:02:03 [BRIDGE_BIND] port 3190 unavailable";
+    String b = "10-07 01:02:04 [BRIDGE_BIND] port 3190 unavailable";
     String c = "10-07 01:02:05 [BRIDGE_BIND] port 3091 unavailable";
     String output = LogCompactor.foldRepeats(a + "\n" + b + "\n" + c);
     assertTrue(output.contains("×2, 10-07 01:02:03 ~ 10-07 01:02:04"));

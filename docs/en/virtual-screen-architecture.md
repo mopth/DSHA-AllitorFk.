@@ -85,7 +85,7 @@ sequenceDiagram
 
 [VirtualScreenCoreIdentity][identity] defines birth identity, and Manager snapshots use [RequestFence][fence]. Core `instance` is exposed as `coreInstance`; `generation` belongs to the virtual-display session. Neither is the DSH Web generation. A current UUID returned by `status` cannot be attached to an old screenshot, tree or anchor. The Manager's `decorate()` does not relabel a successful old observation as a successful observation of the current Core.
 
-[VirtualScreenPeerProof][peer] exchanges nonces on the same socket and binds proof to the application, port and complete birth identity. Request proof additionally binds the method, target and body digest. The raw secret is not sent as a Core HTTP header. `X-Token` on the host's 3090 bridge is another authentication layer and cannot replace Core connection proof.
+[VirtualScreenPeerProof][peer] exchanges nonces on the same socket and binds proof to the application, port and complete birth identity. Request proof additionally binds the method, target and body digest. The raw secret is not sent as a Core HTTP header. `X-Token` on the host's 3190 bridge is another authentication layer and cannot replace Core connection proof.
 
 ## 5. Capture, resizing and what was actually presented
 

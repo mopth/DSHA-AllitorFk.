@@ -36,8 +36,8 @@ public final class LanProxyService {
   private static final String LAN_COOKIE_MAX_AGE = "43200";
   private static final SecureRandom RANDOM = new SecureRandom();
 
-  public static final int LAN_PORT = 3081;
-  public static final int DEFAULT_BACKEND_PORT = 3080;
+  public static final int LAN_PORT = 3181;
+  public static final int DEFAULT_BACKEND_PORT = 3180;
 
   private static final com.deepseekharness.app.util.LanTokenState LAN_TOKEN =
       new com.deepseekharness.app.util.LanTokenState();
@@ -265,7 +265,7 @@ public final class LanProxyService {
     }
     if (!hasDshAuth(generation)) return;
     // The explicit overload receives the authenticated actual port. An unknown
-    // value cannot authorize forwarding to an unrelated service on port 3080.
+    // value cannot authorize forwarding to an unrelated service on port 3180.
     if (backend <= 0 || backend > 65535 || backend == LAN_PORT) return;
     int resolvedBackend = backend;
     ProxyRun previous = activeRun;

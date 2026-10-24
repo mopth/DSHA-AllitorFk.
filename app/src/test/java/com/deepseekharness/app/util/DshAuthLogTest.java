@@ -6,7 +6,7 @@ import static org.junit.Assert.*;
 public class DshAuthLogTest {
   @Test
   public void redactsEveryPossibleReadBoundary() {
-    String line = "中文 dsh web: http://127.0.0.1:3080/?token=" + "privateTOKEN".repeat(4) + "\n";
+    String line = "中文 dsh web: http://127.0.0.1:3180/?token=" + "privateTOKEN".repeat(4) + "\n";
     for (int split = 0; split < line.length(); split++) {
       DshAuthLog log = new DshAuthLog();
       String safe =

@@ -13,7 +13,7 @@ public class WebPreviewPolicyTest {
     assertTrue(
         WebPreviewPolicy.sameService("http://127.0.0.1:8088/", "http://127.0.0.1:8088/chat/123"));
     assertFalse(
-        WebPreviewPolicy.sameService("http://127.0.0.1:8088/", "http://127.0.0.1:3090/exec"));
+        WebPreviewPolicy.sameService("http://127.0.0.1:8088/", "http://127.0.0.1:3190/exec"));
   }
 
   @Test
@@ -24,8 +24,8 @@ public class WebPreviewPolicyTest {
           "",
           "file:///etc/passwd",
           "https://example.org/",
-          "http://127.0.0.1.evil:3080/",
-          "http://token@127.0.0.1:3080/",
+          "http://127.0.0.1.evil:3180/",
+          "http://token@127.0.0.1:3180/",
           "http://127.0.0.1:0/",
           "http://127.0.0.1:65536/"
         }) {

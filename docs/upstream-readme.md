@@ -13,7 +13,7 @@
 > ⚠️ **声明：这是基于 [DSH-APP/DSHA](https://github.com/DSH-APP/DSHA) 的非官方修改版（fork），不是官方发布，未经上游作者审核，与上游作者无关。风险自负。**
 > - **基于版本**：官方 DSHA build190（`0.2.1-rc.2`），提交 `c750348a`。
 > - **主要内容**：proot 仍是默认引擎，proroot、bxroot 可选；bxroot 来自 fix4，带冷安装自动回退（预检明确失败才退回 proot）；实验引擎连续 3 次明确启动失败自动切回 proot（超时或结果不明不计）；Low 包（安卓 6+）；参考 DSH-Kxxy 思路重新编写的离线扩展中心（16 个扩展包，Ubuntu 24.04 arm64 软件包 + 官方上游工具链，未复制 Kxxy 代码）。
-> - **可与官方版共存**：包名 `dsha.AllitorFk_.dsh0_2_1_rc_2`。包名与官方不同，所以是另一个应用，**不会覆盖或替换官方版**，两者可以同时安装。
+> - **可与官方版共存**：包名 `dsha.AllitorFk_.dsh0_2_1_rc_3`。包名与官方不同，所以是另一个应用，**不会覆盖或替换官方版**，两者可以同时安装。
 > - **许可**：沿用上游 MIT 许可，原版权声明原样保留，见 [LICENSE](../LICENSE)。本 fork 自己的资料都放在 [`allitorfk/`](../allitorfk/README.md) 文件夹，上游文件位置不变。
 >
 > *Unofficial fork of DSH-APP/DSHA (build190, `c750348a`); not an official release, not reviewed by the upstream author. Not yet released. MIT license and original copyright retained.*
@@ -171,7 +171,7 @@ SELinux 挡住、沙箱起不来、前端按桌面布局排版。
 
 ### ④ 设备能力（让 agent 真正操作这台手机）
 
-agent 通过本机 `127.0.0.1:3090` 桥调用以下能力（token 门控，`/app/help` 有完整端点清单）：
+agent 通过本机 `127.0.0.1:3190` 桥调用以下能力（token 门控，`/app/help` 有完整端点清单）：
 
 | 能力 | 说明 |
 |---|---|
@@ -292,8 +292,8 @@ agent 通过本机 `127.0.0.1:3090` 桥调用以下能力（token 门控，`/app
 │  ├ 启动 / 安装修复 / 配置 / 工作区 / 插件 / 终端     │
 │  ├ 网页内核：系统 WebView（Standard）/ Gecko（Low）  │
 │  ├ 前台服务 + 看门狗 + 通知 + 画中画                 │
-│  ├ App 桥 :3090（无障碍 / 虚拟屏 / 交互 / 文件）     │
-│  ├ LAN 代理 :3081 · ADB / Shizuku / Root 设备通道    │
+│  ├ App 桥 :3190（无障碍 / 虚拟屏 / 交互 / 文件）     │
+│  ├ LAN 代理 :3181 · ADB / Shizuku / Root 设备通道    │
 │  └ 悬浮条（TYPE_APPLICATION_OVERLAY）                │
 ├─────────────────────────────────────────────────────┤
 │ proot（默认）/ proroot（可选，依机型核验）           │

@@ -121,7 +121,7 @@ try {
   try {
     const body = Buffer.alloc(300000, 7); for (let i = 0; i < body.length; i++) body[i] = (i * 31) & 255;
     const sha = createHash('sha256').update(body).digest('hex');
-    const base = RELEASE_PREFIX + 'dsha-AllitorFk.-dsh0.2.1-rc.2';
+    const base = RELEASE_PREFIX + 'dsha-AllitorFk.-dsh0.2.1-rc.3';
     const catalogPath = join(dir, 'cat.json');
     const writeCat = (extra = {}) => fs.writeFileSync(catalogPath, JSON.stringify({ base: {}, download: { base }, packs: [
       { id: 'demo', file: 'demo.dshx', sha256: sha, bytes: body.length, installedBytes: 1, requires: [], ...extra }] }));

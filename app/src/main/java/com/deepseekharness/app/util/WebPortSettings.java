@@ -12,7 +12,7 @@ public final class WebPortSettings {
     if (stored != null) return AUTO;
     try {
       int port = Integer.parseInt(legacyPort == null ? "" : legacyPort.trim());
-      return port > 0 && port <= 65535 && port != 3080 && !WebPortPolicy.reserved(port)
+      return port > 0 && port <= 65535 && port != 3180 && !WebPortPolicy.reserved(port)
           ? FIXED
           : AUTO;
     } catch (NumberFormatException invalid) {

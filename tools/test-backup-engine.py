@@ -34,7 +34,7 @@ class LocalDeviceCredentialsTest(unittest.TestCase):
     """备份包不得携带「本机设备」凭据。
 
     真机实测：老备份把 .bridge_token 打进 Download/DSHA/（任何有存储权限的应用可读），
-    同机任意应用据此即可完全接管 3090 桥。本机凭据必须留在本机。
+    同机任意应用据此即可完全接管 3190 桥。本机凭据必须留在本机。
     """
 
     def setUp(self):

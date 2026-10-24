@@ -4,7 +4,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-/** 3090 桥的路径选择；只识别端点，不解释查询参数或执行平台动作。 */
+/** 3190 桥的路径选择；只识别端点，不解释查询参数或执行平台动作。 */
 public final class BridgeRoutes {
   public enum Route {
     DEVICE_VSCREEN_START(true),

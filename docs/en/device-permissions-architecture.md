@@ -114,7 +114,7 @@ Android's official wireless-debugging pairing flow targets Android11/API30+ phon
 
 ```mermaid
 flowchart TD
-  W[adb-shell wrapper / device request] --> H[Authenticated 3090 bridge and current request]
+  W[adb-shell wrapper / device request] --> H[Authenticated 3190 bridge and current request]
   H --> P[DeviceShellPolicy recognizes and plans]
   P -->|DENY| R[Reject with no executable argv]
   P --> S{Select one channel before dispatch}
@@ -166,7 +166,7 @@ The revision is a monotonic fence that invalidates old requests, not a count of 
 
 ### 8.3 CapabilityBroker responsibilities
 
-3090 bridge credentials use private files and the X-Token header, never a URL token. A reachable local port is not successful authentication. HttpShellService's BridgeRun owns its socket/thread pool and random runId independently; leases represent demand from Web and device services. Request admission captures the current run, global revision and other scope. After stop, a run change or policy change, an old result cannot satisfy a new request. Bridge credentials are not Web-origin permission; dedicated page-to-native interfaces still check the current page/origin and runtime identity.
+3190 bridge credentials use private files and the X-Token header, never a URL token. A reachable local port is not successful authentication. HttpShellService's BridgeRun owns its socket/thread pool and random runId independently; leases represent demand from Web and device services. Request admission captures the current run, global revision and other scope. After stop, a run change or policy change, an old result cannot satisfy a new request. Bridge credentials are not Web-origin permission; dedicated page-to-native interfaces still check the current page/origin and runtime identity.
 
 [CapabilityRequest](../../app/src/main/java/com/deepseekharness/app/capabilities/CapabilityRequest.java) explicitly carries request ID, capability/action, installation identity, bridgeRunId, runtime epoch, target, policyRevision, authorityEpoch and a monotonic-clock deadline. [CapabilityBroker](../../app/src/main/java/com/deepseekharness/app/capabilities/CapabilityBroker.java) belongs to the Application and has one native confirmation slot, not an unbounded dialog queue. `current()` checks domain epoch, cancellation, installation/runtime ownership and deadline. Adapters must still recheck the real runtime, system capability and target. `authorize()/resolve()` are separate from `claimDispatch()`; a dispatch permit is consumed once. A late allow after revocation cannot authorize again. Platform calls, UI callbacks and I/O do not run under the broker lock, avoiding mutual blocking between confirmation and stop.
 

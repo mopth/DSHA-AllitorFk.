@@ -100,7 +100,7 @@ implementation "com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict
 ## 阶段 2 · snapshot / act 屏幕操作
 
 **底子比预想的厚**：`DshaAccessibilityService` 已有 573 行，`uiDump` / `uiTapText` /
-`uiTap` / `uiInput` / `uiKey` / `uiScreenshot` / `uiSwipe` 全都在，而且已经挂在 3090 桥的
+`uiTap` / `uiInput` / `uiKey` / `uiScreenshot` / `uiSwipe` 全都在，而且已经挂在 3190 桥的
 `/app/device` 下。差的只是「ref」这一层 —— 抄
 [HermesApp](https://github.com/SelectXn00b/HermesApp)（MIT）的 Playwright 模式。
 
@@ -122,14 +122,14 @@ implementation "com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict
 |---|---|---|---|
 | 3.1 | 默认助理入口 | 极低 | `AndroidManifest` 加 `ASSIST` + `VOICE_COMMAND` intent-filter，透明 Activity 转发到对话页。长按 home 或「Hey Google, ask DSHA」直接进 |
 | 3.2 | 工具权限三档 | 低 | 自动允许 / 每次询问 / 禁止（默认询问）。现在只有危险命令二元确认；`DangerShellGuard` 与 `/app/ask` 读同一个配置 |
-| 3.3 | 局域网二维码 | 低 | 现在要手输 token；生成 `http://<ip>:3081/?token=…` 的二维码贴在工作区页 |
+| 3.3 | 局域网二维码 | 低 | 现在要手输 token；生成 `http://<ip>:3181/?token=…` 的二维码贴在工作区页 |
 | 3.4 | 构建证明验证指引 | 极低 | 我们已经有 attestation，但 README 没写怎么验：`gh attestation verify --deny-self-hosted-runners` |
 
 ---
 
 ## 阶段 4 · 定位性功能（做之前先确认有人要）
 
-- **4.1 MCP Server**：在 3081 桥上加 MCP Streamable HTTP 端点，暴露 exec /
+- **4.1 MCP Server**：在 3181 桥上加 MCP Streamable HTTP 端点，暴露 exec /
   device.snapshot / device.act / sensors / location / torch / clip / notify，认证复用现有
   Bearer token。做完 Claude Desktop 与 Cursor 就能直接调用手机能力 —— 这是别家没有的定位，
   而且与「手机自给自足」不冲突（是叠加）。

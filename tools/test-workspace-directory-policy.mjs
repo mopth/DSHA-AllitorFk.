@@ -18,7 +18,7 @@ const recipe = JSON.parse(await readFile(path.join(root, asset), 'utf8'));
 const canonical = await readFile(path.join(runtime, 'node_modules', recipe.module), 'utf8');
 const version = JSON.parse(await readFile(
   require.resolve('@deepseek-ai/dsh-api-workspace-controller/package.json'), 'utf8')).version;
-assert.equal(version, '0.2.1-rc.2');
+assert.equal(version, '0.2.1-rc.3');
 assert.equal(recipe.dshVersion, version);
 const fixture = await mkdtemp(path.join(root, 'app/build/workspace-policy-'));
 await symlink(path.join(runtime, 'node_modules'), path.join(fixture, 'node_modules'),
@@ -39,7 +39,7 @@ const patchScript = [
   'request=json.load(sys.stdin)',
   'source=request["source"].encode("utf-8")',
   'patched=builder.patched_content(pathlib.PurePosixPath(request["module"]),source)',
-  'chains,_=builder.load_chains(pathlib.Path(request["stableAssets"]),"0.2.1-rc.2")',
+  'chains,_=builder.load_chains(pathlib.Path(request["stableAssets"]),"0.2.1-rc.3")',
   'patched=builder.apply_stable_patches(patched,chains.get(request["module"],[]))',
   'print(json.dumps({"source":patched.decode("utf-8"),"inputs":builder.recipe_inputs()}))'
 ].join(';');

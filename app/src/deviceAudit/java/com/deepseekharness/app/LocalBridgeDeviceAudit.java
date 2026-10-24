@@ -9,19 +9,19 @@ import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-/** 真正的 3090 监听与解析负载；仅审计安装，端口被其它安装占用时不接管。 */
+/** 真正的 3190 监听与解析负载；仅审计安装，端口被其它安装占用时不接管。 */
 public final class LocalBridgeDeviceAudit extends Instrumentation {
     private final List<Map<String,Object>> cases=new ArrayList<>();private final List<Socket> sockets=new ArrayList<>();
     private void check(boolean value,String message)throws IOException{if(!value)throw new IOException(message);}
     private void pass(String name){cases.add(Map.of("name",name,"status","PASS"));Bundle result=new Bundle();result.putString("case",name);result.putString("status","PASS");sendStatus(1,result);}
-    private Socket connect()throws IOException{Socket socket=new Socket("127.0.0.1",3090);socket.setSoTimeout(7000);sockets.add(socket);return socket;}
+    private Socket connect()throws IOException{Socket socket=new Socket("127.0.0.1",3190);socket.setSoTimeout(7000);sockets.add(socket);return socket;}
     private void write(Socket socket,String text)throws IOException{socket.getOutputStream().write(text.getBytes(StandardCharsets.ISO_8859_1));socket.getOutputStream().flush();}
     private void closed(Socket socket)throws IOException{try{check(socket.getInputStream().read()==-1,"INVALID_HEADER_NOT_CLOSED");}catch(SocketException expectedReset){}}
     @Override public void onCreate(Bundle args){super.onCreate(args);start();}
     @Override public void onStart(){Bundle result=new Bundle();Activity screen=null;HttpShellService bridge=null;Map<String,Object> metrics=new LinkedHashMap<>();
         try{
             DeviceAuditSupport.requireIsolated(getTargetContext());screen=DeviceAuditSupport.open(this,DeviceAuditActivity.class);
-            try(ServerSocket probe=new ServerSocket()){probe.bind(new InetSocketAddress("127.0.0.1",3090));}
+            try(ServerSocket probe=new ServerSocket()){probe.bind(new InetSocketAddress("127.0.0.1",3190));}
             bridge=new HttpShellService(getTargetContext());bridge.start();long until=android.os.SystemClock.elapsedRealtime()+5000;while(!HttpShellService.isReady()&&android.os.SystemClock.elapsedRealtime()<until)Thread.sleep(20);check(HttpShellService.isReady(),"LOCAL_BRIDGE_PORT_UNAVAILABLE");
             var field=HttpShellService.class.getDeclaredField("authToken");field.setAccessible(true);String token=(String)field.get(null);check(token!=null&&!token.isEmpty(),"BRIDGE_AUTH_NOT_READY");
             try(Socket socket=connect()){

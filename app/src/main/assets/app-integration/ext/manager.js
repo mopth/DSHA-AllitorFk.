@@ -216,7 +216,7 @@ export function createExtensionManager(options = {}) {
       const { files } = await extractDshx(file, unpack, pid);
       verifySums(readFileSync(join(unpack, 'SHA256SUMS'), 'utf8'), files);
       const manifest = JSON.parse(readFileSync(join(unpack, 'dshx.json'), 'utf8'));
-      const sameBase = ['rootfsVersion', 'toolsLockSha256', 'statusSha256'].every(k => manifest.base?.[k] === cat.base[k]);
+      const sameBase = ['rootfsVersion', 'toolsLockSha256', 'statusSha256', 'dshVersion'].every(k => manifest.base?.[k] === cat.base[k]);
       if (manifest.id !== pid || !sameBase) throw new Error('EXT_MANIFEST_MISMATCH');
       const before = dpkgInstalled();
       const autoBefore = new Set((await run('apt-mark', ['showauto'], { capture: true, quiet: true })).out.split('\n').map(x => x.trim()).filter(Boolean));

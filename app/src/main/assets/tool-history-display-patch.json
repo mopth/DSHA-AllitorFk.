@@ -1,7 +1,7 @@
 {
-  "dshVersion": "0.2.1-rc.2",
+  "dshVersion": "0.2.1-rc.3",
   "module": "@deepseek-ai/dsh-client-ui-tool/lib/client.js",
-  "packageVersion": "0.2.1-rc.2",
+  "packageVersion": "0.2.1-rc.3",
   "canonicalSourceSha256": "a0012c1f4bdc34d68ba6b267294884ffeec6b6c467540ceabe0ff5d6135f9e05",
   "patches": [
     {

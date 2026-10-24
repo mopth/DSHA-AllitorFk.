@@ -88,7 +88,7 @@ try:
     else: raise AssertionError('原生测试桥未就绪')
     token = adb('shell', 'run-as com.dsh.client cat '+shlex.quote(fixture_cache+'/token')).stdout.strip()
     require(token.startswith('audit_'), '仅使用独立测试 token')
-    forwarded = adb('forward', 'tcp:0', 'tcp:3090')
+    forwarded = adb('forward', 'tcp:0', 'tcp:3190')
     require(forwarded.returncode == 0, 'USB 端口转发就绪')
     port = int(forwarded.stdout.strip())
     require(request('/health') == 'OK', '真实原生桥健康检查')

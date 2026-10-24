@@ -37,7 +37,7 @@ This index leads to English operational and architectural pages. Immutable histo
 |---|---|
 | First installation, component probing, targeted repair, maintenance, interrupted operations | [Installation and maintenance](install-and-maintenance.md), [startup and diagnostics](startup-and-diagnostics.md), [application/managed updates](update.md) |
 | Engine/static-loader/seccomp, DNS, and port diagnosis | [Runtime/network choices](runtime-and-network.md), [engines](runtime-engines.md), [DNS](dns-configuration.md), [ports](ports-and-networking.md) |
-| Device channels, 3090 protocol, LAN, files, system documents | [Device channels](device-channels.md), [bridge and files](bridge-and-files.md), [LAN](lan.md), [Web files](web-file-sharing.md) |
+| Device channels, 3190 protocol, LAN, files, system documents | [Device channels](device-channels.md), [bridge and files](bridge-and-files.md), [LAN](lan.md), [Web files](web-file-sharing.md) |
 | One-click/manual/automatic backup, restore, snapshots, independent recovery | [Backup and restore](backup-and-restore.md), [configuration snapshots](config-snapshots.md), [independent recovery](emergency-recovery.md), [v5 format](backup-format-v5.md) |
 | Plugin installation, system/user separation, protocol, permissions, restart | [Plugin operations](plugins.md), [plugin runtime and permissions](plugin-runtime-and-permissions.md) |
 | PTY/simple terminals, WebView/Gecko, desktop UA, PiP | [Terminals](terminal.md), [browser engines](browser-engines.md), [picture-in-picture](picture-in-picture.md) |

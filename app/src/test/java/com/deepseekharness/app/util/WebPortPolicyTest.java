@@ -23,7 +23,7 @@ public class WebPortPolicyTest {
         0,
         WebPortPolicy.choose(
                 0,
-                3090,
+                3190,
                 port -> {
                   throw new AssertionError();
                 })
@@ -47,14 +47,14 @@ public class WebPortPolicyTest {
 
   @Test
   public void retainsPreferredAndReusesOnlyAvailableCachedPort() throws Exception {
-    assertEquals(3080, WebPortPolicy.choose(3080, 40000, port -> true).listen);
-    assertEquals(40000, WebPortPolicy.choose(3080, 40000, port -> port == 40000).listen);
-    assertEquals(0, WebPortPolicy.choose(3080, 40000, port -> false).listen);
+    assertEquals(3180, WebPortPolicy.choose(3180, 40000, port -> true).listen);
+    assertEquals(40000, WebPortPolicy.choose(3180, 40000, port -> port == 40000).listen);
+    assertEquals(0, WebPortPolicy.choose(3180, 40000, port -> false).listen);
     assertEquals(
         0,
         WebPortPolicy.choose(
-                3090,
-                3081,
+                3190,
+                3181,
                 port -> {
                   throw new AssertionError("reserved port probed");
                 })
@@ -75,7 +75,7 @@ public class WebPortPolicyTest {
   public void probeFailuresDoNotPretendToBePortCollisions() {
     try {
       WebPortPolicy.choose(
-          3080,
+          3180,
           0,
           port -> {
             throw new IOException("permission denied");
@@ -95,8 +95,8 @@ public class WebPortPolicyTest {
         WebPortPolicy.authentication(
             "dsh web: " + url + "\ndsh web: http://127.0.0.1:45679/?token=" + token, 0));
     assertNull(WebPortPolicy.authentication("dsh web: http://localhost:45678/?token=" + token, 0));
-    assertNull(WebPortPolicy.authentication("dsh web: http://127.0.0.1:3090/?token=" + token, 0));
-    assertNull(WebPortPolicy.authentication("dsh web: " + url, 3080));
+    assertNull(WebPortPolicy.authentication("dsh web: http://127.0.0.1:3190/?token=" + token, 0));
+    assertNull(WebPortPolicy.authentication("dsh web: " + url, 3180));
     assertNull(WebPortPolicy.authentication("plugin example " + url, 45678));
     assertEquals(url, WebPortPolicy.authentication("dsh web: " + url, 45678));
     assertNull(WebPortPolicy.authentication("dsh web: " + url, 45679));
@@ -105,16 +105,16 @@ public class WebPortPolicyTest {
   @Test
   public void identifiesTheReportedWebBindFailureWithoutMisclassifyingOtherPluginErrors() {
     String error =
-        "@deepseek-ai/dsh-host-webserver: listen EADDRINUSE: address already in use 127.0.0.1:3080";
-    assertEquals(3080, WebPortPolicy.conflictPort(error));
-    assertEquals(-1, WebPortPolicy.conflictPort("a-plugin: listen EADDRINUSE 127.0.0.1:3090"));
+        "@deepseek-ai/dsh-host-webserver: listen EADDRINUSE: address already in use 127.0.0.1:3180";
+    assertEquals(3180, WebPortPolicy.conflictPort(error));
+    assertEquals(-1, WebPortPolicy.conflictPort("a-plugin: listen EADDRINUSE 127.0.0.1:3190"));
     assertEquals(
         -1,
         WebPortPolicy.conflictPort("@deepseek-ai/dsh-host-webserver: Cannot find module example"));
     StartupTrace trace = new StartupTrace();
     trace.begin(1, 0, false);
     trace.issue(1, 10, "@deepseek-ai/dsh-web-app", error);
-    assertTrue(trace.snapshot(20, "en").log.contains("Web port in use: 3080"));
+    assertTrue(trace.snapshot(20, "en").log.contains("Web port in use: 3180"));
     assertFalse(trace.snapshot(20, "en").issues.containsKey("@deepseek-ai/dsh-web-app"));
   }
 }

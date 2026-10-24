@@ -241,8 +241,8 @@ public final class FragmentEntrySelfTest {
     @Override
     String webEntryUrl() {
       return changeUrl && urlReads++ > 0
-          ? "http://127.0.0.1:3081/?token=changed-fixture"
-          : "http://127.0.0.1:3080/?token=debug-fixture";
+          ? "http://127.0.0.1:3181/?token=changed-fixture"
+          : "http://127.0.0.1:3180/?token=debug-fixture";
     }
 
     @Override

@@ -40,7 +40,7 @@ public class RecoveryBrokerProtocolTest {
         IOException.class,
         () ->
             RecoveryBrokerProtocol.validate(
-                head("/v1/read", "Origin: http://127.0.0.1:3080\r\n"), 45000, TOKEN));
+                head("/v1/read", "Origin: http://127.0.0.1:3180\r\n"), 45000, TOKEN));
     assertThrows(
         IOException.class,
         () ->
@@ -54,11 +54,11 @@ public class RecoveryBrokerProtocolTest {
   @Test
   public void multilineCredentialsNeverEscape() {
     String text =
-        "model: deepseek\napiKey: |\n  private-first-line\n  private-second-line\nport: 3080\n";
+        "model: deepseek\napiKey: |\n  private-first-line\n  private-second-line\nport: 3180\n";
     String redacted = RecoveryBrokerProtocol.redact(text);
     assertFalse(redacted.contains("private-"));
     assertTrue(redacted.contains("model: deepseek"));
-    assertTrue(redacted.contains("port: 3080"));
+    assertTrue(redacted.contains("port: 3180"));
     assertFalse(
         RecoveryBrokerProtocol.redact("'password': >-\n   phrase secret\nmodel: ok")
             .contains("phrase secret"));

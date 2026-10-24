@@ -21,7 +21,7 @@ public class WebLaunchCommandTest {
 
   @Test
   public void profileAndSettingsRemainQuoted() {
-    String result = WebLaunchCommand.build("ask", true, "en", "recovery'; echo injected", 3080, 1);
+    String result = WebLaunchCommand.build("ask", true, "en", "recovery'; echo injected", 3180, 1);
     assertTrue(result.contains("export DSH_CONFIRM=1"));
     assertTrue(result.contains("--profile " + ShellQuote.arg("recovery'; echo injected")));
     assertThrows(

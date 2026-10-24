@@ -101,7 +101,7 @@ const relay = await readFile(path.join(root,'app/src/main/assets/recovery-web-in
 let foreignConnects = 0;
 const foreignWindow={addEventListener(){}};foreignWindow.top=foreignWindow;
 vm.runInNewContext(relay,{window:foreignWindow,
-  location:{protocol:'http:',hostname:'127.0.0.1',port:'3081',username:'',password:''},
+  location:{protocol:'http:',hostname:'127.0.0.1',port:'3181',username:'',password:''},
   browser:{runtime:{connectNative(){foreignConnects++;throw new Error('foreign origin reached locale bridge');}}}});
 assert.equal(foreignConnects,0);
 console.log('PASS locked recovery HTML/PDF Worker/resource overlay and real rc2 locale EN/ZH, cancellation, invalid origin');

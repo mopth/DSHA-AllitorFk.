@@ -110,7 +110,7 @@ public final class WebPortAudit extends Instrumentation {
       savedFiles.put(failure, failure.isFile() ? Compat.readAllBytes(failure) : null);
       for (String runtime : new String[] {"proot", "proroot"}) {
         c.config().setProroot(runtime.equals("proroot"));
-        owner = listen(WebPortPolicy.available(3080) ? 3080 : 0);
+        owner = listen(WebPortPolicy.available(3180) ? 3180 : 0);
         int preferred = owner.getLocalPort();
         c.config().setPort(String.valueOf(preferred));
         prefs.edit().remove("web_fallback_for").remove("web_fallback_port").commit();

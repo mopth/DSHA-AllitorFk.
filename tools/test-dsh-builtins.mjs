@@ -189,7 +189,7 @@ test('status overlay actual apply forwards current stream and tool events throug
     syncBuiltinESMExports();
     globalThis.fetch = async (input,options) => {
       const url=new URL(input);
-      assert.equal(url.origin,'http://127.0.0.1:3090');
+      assert.equal(url.origin,'http://127.0.0.1:3190');
       assert.ok(['/app/overlay','/app/plugins'].includes(url.pathname));
       assert.equal(url.searchParams.has('token'),false);
       assert.equal(options.headers['X-Token'],'owned-fixture-token');

@@ -147,7 +147,7 @@ const upstream = fs.statSync(input).isDirectory()
 const raw = fs.readFileSync(upstream, 'utf8');
 const recipe = JSON.parse(fs.readFileSync(new URL('permission-full-access-patch.json', assets), 'utf8'));
 await test('exact official client recipe applies once and parses without executing SDK', async () => {
-  assert.equal(recipe.dshVersion, '0.2.1-rc.2');
+  assert.equal(recipe.dshVersion, '0.2.1-rc.3');
   assert.equal(recipe.module, '@deepseek-ai/dsh-client-ui-permission-presets/lib/client.js');
   let patched = raw;
   for (const patch of recipe.patches) {

@@ -20,6 +20,8 @@ READ_COMPATIBILITY = {
     # build190: verified old storage and V4 none/zstd logs with the real new readers.
     # This is forward reading only; it does not authorize an old runtime rollback.
     '0.2.1-rc.2': ['dsh-0.1.7-rc.1', 'dsh-0.1.7-rc.2', 'dsh-0.2.0-rc.2'],
+    # AllitorFk rc.3: storage-json / session-persistence modules are byte-identical to rc.2.
+    '0.2.1-rc.3': ['dsh-0.1.7-rc.1', 'dsh-0.1.7-rc.2', 'dsh-0.2.0-rc.2', 'dsh-0.2.1-rc.2'],
 }
 
 def digest(path):

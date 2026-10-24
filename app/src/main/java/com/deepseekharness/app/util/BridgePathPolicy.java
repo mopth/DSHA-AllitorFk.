@@ -3,7 +3,7 @@ package com.deepseekharness.app.util;
 import java.util.Locale;
 
 /**
- * 3090 桥的<b>敏感路径</b>判据（纯逻辑，无 Android 依赖）。
+ * 3190 桥的<b>敏感路径</b>判据（纯逻辑，无 Android 依赖）。
  *
  * <p><b>为什么需要它</b>：{@code /app/export} 与 {@code /app/readfile} 原先接受任意绝对路径，
  * 而容器内 root 能读 {@code /root/.dsh} 下的全部凭据。真机实测确认了一条完整链路：
@@ -13,7 +13,7 @@ import java.util.Locale;
  *     → /app/export?path=/root/.dsh/.bridge_token
  *     → 文件落到 /sdcard/Download/DSHA/（公共目录，任何 App 可读）
  *     → 同一台手机的任意应用拿到桥 token
- *     → 完全接管 3090 桥（读屏、点按、输入、执行设备命令）
+ *     → 完全接管 3190 桥（读屏、点按、输入、执行设备命令）
  * </pre>
  *
  * <p>受损的不只是桥 token：{@code .credentials.yaml}（含 API key 与会话密钥）、

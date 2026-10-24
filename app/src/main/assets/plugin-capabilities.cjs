@@ -57,7 +57,7 @@ function analyze(files) {
           const target=literal(node.arguments[0]);
           if(typeof target==='string') {
             try { const url=new URL(target);
-              if(['127.0.0.1','localhost','[::1]'].includes(url.hostname)&&url.port==='3090') add({kind:'bridge-reference',value:label(url.pathname),file:item.file,line:node.loc.start.line});
+              if(['127.0.0.1','localhost','[::1]'].includes(url.hostname)&&url.port==='3190') add({kind:'bridge-reference',value:label(url.pathname),file:item.file,line:node.loc.start.line});
             } catch { unknown.push(item.file+':dynamic-bridge'); }
           } else unknown.push(item.file+':dynamic-bridge');
         }

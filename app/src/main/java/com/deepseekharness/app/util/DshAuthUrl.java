@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
 public final class DshAuthUrl {
 
   /** 默认 loopback base URL（端口未自定义时）。 */
-  public static final String LOOPBACK_BASE_URL = "http://127.0.0.1:3080/";
+  public static final String LOOPBACK_BASE_URL = "http://127.0.0.1:3180/";
 
   /** 默认的完整 BrowserAuth URL 前缀。 */
   public static final String AUTH_URL_PREFIX = LOOPBACK_BASE_URL + "?token=";
@@ -33,7 +33,7 @@ public final class DshAuthUrl {
 
   /** 解析后的不可变启动信息。token 永不写盘、不写日志。 */
   public static final class Parsed {
-    /** 含实际端口的 base URL，如 {@code http://127.0.0.1:3080/}。 */
+    /** 含实际端口的 base URL，如 {@code http://127.0.0.1:3180/}。 */
     public final String loopbackBaseUrl;
 
     public final String authUrl;

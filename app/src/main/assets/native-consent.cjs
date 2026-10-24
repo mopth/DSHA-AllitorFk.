@@ -1,5 +1,5 @@
 'use strict';
-// APK-owned launcher query for production build170's authenticated 3090 bridge.
+// APK-owned launcher query for production build170's authenticated 3190 bridge.
 // It accepts no address, path, token, headers or request body from callers.
 const fs = require('node:fs');
 const http = require('node:http');
@@ -33,7 +33,7 @@ function credential() {
   } finally { fs.closeSync(fd); }
 }
 function readConnection() {
-  return Object.freeze({ applicationId: 'dsha.AllitorFk_.dsh0_2_1_rc_2', generation: credential().generation });
+  return Object.freeze({ applicationId: 'dsha.AllitorFk_.dsh0_2_1_rc_3', generation: credential().generation });
 }
 function bridgeFetch(route, init = {}) {
   if (!['/device/consent', '/app/native-policy'].includes(route)
@@ -47,7 +47,7 @@ function bridgeFetch(route, init = {}) {
       throw invalid('NATIVE_CONSENT_TOKEN_CHANGED');
   } catch (error) { return Promise.reject(error); }
   return new Promise((resolve, reject) => {
-    const request = http.request({ protocol: 'http:', hostname: '127.0.0.1', port: 3090,
+    const request = http.request({ protocol: 'http:', hostname: '127.0.0.1', port: 3190,
       path: '/app/native-policy', method: 'GET', headers: { 'X-Token': current.token },
       signal: init.signal, agent: false }, response => {
       const chunks = []; let size = 0;

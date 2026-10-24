@@ -179,7 +179,7 @@ def main():
     assert sha(original_input) == CANONICAL_SHA, 'unknown canonical upstream bytes'
     historical = json.loads((HISTORY / 'session-interaction-patch.json').read_text(encoding='utf-8'))
     current = json.loads((ASSETS / 'session-interaction-patch.json').read_text(encoding='utf-8'))
-    assert historical['dshVersion'] == current['dshVersion'] == '0.2.1-rc.2'
+    assert historical['dshVersion'] == current['dshVersion'] == '0.2.1-rc.3'
     actual_v3 = apply_recipe(original_input, historical, HISTORY)
     assert sha(actual_v3) == HISTORICAL_MANAGED_SHA, 'derived V3 must match the independently retained managed baseline'
     expected = apply_recipe(original_input, current, ASSETS)

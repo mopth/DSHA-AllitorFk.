@@ -14,7 +14,7 @@ Configure and revoke Root, Shizuku and ADB separately under **Settings → Devic
 | Shizuku | Start Shizuku, allow DSHA in its manager, and wait for the execution-service Binder connection | Manager permission does not mean the execution service is ready | An unavailable Binder or unready service returns a failure; losing contact after dispatch can leave an UNKNOWN result |
 | Root | Have an existing su/manager and explicitly allow DSHA; discovery must not silently request permission | Finding su, user approval and a successful real command are three separate steps | Without su the channel is unavailable; a user refusal is not bypassed through another interpreter |
 
-Android supplies both the ADB pairing port and connection port. Do not enter the Web port or 3090. The application prepares dependencies offline. `PAIR_OK`, `CONNECT_OK`, `CONNECT_WARN` and `DEPS_MISSING` have different meanings. Having paired is no reason to report a connection warning as success.
+Android supplies both the ADB pairing port and connection port. Do not enter the Web port or 3190. The application prepares dependencies offline. `PAIR_OK`, `CONNECT_OK`, `CONNECT_WARN` and `DEPS_MISSING` have different meanings. Having paired is no reason to report a connection warning as success.
 
 ## How one device command is dispatched
 

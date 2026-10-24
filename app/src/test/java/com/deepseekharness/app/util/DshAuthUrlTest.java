@@ -23,9 +23,9 @@ public class DshAuthUrlTest {
 
   @Test
   public void rejectsWrongAuthority() {
-    assertNull(DshAuthUrl.parse("http://localhost:3080/?token=" + TOKEN_43));
-    assertNull(DshAuthUrl.parse("https://127.0.0.1:3080/?token=" + TOKEN_43));
-    assertNull(DshAuthUrl.parse("http://192.168.1.5:3080/?token=" + TOKEN_43));
+    assertNull(DshAuthUrl.parse("http://localhost:3180/?token=" + TOKEN_43));
+    assertNull(DshAuthUrl.parse("https://127.0.0.1:3180/?token=" + TOKEN_43));
+    assertNull(DshAuthUrl.parse("http://192.168.1.5:3180/?token=" + TOKEN_43));
   }
 
   @Test
@@ -44,7 +44,7 @@ public class DshAuthUrlTest {
     assertNull(DshAuthUrl.parse("http://127.0.0.1:0/?token=" + TOKEN_43));
     assertNull(DshAuthUrl.parse("http://127.0.0.1:999999/?token=" + TOKEN_43));
     assertNull(DshAuthUrl.findAny(DshAuthUrl.AUTH_URL_PREFIX + TOKEN_43, 9999));
-    assertNotNull(DshAuthUrl.findAny(DshAuthUrl.AUTH_URL_PREFIX + TOKEN_43, 3080));
+    assertNotNull(DshAuthUrl.findAny(DshAuthUrl.AUTH_URL_PREFIX + TOKEN_43, 3180));
   }
 
   @Test

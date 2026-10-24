@@ -140,7 +140,7 @@ public final class RuntimePackageCommandsAndroidTest {
     resources.put("runtime-descriptor.json", "{\"runtimeId\":\"" + ID + "\"}");
     resources.put("managed-runtime-inputs.json", "{\"schema\":1,\"installs\":[]}");
     resources.put(
-        "runtime-patches.json", "{\"schema\":1,\"dshVersion\":\"0.2.1-rc.2\",\"active\":[]}");
+        "runtime-patches.json", "{\"schema\":1,\"dshVersion\":\"0.2.1-rc.3\",\"active\":[]}");
     resources.put("builtin-plugins.json", "{}");
     resources.put("runtime-tools.json", "{}");
     resources.put("bridge-token-compat.cjs", "// isolated command fixture\n");

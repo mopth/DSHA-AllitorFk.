@@ -13,7 +13,7 @@
 > ⚠️ **Disclaimer: this is an unofficial fork of [DSH-APP/DSHA](https://github.com/DSH-APP/DSHA). It is not an official release, has not been reviewed by the upstream author, and is not affiliated with them. Use at your own risk.**
 > - **Based on**: official DSHA build190 (`0.2.1-rc.2`), commit `c750348a`.
 > - **What it contains**: proot stays the default engine, proroot and bxroot are selectable; bxroot comes from fix4 with automatic cold-install fallback (bxroot → proot only on a definite precheck failure); an experimental engine that fails to start 3 times in a row with a definite failure is switched back to proot automatically (timeouts and unknown results never count); the Low package (Android 6+); and an offline extension center rewritten after the ideas of DSH-Kxxy (16 packs: Ubuntu 24.04 arm64 packages plus official upstream toolchains; no Kxxy code copied).
-> - **Coexists with the official app**: package name `dsha.AllitorFk_.dsh0_2_1_rc_2`. Because the package name differs, it is a separate app that **does not overwrite or replace the official install** — both can be installed side by side.
+> - **Coexists with the official app**: package name `dsha.AllitorFk_.dsh0_2_1_rc_3`. Because the package name differs, it is a separate app that **does not overwrite or replace the official install** — both can be installed side by side.
 > - **License**: upstream MIT license; the original copyright notice is kept unchanged, see [LICENSE](../LICENSE). This fork's own material lives in [`allitorfk/`](../allitorfk/README.md); upstream files stay where they are.
 
 ---
@@ -172,7 +172,7 @@ The following comparison belongs to the previous build170 release. Older release
 
 ### ④ Device capabilities (the agent's hands on this phone)
 
-The agent calls these through the local `127.0.0.1:3090` bridge (token-gated; `/app/help` lists every endpoint):
+The agent calls these through the local `127.0.0.1:3190` bridge (token-gated; `/app/help` lists every endpoint):
 
 | Capability | Details |
 |---|---|
@@ -294,9 +294,9 @@ Listed honestly, so you don't discover them after installing:
 │  │   plugins / terminal                             │
 │  ├ Web engine: system WebView (Std) / Gecko (Low)   │
 │  ├ Foreground service + watchdog + notifications+PiP│
-│  ├ App bridge :3090 (accessibility / vscreen /      │
+│  ├ App bridge :3190 (accessibility / vscreen /      │
 │  │   interaction / files)                           │
-│  ├ LAN proxy :3081 · ADB / Shizuku / Root channels  │
+│  ├ LAN proxy :3181 · ADB / Shizuku / Root channels  │
 │  └ Overlay (TYPE_APPLICATION_OVERLAY)               │
 ├─────────────────────────────────────────────────────┤
 │ proot (default) / proroot (optional)│

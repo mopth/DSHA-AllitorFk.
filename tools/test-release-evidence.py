@@ -26,7 +26,7 @@ class ReleaseEvidenceTest(unittest.TestCase):
         self.apks=[{'flavor':'standard','versionCode':147,'sha256':'a'*64},
                    {'flavor':'low','versionCode':147,'sha256':'b'*64}]
         checks=['web-ready','existing-data-preserved','plugins-visible','recovery-ready','no-crash']
-        self.proof={'schema':1,'package':'dsha.AllitorFk_.dsh0_2_1_rc_2','certificateSha256':gate.CERT,
+        self.proof={'schema':1,'package':'dsha.AllitorFk_.dsh0_2_1_rc_3','certificateSha256':gate.CERT,
                     'versionCode':147,'serial':'test-device','firstInstallTimePreserved':True,
                     'nonDestructive':True,'flavors':{
                         'standard':{'sha256':'a'*64,'result':'PASS','checks':checks},

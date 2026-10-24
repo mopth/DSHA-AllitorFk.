@@ -3,7 +3,7 @@ package com.deepseekharness.app.util;
 /**
  * HTTP 查询串取参数 —— 树里唯一一份实现，纯逻辑无 Android 依赖。
  *
- * <p><b>为什么必须逐参数比较参数名</b>：原先 3090 桥的 {@code getParam} 是
+ * <p><b>为什么必须逐参数比较参数名</b>：原先 3190 桥的 {@code getParam} 是
  * {@code query.indexOf(key + "=")}，在整个查询串里任意位置找 {@code key=}，
  * 于是任何<b>以目标参数名结尾</b>的参数都会把它劫持掉：
  *
@@ -12,7 +12,7 @@ package com.deepseekharness.app.util;
  *   ?xtext=junk&amp;text=real  取 text → 得到 "junk"
  * </pre>
  *
- * 局域网桥那边为 token 修过完全一样的毛病，教训也写下来了，但 3090 桥这份漏了 ——
+ * 局域网桥那边为 token 修过完全一样的毛病，教训也写下来了，但 3190 桥这份漏了 ——
  * 又是一次「同一份判断散落两处」。现在两边都走这里。
  */
 public final class Query {

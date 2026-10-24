@@ -113,16 +113,16 @@ public class LanAuthTest {
 
   @Test
   public void stripTokenFromUrl() {
-    String out = LanAuth.stripTokenFromUrl("http://192.168.1.5:3081/?token=" + TOKEN + "&x=1");
-    assertEquals("http://192.168.1.5:3081/?x=1", out);
+    String out = LanAuth.stripTokenFromUrl("http://192.168.1.5:3181/?token=" + TOKEN + "&x=1");
+    assertEquals("http://192.168.1.5:3181/?x=1", out);
   }
 
   @Test
   public void stripTokenOnlyRemovesToken() {
-    String url = "http://h:3081/?token=" + TOKEN;
+    String url = "http://h:3181/?token=" + TOKEN;
     assertFalse(LanAuth.stripTokenFromUrl(url).contains("token="));
     // 不误删其它同名相近参数
-    String url2 = "http://h:3081/?token2=keep&tokens=keep2";
+    String url2 = "http://h:3181/?token2=keep&tokens=keep2";
     assertNotNull(LanAuth.stripTokenFromUrl(url2));
     assertTrue(LanAuth.stripTokenFromUrl(url2).contains("token2=keep"));
     assertTrue(LanAuth.stripTokenFromUrl(url2).contains("tokens=keep2"));

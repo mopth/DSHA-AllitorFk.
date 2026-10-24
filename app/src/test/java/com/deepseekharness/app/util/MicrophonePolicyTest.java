@@ -6,11 +6,11 @@ import static org.junit.Assert.*;
 public class MicrophonePolicyTest {
   @Test
   public void exactLoopbackOriginAndPort() {
-    assertTrue(MicrophonePolicy.trustedOrigin("http://127.0.0.1:3080", "http://127.0.0.1:3080/"));
+    assertTrue(MicrophonePolicy.trustedOrigin("http://127.0.0.1:3180", "http://127.0.0.1:3180/"));
     assertTrue(
         MicrophonePolicy.trustedOrigin("http://localhost:4141/chat", "http://localhost:4141/"));
-    assertFalse(MicrophonePolicy.trustedOrigin("http://localhost:3080", "http://127.0.0.1:3080/"));
-    assertFalse(MicrophonePolicy.trustedOrigin("http://127.0.0.1:3081", "http://127.0.0.1:3080/"));
+    assertFalse(MicrophonePolicy.trustedOrigin("http://localhost:3180", "http://127.0.0.1:3180/"));
+    assertFalse(MicrophonePolicy.trustedOrigin("http://127.0.0.1:3181", "http://127.0.0.1:3180/"));
   }
 
   @Test
@@ -19,16 +19,16 @@ public class MicrophonePolicyTest {
         new String[] {
           null,
           "",
-          "https://127.0.0.1:3080",
-          "http://127.0.0.1.evil:3080",
-          "http://user@127.0.0.1:3080",
+          "https://127.0.0.1:3180",
+          "http://127.0.0.1.evil:3180",
+          "http://user@127.0.0.1:3180",
           "http://127.0.0.1",
           "http://127.0.0.1:65536",
           "file:///root",
-          "blob:http://127.0.0.1:3080/a",
-          "http://localhost\\@127.0.0.1:3080"
-        }) assertFalse(value, MicrophonePolicy.trustedOrigin(value, "http://127.0.0.1:3080/"));
-    assertFalse(MicrophonePolicy.trustedOrigin("http://127.0.0.1:3080", "http://evil:3080/"));
+          "blob:http://127.0.0.1:3180/a",
+          "http://localhost\\@127.0.0.1:3180"
+        }) assertFalse(value, MicrophonePolicy.trustedOrigin(value, "http://127.0.0.1:3180/"));
+    assertFalse(MicrophonePolicy.trustedOrigin("http://127.0.0.1:3180", "http://evil:3180/"));
   }
 
   @Test

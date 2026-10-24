@@ -21,9 +21,9 @@ public class AllitorFkNamingTest {
     String g = gradle();
     assertTrue(g.contains("ext.dshaDisplayName = 'DSHA-AllitorFk.'"));
     assertTrue(g.contains("resValue 'string', 'app_name', dshaDisplayName"));
-    assertTrue(g.contains("ext.dshaReleaseName = 'DSHA-AllitorFk.-dsh0.2.1-rc.2'"));
-    assertTrue(g.contains("applicationId 'dsha.AllitorFk_.dsh0_2_1_rc_2'") || g.contains("applicationId \"dsha.AllitorFk_.dsh0_2_1_rc_2\""));
-    assertTrue(g.contains("-dsh0.2.1-rc.2-AllitorFk\""));
+    assertTrue(g.contains("ext.dshaReleaseName = 'DSHA-AllitorFk.-dsh0.2.1-rc.3'"));
+    assertTrue(g.contains("applicationId 'dsha.AllitorFk_.dsh0_2_1_rc_3'") || g.contains("applicationId \"dsha.AllitorFk_.dsh0_2_1_rc_3\""));
+    assertTrue(g.contains("-dsh0.2.1-rc.3-AllitorFk\""));
     assertTrue(g.contains("versionNameSuffix '-low'"));
     assertTrue(!g.contains("versionNameSuffix 'full'") && !g.contains("full {"));
   }

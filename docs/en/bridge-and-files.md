@@ -1,17 +1,17 @@
-# The 3090 bridge, file exchange and DocumentsProvider
+# The 3190 bridge, file exchange and DocumentsProvider
 
 Review date: 2026-10-21. Reference baseline: published F10 `087724c`. This page reviews production routes, file policies and related test sources in the current build190 working tree. It is not a receipt for device or endpoint execution during this work. The bridge protocol is defined by the running instance's `/app/version` and `/app/help`.
 
 ## Identify the entry point before making a call
 
-3090 is the application's internal device bridge. It listens only on IPv4 `127.0.0.1` and IPv6 `::1`; it is not the externally accessible Web service. DSH chooses its Web port dynamically, and LAN access is provided separately through the 3081 proxy. See [ports](ports-and-networking.md) and [LAN operation](lan.md). Sending a Web request, sending an Android bridge command and opening a file Provider are three separate paths.
+3190 is the application's internal device bridge. It listens only on IPv4 `127.0.0.1` and IPv6 `::1`; it is not the externally accessible Web service. DSH chooses its Web port dynamically, and LAN access is provided separately through the 3181 proxy. See [ports](ports-and-networking.md) and [LAN operation](lan.md). Sending a Web request, sending an Android bridge command and opening a file Provider are three separate paths.
 
 [HttpShellService](../../app/src/main/java/com/deepseekharness/app/HttpShellService.java) currently reports `BRIDGE_PROTOCOL=3`. Callers first check the version/capabilities and use protocol compatibility checks; the application's display version cannot establish whether an endpoint exists. The host writes bridge token headers to `/root/.dsh/.bridge_headers`. Keep credentials in the file:
 
 ```sh
-curl -s -H @/root/.dsh/.bridge_headers http://127.0.0.1:3090/app/version
+curl -s -H @/root/.dsh/.bridge_headers http://127.0.0.1:3190/app/version
 curl -s -G -H @/root/.dsh/.bridge_headers \
-  http://127.0.0.1:3090/app/readfile --data-urlencode 'path=/root/report.md'
+  http://127.0.0.1:3190/app/readfile --data-urlencode 'path=/root/report.md'
 ```
 
 Authentication accepts **exactly one** `X-Token` header. Empty tokens, duplicate headers and a `token` parameter in the URL are rejected. Cookies are not bridge credentials. [BridgeCredentialAuth](../../app/src/main/java/com/deepseekharness/app/util/BridgeCredentialAuth.java) implements these rules. The bridge does not grant CORS access. That does not guarantee isolation of arbitrary plugins under the same UID: plugins and terminals can use content accessible to that UID. See the [security model](security-model.md). Do not copy tokens, header-file contents or credential-bearing commands into reports.

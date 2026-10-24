@@ -53,7 +53,7 @@ def validate_device_evidence(proof, apks):
     variants={item['flavor']:item for item in apks}
     if set(variants)!={'standard','low'}:
         raise ValueError('DEVICE_EVIDENCE_FLAVORS')
-    if proof.get('schema')!=1 or proof.get('package')!='dsha.AllitorFk_.dsh0_2_1_rc_2' or proof.get('certificateSha256')!=CERT \
+    if proof.get('schema')!=1 or proof.get('package')!='dsha.AllitorFk_.dsh0_2_1_rc_3' or proof.get('certificateSha256')!=CERT \
             or proof.get('versionCode')!=variants['standard']['versionCode'] \
             or proof.get('versionCode')!=variants['low']['versionCode'] \
             or not isinstance(proof.get('serial'),str) or not proof['serial'].strip() \
@@ -154,7 +154,7 @@ def deliver_from_receipt(path,evidence,baseline):
     publish_apks(report['apks'])
     report['status']='PASS_FOR_EXECUTED_SCOPE'
     report['softwareReceipt']={'path':str(path.resolve()),'sha256':digest(path)}
-    report['device']={'status':'MATCHED_EXTERNAL_EVIDENCE','package':'dsha.AllitorFk_.dsh0_2_1_rc_2',
+    report['device']={'status':'MATCHED_EXTERNAL_EVIDENCE','package':'dsha.AllitorFk_.dsh0_2_1_rc_3',
                       'evidence':str(evidence.resolve()),'sha256':digest(evidence)}
     report['deliveredAt']=datetime.datetime.now(datetime.timezone.utc).isoformat()
     destination=store_delivery_receipt(report)
@@ -194,7 +194,7 @@ def main():
     report={'schema':1,'verificationSchema':2,'startedAt':datetime.datetime.now(datetime.timezone.utc).isoformat(),'status':'RUNNING','commands':[],
         'commit':subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),
         'dirty':bool(subprocess.check_output(['git','status','--porcelain'],cwd=ROOT)),
-        'device':{'status':'EXTERNAL_EVIDENCE_REQUIRED','package':'dsha.AllitorFk_.dsh0_2_1_rc_2'},
+        'device':{'status':'EXTERNAL_EVIDENCE_REQUIRED','package':'dsha.AllitorFk_.dsh0_2_1_rc_3'},
         'notVerified':['Android 6/7 physical devices','minimum standard API 30 physical device','reported Android 16 tablet','physical 16 KiB kernel','power loss durability'],
         'githubUploaded':False,'productionInstallationModified':False,'junitForksPerFlavor':args.test_forks}
     initial_source=source_snapshot()
@@ -306,7 +306,7 @@ def main():
                     if f'Verified using {scheme} scheme' not in signature or not re.search(r'Verified using '+scheme+r' scheme[^\n]+true',signature):raise RuntimeError('APK lacks verified '+scheme+' signing')
             badging=run(flavor+'-manifest',[build_tools/('aapt.exe' if os.name=='nt' else 'aapt'),'dump','badging',apk])
             package=re.search(r"package: name='([^']+)' versionCode='([^']+)' versionName='([^']+)'",badging)
-            if not package or package[1]!='dsha.AllitorFk_.dsh0_2_1_rc_2' or 'application-debuggable' in badging or f"sdkVersion:'{minimum}'" not in badging or "native-code: 'arm64-v8a'" not in badging:raise RuntimeError('Unexpected release manifest')
+            if not package or package[1]!='dsha.AllitorFk_.dsh0_2_1_rc_3' or 'application-debuggable' in badging or f"sdkVersion:'{minimum}'" not in badging or "native-code: 'arm64-v8a'" not in badging:raise RuntimeError('Unexpected release manifest')
             report['apks'].append({'flavor':flavor,'path':str(apk),'package':package[1],'versionCode':int(package[2]),'versionName':package[3],
                                   'minSdk':minimum,'abi':['arm64-v8a'],'size':apk.stat().st_size,'sha256':digest(apk),'certificateSha256':CERT if signed else None})
         try:
@@ -342,7 +342,7 @@ def main():
             proof=json.loads(args.device_evidence.read_text(encoding='utf8'))
             validate_device_evidence(proof,report['apks'])
             validate_acceptance(proof,acceptance)
-            report['device']={'status':'MATCHED_EXTERNAL_EVIDENCE','package':'dsha.AllitorFk_.dsh0_2_1_rc_2',
+            report['device']={'status':'MATCHED_EXTERNAL_EVIDENCE','package':'dsha.AllitorFk_.dsh0_2_1_rc_3',
                               'evidence':str(args.device_evidence.resolve()),'sha256':digest(args.device_evidence)}
             publish_apks(report['apks'])
         report['status']='PASS_UNSIGNED_PACKAGE' if args.stage=='package' else 'PASS_FOR_EXECUTED_SCOPE' if args.deliver else 'PASS_WITH_EXPLICIT_DEVICE_GAPS'

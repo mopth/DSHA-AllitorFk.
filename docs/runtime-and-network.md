@@ -9,7 +9,7 @@
 | 需要稳定启动 | [引擎](runtime-engines.md)与启动诊断 | 当前默认proot；显式proroot需重启Web，冷安装按选型 |
 | proroot出现加载器兼容问题 | 实际 `runtimeMode`、加载器输出和退出证明 | “使用proroot静态加载器”默认开，下次运行态构建读取；关闭不是通用提速方案 |
 | proot在ROM上发生seccomp兼容失败 | 启动失败阶段及实际proot命令 | “禁用proot seccomp加速”默认关，下次启动生效；不承诺统一性能损失数字 |
-| 端口冲突或旧URL打不开 | [本轮实际端口和鉴权](ports-and-networking.md) | 自动为默认；手动排除3081/3090，保存后需重启Web |
+| 端口冲突或旧URL打不开 | [本轮实际端口和鉴权](ports-and-networking.md) | 自动为默认；手动排除3081/3190，保存后需重启Web |
 | DNS lookup失败 | [DNS作用层](dns-configuration.md)、原始错误和实际resolver | auto/ipv4/native在新启动环境读取；不重放已经发送的HTTP或业务操作 |
 | 电脑访问手机 | [LAN](lan.md)开关、系统许可和本轮链接 | LAN默认关，使用3081代理；不开放3090桥 |
 

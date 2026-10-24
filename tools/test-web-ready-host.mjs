@@ -32,7 +32,7 @@ try{
  const after=(await rpc('settings/describe')).namespaces.find(row=>row.ns===notice.ns);
  assert.equal(after.value.welcomeNoticeVersion,'2026-09-28.1');
  assert.match(fs.readFileSync(path.join(profile,'cordis.patch.yml'),'utf8'),/welcomeNoticeVersion: 2026-09-28\.1/);
- console.log(JSON.stringify({status:'PASS',stage:'real-host-settings-mutate',elapsedMs:Date.now()-started,version:'0.2.1-rc.2',deviceValidation:false}));
+ console.log(JSON.stringify({status:'PASS',stage:'real-host-settings-mutate',elapsedMs:Date.now()-started,version:'0.2.1-rc.3',deviceValidation:false}));
  await rpc('settings/mutate',{ns:notice.ns,ops:[{op:'unset',path:['welcomeNoticeVersion']}],expectedRevision:after.revision});
  const require=createRequire(import.meta.url);
  let playwright;try{playwright=require(process.env.DSHA_PLAYWRIGHT||'playwright');}catch{playwright=require(path.join(process.env.USERPROFILE,'.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright'));}

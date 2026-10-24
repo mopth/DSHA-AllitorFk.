@@ -89,7 +89,7 @@ public class LanProxyHostTest {
   static byte[] request(String target, String token, boolean queryCredential) throws Exception {
     try (Socket socket = new Socket("127.0.0.1", LanProxyService.LAN_PORT)) {
       socket.setSoTimeout(4000);
-      String header = "GET " + target + " HTTP/1.1\r\nHost: 127.0.0.1:3081\r\nConnection: close\r\n"
+      String header = "GET " + target + " HTTP/1.1\r\nHost: 127.0.0.1:3181\r\nConnection: close\r\n"
           + (queryCredential ? "" : "Cookie: dsha_lan=" + token + "\r\n") + "\r\n";
       socket.getOutputStream().write(header.getBytes(StandardCharsets.US_ASCII));
       return socket.getInputStream().readAllBytes();
@@ -125,7 +125,7 @@ public class LanProxyHostTest {
     assertTrue(LanProxyService.setDshAuthCookie(COOKIE, 13));
     LanProxyService.start(null, null, 0, 13);
     Thread.sleep(80);
-    assertFalse("an unknown actual port cannot silently become 3080", LanProxyService.isBound());
+    assertFalse("an unknown actual port cannot silently become 3180", LanProxyService.isBound());
   }
 
   @Test public void tokenExchangeKeepsTheOriginalSafeCallbackTarget() throws Exception {
@@ -148,7 +148,7 @@ public class LanProxyHostTest {
         Socket socket = new Socket("127.0.0.1", LanProxyService.LAN_PORT);
         idle.add(socket);
         socket.setSoTimeout(2500);
-        String header = "GET / HTTP/1.1\r\nHost: 127.0.0.1:3081\r\nCookie: dsha_lan=" + token + "\r\n\r\n";
+        String header = "GET / HTTP/1.1\r\nHost: 127.0.0.1:3181\r\nCookie: dsha_lan=" + token + "\r\n\r\n";
         socket.getOutputStream().write(header.getBytes(StandardCharsets.US_ASCII));
         var input = socket.getInputStream();
         var head = HttpProtocol.readHead(input, socket, HttpProtocol.LAN, HttpProtocol.deadline(2500), false);
@@ -157,7 +157,7 @@ public class LanProxyHostTest {
       }
       try (Socket current = new Socket("127.0.0.1", LanProxyService.LAN_PORT)) {
         current.setSoTimeout(2000);
-        current.getOutputStream().write(("GET / HTTP/1.1\r\nHost: 127.0.0.1:3081\r\nCookie: dsha_lan=" + token + "\r\nConnection: close\r\n\r\n").getBytes(StandardCharsets.US_ASCII));
+        current.getOutputStream().write(("GET / HTTP/1.1\r\nHost: 127.0.0.1:3181\r\nCookie: dsha_lan=" + token + "\r\nConnection: close\r\n\r\n").getBytes(StandardCharsets.US_ASCII));
         assertTrue("idle keep-alive sockets must not exhaust request workers", new String(current.getInputStream().readAllBytes(), StandardCharsets.US_ASCII).startsWith("HTTP/1.1 200"));
       }
     } finally { for (Socket socket : idle) socket.close(); }
@@ -177,7 +177,7 @@ public class LanProxyHostTest {
     try (Backend backend = new Backend("websocket")) {
       start(backend, 17);
       String token = LanProxyService.getLanToken(null);
-      String credential = " HTTP/1.1\r\nHost: 127.0.0.1:3081\r\nCookie: dsha_lan=" + token
+      String credential = " HTTP/1.1\r\nHost: 127.0.0.1:3181\r\nCookie: dsha_lan=" + token
           + "\r\nConnection: Upgrade\r\nUpgrade: websocket\r\nSec-WebSocket-Version: 13\r\nSec-WebSocket-Key: AAAAAAAAAAAAAAAAAAAAAA==\r\n\r\n";
       try (Socket socket = new Socket("127.0.0.1", LanProxyService.LAN_PORT)) {
         socket.setSoTimeout(3000);

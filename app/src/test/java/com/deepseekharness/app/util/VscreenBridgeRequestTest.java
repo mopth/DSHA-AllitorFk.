@@ -128,7 +128,7 @@ public class VscreenBridgeRequestTest {
 
   static HttpProtocol.Head post(int length, String type) throws Exception {
     return HttpProtocol.parse(
-        "POST /app/vscreen/edit HTTP/1.1\r\nHost: 127.0.0.1:3090\r\nContent-Type: "
+        "POST /app/vscreen/edit HTTP/1.1\r\nHost: 127.0.0.1:3190\r\nContent-Type: "
             + type
             + "\r\nContent-Length: "
             + length
@@ -146,7 +146,7 @@ public class VscreenBridgeRequestTest {
         Socket client = new Socket("127.0.0.1", server.getLocalPort());
         Socket accepted = server.accept()) {
       String header =
-          "POST /app/vscreen/edit HTTP/1.1\r\nHost: 127.0.0.1:3090\r\nContent-Type: application/json; charset=utf-8\r\nContent-Length: "
+          "POST /app/vscreen/edit HTTP/1.1\r\nHost: 127.0.0.1:3190\r\nContent-Type: application/json; charset=utf-8\r\nContent-Length: "
               + body.length
               + "\r\n\r\n";
       client.getOutputStream().write(header.getBytes(StandardCharsets.US_ASCII));
@@ -167,7 +167,7 @@ public class VscreenBridgeRequestTest {
     String get =
         "GET /app/vscreen/edit?generation=gen&editorId=3%3A42&text="
             + URLEncoder.encode(text, "UTF-8")
-            + " HTTP/1.1\r\nHost: 127.0.0.1:3090\r\n\r\n";
+            + " HTTP/1.1\r\nHost: 127.0.0.1:3190\r\n\r\n";
     assertEquals(
         431, assertThrows(HttpProtocol.Failure.class, () -> HttpProtocol.parse(get, true)).status);
     assertEquals(

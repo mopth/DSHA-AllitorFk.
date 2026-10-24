@@ -5,7 +5,7 @@ public final class AppIdentity {
   private AppIdentity() {}
 
   public static String applicationId() {
-    return "dsha.AllitorFk_.dsh0_2_1_rc_2";
+    return "dsha.AllitorFk_.dsh0_2_1_rc_3";
   }
 
   public static String displayName() {
@@ -13,7 +13,7 @@ public final class AppIdentity {
   }
 
   public static String publicDirectoryName() {
-    return "DSHA-AllitorFk";
+    return "DSHA-AllitorFk-rc3";
   }
 
   public static String defaultUpdateFeed() {

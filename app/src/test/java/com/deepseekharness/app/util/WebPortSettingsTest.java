@@ -7,20 +7,20 @@ public final class WebPortSettingsTest {
   @Test
   public void migratesDefaultButPreservesCustomAndExplicitManualPort() {
     assertEquals("auto", WebPortSettings.mode(null, null));
-    assertEquals("auto", WebPortSettings.mode(null, "3080"));
+    assertEquals("auto", WebPortSettings.mode(null, "3180"));
     assertEquals("fixed", WebPortSettings.mode(null, "45678"));
-    assertEquals("fixed", WebPortSettings.mode("fixed", "3080"));
+    assertEquals("fixed", WebPortSettings.mode("fixed", "3180"));
     assertEquals("auto", WebPortSettings.mode("auto", "45678"));
-    assertEquals("auto", WebPortSettings.mode(null, "3090"));
+    assertEquals("auto", WebPortSettings.mode(null, "3190"));
     assertEquals("auto", WebPortSettings.mode(null, "invalid"));
     assertEquals("auto", WebPortSettings.mode("invalid", "45678"));
   }
 
   @Test
   public void onlyFixedModeRequiresAValidUnreservedPort() {
-    assertEquals(0, WebPortSettings.requested("auto", 3080));
+    assertEquals(0, WebPortSettings.requested("auto", 3180));
     assertEquals(45678, WebPortSettings.requested("fixed", 45678));
-    for (int port : new int[] {0, -1, 3081, 3090, 65536}) {
+    for (int port : new int[] {0, -1, 3181, 3190, 65536}) {
       try {
         WebPortSettings.requested("fixed", port);
         fail();
@@ -38,10 +38,10 @@ public final class WebPortSettingsTest {
 
   @Test
   public void explicitFixedImportsNeverNormalizeToAnotherPort() {
-    assertEquals(3080, WebPortSettings.fixedImport("3080"));
+    assertEquals(3180, WebPortSettings.fixedImport("3180"));
     assertEquals(45678, WebPortSettings.fixedImport(" 45678 "));
     for (Object value :
-        new Object[] {null, 3080, false, "", "oops", "0", "65536", "3081", "3090"}) {
+        new Object[] {null, 3180, false, "", "oops", "0", "65536", "3181", "3190"}) {
       try {
         WebPortSettings.fixedImport(value);
         fail(String.valueOf(value));

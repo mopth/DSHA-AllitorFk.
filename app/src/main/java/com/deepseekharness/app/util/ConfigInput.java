@@ -11,7 +11,7 @@ public final class ConfigInput {
           com.deepseekharness.app.util.UiText.text("端口请输入 1—65535 的整数"));
     if (port == Constants.LAN_BRIDGE_PORT || port == Constants.SHELL_BRIDGE_PORT)
       throw new IllegalArgumentException(
-          com.deepseekharness.app.util.UiText.text("3081 和 3090 已用于 App 桥接，请换一个端口"));
+          com.deepseekharness.app.util.UiText.text("3181 和 3190 已用于 App 桥接，请换一个端口"));
     return port;
   }
 

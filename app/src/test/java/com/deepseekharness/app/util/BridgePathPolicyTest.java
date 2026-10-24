@@ -7,7 +7,7 @@ import static org.junit.Assert.*;
  * 锁定桥的敏感路径判据。
  *
  * <p>真机实测过的攻击链：{@code /app/export?path=/root/.dsh/.bridge_token}
- * 能把桥 token 写到公共目录，同机任意应用据此完全接管 3090 桥。
+ * 能把桥 token 写到公共目录，同机任意应用据此完全接管 3190 桥。
  * 这些断言就是钉住「这条路必须被堵死」。
  */
 public class BridgePathPolicyTest {

@@ -56,7 +56,7 @@ try {
     /invalid Gecko native application name/, 'old hyphenated name must fail before a port exists');
   vm.runInNewContext(relay, {
     window: pageWindow,
-    location: { protocol: 'http:', hostname: 'localhost', port: '3081', username: '', password: '' },
+    location: { protocol: 'http:', hostname: 'localhost', port: '3181', username: '', password: '' },
     document,
     browser: { runtime: geckoRuntime },
     MutationObserver: class { observe() {} disconnect() {} },

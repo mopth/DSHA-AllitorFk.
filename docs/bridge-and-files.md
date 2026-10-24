@@ -1,17 +1,17 @@
-# 3090 桥、文件交换与 DocumentsProvider
+# 3190 桥、文件交换与 DocumentsProvider
 
 核验日期：2026-10-21。参考基线：已发布 F10 `087724c`；本文核对当前 build190 工作树的生产路由、文件策略及相关测试源码。本文不是本轮设备或接口执行回执。桥协议以实际 `/app/version` 和 `/app/help` 为准。
 
 ## 调用前先辨认入口
 
-3090 是应用内部设备桥，只监听 IPv4 `127.0.0.1` 和 IPv6 `::1`，不是对外 Web 服务。DSH Web 端口动态选择，LAN 访问另由 3081 代理提供，见[端口说明](ports-and-networking.md)和[LAN 操作](lan.md)。给 Web 发请求、给 Android 桥发命令、打开文件 Provider 是三条不同链路。
+3190 是应用内部设备桥，只监听 IPv4 `127.0.0.1` 和 IPv6 `::1`，不是对外 Web 服务。DSH Web 端口动态选择，LAN 访问另由 3181 代理提供，见[端口说明](ports-and-networking.md)和[LAN 操作](lan.md)。给 Web 发请求、给 Android 桥发命令、打开文件 Provider 是三条不同链路。
 
 [HttpShellService](../app/src/main/java/com/deepseekharness/app/HttpShellService.java)当前报告 `BRIDGE_PROTOCOL=3`。调用方先检查版本/能力，使用协议兼容判断，不用应用显示版本推断端点存在。桥 token 由宿主写入 `/root/.dsh/.bridge_headers`；推荐保持凭据在文件中：
 
 ```sh
-curl -s -H @/root/.dsh/.bridge_headers http://127.0.0.1:3090/app/version
+curl -s -H @/root/.dsh/.bridge_headers http://127.0.0.1:3190/app/version
 curl -s -G -H @/root/.dsh/.bridge_headers \
-  http://127.0.0.1:3090/app/readfile --data-urlencode 'path=/root/report.md'
+  http://127.0.0.1:3190/app/readfile --data-urlencode 'path=/root/report.md'
 ```
 
 鉴权只接受**一个** `X-Token` 头；空 token、重复头、URL 中的 `token` 参数均拒绝，Cookie 不作为桥凭据。规则由[BridgeCredentialAuth](../app/src/main/java/com/deepseekharness/app/util/BridgeCredentialAuth.java)实现。桥不提供 CORS 放行；这不能变成“任意同 UID 插件受隔离”的保证。插件与终端可以使用该 UID 可访问的内容，见[安全模型](security-model.md)。不要把 token、头文件内容或带凭据命令复制到报告。

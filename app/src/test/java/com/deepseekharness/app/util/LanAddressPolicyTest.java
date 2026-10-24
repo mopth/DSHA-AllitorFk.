@@ -66,7 +66,7 @@ public class LanAddressPolicyTest {
           "10.0.0",
           "10.0.0.01",
           " 10.0.0.1",
-          "10.0.0.1:3081",
+          "10.0.0.1:3181",
           "10.0.0.1\n"
         }) assertFalse(ip, LanAddressPolicy.privateIpv4(ip));
     assertFalse(LanAddressPolicy.privateIpv4(null));

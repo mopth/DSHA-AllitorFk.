@@ -45,7 +45,7 @@ const actualTransport = (() => {
     openSync: () => 7, fstatSync: () => info(false),
     readSync: (_fd, bytes) => bytes.write(token), closeSync: () => {} };
   const http = { request(options, accept) {
-    assert.equal(options.hostname, '127.0.0.1'); assert.equal(options.port, 3090);
+    assert.equal(options.hostname, '127.0.0.1'); assert.equal(options.port, 3190);
     assert.equal(options.path, '/app/native-policy'); assert.equal(options.headers['X-Token'], token);
     const request = new EventEmitter();
     request.end = () => queueMicrotask(() => {

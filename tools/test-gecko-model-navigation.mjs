@@ -4,7 +4,7 @@ import vm from 'node:vm';
 import {readFileSync} from 'node:fs';
 const listeners={},events=[],outbound=[];let receive;
 const window={addEventListener:(type,fn)=>listeners[type]=fn,dispatchEvent:event=>events.push(event.type)};window.top=window;
-const context=vm.createContext({window,location:{origin:'http://127.0.0.1:3080',pathname:'/'},browser:{runtime:{connectNative:()=>({onMessage:{addListener:fn=>receive=fn},postMessage:value=>outbound.push(value)})}},
+const context=vm.createContext({window,location:{origin:'http://127.0.0.1:3180',pathname:'/'},browser:{runtime:{connectNative:()=>({onMessage:{addListener:fn=>receive=fn},postMessage:value=>outbound.push(value)})}},
   Event:class {constructor(type){this.type=type}},CustomEvent:class {constructor(type){this.type=type}},
   document:{createElement:()=>({textContent:'',remove(){}})}});
 context.document.head={appendChild:script=>vm.runInContext(script.textContent,context)};

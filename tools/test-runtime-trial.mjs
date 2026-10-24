@@ -39,7 +39,7 @@ function trialContext(backend){
    async create(value){header=value;return {async flush(){},async close(){}}},
    async open(id){return {header:{...header,id,version:4},async read(){return {events:[]}},async close(){}}},
   },
-  webServer:{port:3080,register(){return ()=>{}}},connection:{requestRejection(){return undefined}},
+  webServer:{port:3180,register(){return ()=>{}}},connection:{requestRejection(){return undefined}},
   effect(install){return install()},on(){return ()=>{}},
  };
 }
@@ -157,10 +157,10 @@ try{
  const source=(await fs.readFile(path.join(repository,'app/src/main/assets/runtime-trial-page.js'),'utf8')).replace('__DSHA_TRIAL_NONCE__','a'.repeat(32)).replace('__DSHA_TRIAL_HOME__',JSON.stringify(home));
  function browser(responses){let tick,cleared=0,requests=0;const sockets=[];
   function Socket(){this.events={};this.addEventListener=(name,fn)=>{this.events[name]=fn};sockets.push(this)}
-  const context={window:{WebSocket:Socket,addEventListener(){}},URL,Object,JSON,location:{href:'http://127.0.0.1:3080/',host:'127.0.0.1:3080'},
+  const context={window:{WebSocket:Socket,addEventListener(){}},URL,Object,JSON,location:{href:'http://127.0.0.1:3180/',host:'127.0.0.1:3180'},
    document:{getElementById:()=>({children:[{}]}),querySelector:()=>null},setInterval(fn){tick=fn;return 7},clearInterval(id){assert.equal(id,7);cleared++},
    fetch:async()=>{requests++;const response=responses.shift();if(response instanceof Error)throw response;return response||{ok:true}}};
-  vm.runInNewContext(source,context);return{connect(url='ws://127.0.0.1:3080/api/remote.mux',frame=readyFrame){new context.window.WebSocket(url);const socket=sockets.at(-1);socket.events.open?.();socket.events.message?.({data:JSON.stringify(frame)});},async tick(){tick();await new Promise(resolve=>setImmediate(resolve));},get requests(){return requests},get cleared(){return cleared}};
+  vm.runInNewContext(source,context);return{connect(url='ws://127.0.0.1:3180/api/remote.mux',frame=readyFrame){new context.window.WebSocket(url);const socket=sockets.at(-1);socket.events.open?.();socket.events.message?.({data:JSON.stringify(frame)});},async tick(){tick();await new Promise(resolve=>setImmediate(resolve));},get requests(){return requests},get cleared(){return cleared}};
  }
  for(const response of [{ok:false},new Error('synthetic_network_failure')])await test('synthetic_renderer_retry_'+(response instanceof Error?'network':'http'),async()=>{
   const page=browser([response,{ok:true}]);page.connect();await page.tick();assert.equal(page.requests,1);assert.equal(page.cleared,0);

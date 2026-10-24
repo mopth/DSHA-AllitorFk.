@@ -16,7 +16,7 @@ export function preparePrivatePluginInventory({source,raw,directory,managerSourc
   const canonical=fs.readFileSync(path.join(raw,'node_modules',moduleName),'utf8').replaceAll('\r\n','\n');
   let patched=canonical;
   const registry=JSON.parse(fs.readFileSync(path.join(assets,'runtime-patches.json')));
-  assert.equal(registry.schema,1);assert.equal(registry.dshVersion,'0.2.1-rc.2');
+  assert.equal(registry.schema,1);assert.equal(registry.dshVersion,'0.2.1-rc.3');
   const recipes=[];
   for(const row of registry.active){
     const file=path.join(assets,row.asset),recipe=JSON.parse(fs.readFileSync(file));

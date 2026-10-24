@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "dshVersion": "0.2.1-rc.2",
+  "dshVersion": "0.2.1-rc.3",
   "baseVersion": "10",
   "archives": [
     {
@@ -10,7 +10,7 @@
     },
     {
       "asset": "recovery-dsh-runtime.bin",
-      "sha256": "0bf8830eef95e317ffd25d9bce4547871694063d94facbf78104ebe2c197097a",
+      "sha256": "6d2a4d2efb0eed3a5a58f25753fa18d712fcba7ec65199e4641e946e00aa9853",
       "seed": "app/src/main/assets/dsh-runtime.bin"
     }
   ]

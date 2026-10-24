@@ -8,7 +8,7 @@
 - Standard：`DSHA-AllitorFk.-dsh0.2.1-rc.2.apk`（Android 11+，minSdk 30，arm64，293,038,835 字节）。
 - Low：`DSHA-AllitorFk.-dsh0.2.1-rc.2-low.apk`（Android 6+，minSdk 23，arm64，368,459,527 字节，内置 GeckoView）。
 - 16 个离线扩展包 `.dshx` 也在同一个 Release；校验值见 Release 里的 `SHA256SUMS.txt`（`sha256sum -c SHA256SUMS.txt`）。
-- 手机上显示名为 `DSHA-AllitorFk.`；包名 `dsha.AllitorFk_.dsh0_2_1_rc_2`，与官方 `dsh.android.client` 不同，可同时安装。
+- 手机上显示名为 `DSHA-AllitorFk.`；包名 `dsha.AllitorFk_.dsh0_2_1_rc_3`，与官方 `dsh.android.client` 不同，可同时安装。
 - Standard 与 Low 包名相同，只能装其中一个。
 - 测试签名、尚未做真机验证。以后换不同签名的版本需先卸载（会丢数据，请先备份）。
 

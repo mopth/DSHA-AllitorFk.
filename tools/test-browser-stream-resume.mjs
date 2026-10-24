@@ -19,7 +19,7 @@ async function until(check) {
 
 function fixture({holdRpc=false}={}) {
   const window = new EventTarget(), document = new EventTarget(), modules = new Map(), disposers = [];
-  Object.assign(document,{hidden:false,baseURI:'http://127.0.0.1:3080/'});
+  Object.assign(document,{hidden:false,baseURI:'http://127.0.0.1:3180/'});
   window.navigator = {onLine:true};
   window.top = window;
   let hostText='before-background', rpcCalls=0;

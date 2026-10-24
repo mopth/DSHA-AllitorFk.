@@ -160,7 +160,7 @@ public class HttpProtocolTest {
             + command
             + "&token="
             + "a".repeat(64)
-            + " HTTP/1.1\r\nHost: 127.0.0.1:3090\r\n\r\n";
+            + " HTTP/1.1\r\nHost: 127.0.0.1:3190\r\n\r\n";
     assertEquals(
         raw.length(),
         HttpProtocol.readHead(
