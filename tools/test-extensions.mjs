@@ -275,7 +275,7 @@ try {
   {
     const calls = []; let handler;
     const fakeManager = { cleanupStaging() {}, list: () => ({ packs: [] }), log: () => [], busy: () => false,
-      start: (action, id) => { calls.push([action, id]); return 'j'; }, importStream: async () => {} };
+      start: (action, id, opts) => { calls.push([action, id, opts]); return 'j'; }, importStream: async () => {} };
     registerExtensionRoutes({ webServer: { register: (r) => { handler = r.handler; return () => {}; } },
       connection: { authorizeIndex: (req, res) => { if (req.headers.cookie === 'ok') return true; res.writeHead(401); res.end(); return false; } } }, { manager: fakeManager });
     const server = createServer((req, res) => handler(req, res));
@@ -292,8 +292,12 @@ try {
         assert.equal(await go(p, { ...good, 'content-type': 'text/plain' }), 415, route + ' simple content type');
         assert.equal(calls.length, 0);
         assert.equal(await go(p, good), 202);
-        assert.deepEqual(calls.pop(), [route, 'dev-base']);
+        assert.deepEqual(calls.pop(), [route, 'dev-base', { withDeps: false }]);
       }
+      assert.equal(await go('/__dsha/extensions/api/activate', good, JSON.stringify({ id: 'r8', withDeps: true })), 202);
+      assert.deepEqual(calls.pop(), ['activate', 'r8', { withDeps: true }]);
+      assert.equal(await go('/__dsha/extensions/api/activate', good, JSON.stringify({ id: 'r8', withDeps: 'yes' })), 202);
+      assert.deepEqual(calls.pop(), ['activate', 'r8', { withDeps: false }], 'only literal true opts in');
       assert.equal(await fetch(base + '/__dsha/extensions/api/download', { headers: { cookie: 'ok' } }).then(r => r.status), 405, 'GET is not a download trigger');
       console.log('ok   routes: download/install behind authorizeIndex + Origin + x-dsha-ext + JSON; only id is used');
     } finally { server.close(); }
@@ -305,9 +309,56 @@ try {
     for (const text of ['下载并安装', 'Download & install', '在浏览器中下载', 'Download in browser', '从文件导入', 'Import from file',
       '「下载」文件夹', 'Downloads folder', '自动核对 sha256', 'checked automatically', "T('文件 ','File ')",
       'EXT_NETWORK:', 'EXT_PACK_DIGEST:', 'EXT_NO_SPACE:', '网络连接失败', 'Network error', '校验没通过', 'failed its check', '存储空间不够', 'Not enough storage',
-      "post(action,{id:p.id})", 'a.href=p.url', '重试下载并安装', '<progress'.slice(1)])
+      "post(action,body)", 'body.withDeps=true', '需要先装好', "className='err'", '启用失败'.slice(0,0) + '操作失败', 'EXT_REQUIRES:T(', 'EXT_CMD_FAILED:T(', 'EXT_PREFIX_EXISTS:T(', 'a.href=p.url', '重试下载并安装', '<progress'.slice(1)])
       assert.ok(page.includes(text), 'page missing: ' + text);
     assert.ok(!/Full 版/.test(page), 'no Full wording');
     console.log('ok   page: zh/en how-to (A one tap, B browser + import), sizes, auto hash check, plain errors');
   }
+}
+
+// 依赖：缺依赖时同步拒绝并列出缺什么；确认后先下载并启用依赖；失败原因（含哪个依赖）落盘，服务重启后仍可见。
+{
+  const fs = await import('node:fs');
+  const { createHash } = await import('node:crypto');
+  const { createExtensionManager, missingDeps, RELEASE_PREFIX } = await import('../app/src/main/assets/app-integration/ext/manager.js');
+  const cat = { packs: [{ id: 'a', requires: [] }, { id: 'b', requires: ['a'] }, { id: 'c', requires: ['b', 'a'] }, { id: 'x', requires: ['y'] }, { id: 'y', requires: ['x'] }] };
+  assert.deepEqual(missingDeps(cat, {}, 'c'), ['a', 'b']);
+  assert.deepEqual(missingDeps(cat, { a: {} }, 'c'), ['b']);
+  assert.deepEqual(missingDeps(cat, { a: {}, b: {} }, 'c'), []);
+  assert.throws(() => missingDeps(cat, {}, 'x'), /EXT_REQUIRES_CYCLE/);
+  const real = JSON.parse(readFileSync(new URL('../app/src/main/assets/app-integration/ext-catalog.json', import.meta.url), 'utf8'));
+  const r8 = real.packs.find(p => p.requires.includes('jdk21'));
+  assert.ok(r8, 'some real pack depends on jdk21');
+  assert.ok(missingDeps(real, {}, r8.id).includes('jdk21'));
+  for (const p of real.packs) missingDeps(real, {}, p.id); // 真实目录无环、无缺条目
+
+  const dir = mkdtempSync(join(tmpdir(), 'dshx-deps-'));
+  try {
+    const body = Buffer.alloc(1000, 3);
+    const sha = createHash('sha256').update(body).digest('hex');
+    const catalogPath = join(dir, 'cat.json');
+    fs.writeFileSync(catalogPath, JSON.stringify({ base: { toolsLockSha256: 'nope', rootfsVersion: 'nope' }, download: { base: RELEASE_PREFIX + 't' }, packs: [
+      { id: 'jdk', file: 'jdk.dshx', sha256: sha, bytes: body.length, installedBytes: 1, requires: [] },
+      { id: 'r8', file: 'r8.dshx', sha256: sha, bytes: body.length, installedBytes: 1, requires: ['jdk'] }] }));
+    fs.mkdirSync(join(dir, 'state/packs'), { recursive: true });
+    fs.writeFileSync(join(dir, 'state/packs/r8.dshx'), body);
+    const fetched = [];
+    const mk = () => createExtensionManager({ root: dir, stateDir: join(dir, 'state'), catalogPath, sleep: async () => {}, freeBytes: () => 1e12,
+      fetch: async (url) => { fetched.push(url); return { status: 200, headers: { 'content-length': String(body.length) }, body: (async function* () { yield body; })() }; } });
+    let m = mk();
+    assert.throws(() => m.start('activate', 'r8'), /^Error: EXT_REQUIRES:jdk$/);
+    assert.equal(m.busy(), false, 'sync reject leaves no job');
+    assert.throws(() => m.start('install', 'r8'), /EXT_REQUIRES:jdk/);
+    m.start('activate', 'r8', { withDeps: true });
+    for (let k = 0; k < 200 && m.busy(); k++) await new Promise(r => setTimeout(r, 10));
+    assert.deepEqual(fetched, [RELEASE_PREFIX + 't/jdk.dshx'], 'missing dependency downloaded first');
+    const job = m.list().job;
+    assert.equal(job.ok, false); assert.equal(job.dep, 'jdk', 'failure attributed to the dependency');
+    assert.ok(job.error);
+    assert.ok(m.log().some(l => l.includes('先下载依赖 jdk')));
+    // 新实例（等同 Web 服务重启）仍能读到上次失败。
+    const again = mk().list().job;
+    assert.equal(again.pid, 'r8'); assert.equal(again.ok, false); assert.equal(again.dep, 'jdk');
+    console.log('ok   deps: missing deps rejected synchronously with names, withDeps downloads+enables deps first, failure names the dependency and survives restart');
+  } finally { rmSync(dir, { recursive: true, force: true }); }
 }

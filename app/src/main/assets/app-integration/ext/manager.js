@@ -16,6 +16,23 @@ const TAG = /^[A-Za-z0-9][A-Za-z0-9._-]{0,100}$/;
 const DOWNLOAD_HOSTS = new Set(['github.com', 'objects.githubusercontent.com', 'release-assets.githubusercontent.com']);
 
 /** 由目录算出某包的下载地址；目录里的 base 不在固定前缀下或文件名不合规时拒绝。 */
+/** 按依赖顺序（先依赖后本包）列出 pid 还缺的、尚未启用的依赖；目录里有环或缺条目时抛错。 */
+export function missingDeps(cat, active, pid) {
+  const out = [];
+  const visit = (id, path) => {
+    const entry = cat.packs.find(p => p.id === id);
+    if (!entry) throw new Error('EXT_UNKNOWN:' + id);
+    for (const req of entry.requires ?? []) {
+      if (path.includes(req)) throw new Error('EXT_REQUIRES_CYCLE:' + req);
+      if (active[req] || out.includes(req)) continue;
+      visit(req, [...path, req]);
+      out.push(req);
+    }
+  };
+  visit(pid, [pid]);
+  return out;
+}
+
 export function packUrl(cat, entry) {
   const base = cat?.download?.base;
   if (typeof base !== 'string' || !base.startsWith(RELEASE_PREFIX)) throw new Error('EXT_DOWNLOAD_BASE');
@@ -37,7 +54,13 @@ export function createExtensionManager(options = {}) {
   let job = null;
   const fetchImpl = options.fetch ?? globalThis.fetch;
   const sleep = options.sleep ?? ((ms) => new Promise(r => setTimeout(r, ms)));
-  let lastJob = null;
+  const lastJobFile = join(home, 'last-job.json');
+  // 上次任务结果落盘：Web 服务重启后卡片上仍能看到失败原因。
+  let lastJob = (() => { try { const j = JSON.parse(readFileSync(lastJobFile, 'utf8')); return j && typeof j.pid === 'string' ? j : null; } catch { return null; } })();
+  const saveLastJob = (j) => {
+    lastJob = j;
+    try { mkdirSync(home, { recursive: true, mode: 0o700 }); writeFileSync(lastJobFile, JSON.stringify(j) + '\n', { mode: 0o600 }); } catch {}
+  };
 
   const catalog = () => JSON.parse(readFileSync(catalogPath, 'utf8'));
   const readState = () => { try { return JSON.parse(readFileSync(stateFile, 'utf8')); } catch { return { schema: 1, active: {} }; } };
@@ -466,19 +489,35 @@ export function createExtensionManager(options = {}) {
     };
   }
 
-  function start(action, pid) {
+  function start(action, pid, opts = {}) {
     if (job) throw new Error('EXT_BUSY');
+    let deps = [];
+    if (action === 'activate' || action === 'install') {
+      if (!ID.test(pid)) throw new Error('EXT_ID');
+      deps = missingDeps(catalog(), readState().active, pid);
+      // 缺依赖时同步拒绝（页面立刻能在卡片上提示），除非用户确认了“连同依赖一起装”。
+      if (deps.length && opts.withDeps !== true) throw new Error('EXT_REQUIRES:' + deps.join(','));
+    }
     const id = randomBytes(6).toString('hex');
     log.length = 0;
     job = { id, pid, action };
     const progress = (done, total) => { if (job && job.id === id) { job.done = done; job.total = total; } };
-    const work = action === 'activate' ? activate(pid)
+    const ensure = async (dep) => {
+      try {
+        const entry = catalog().packs.find(p => p.id === dep);
+        if (!existsSync(join(packsDir, entry.file))) { say(`先下载依赖 ${dep}`); await download(dep, progress); }
+        say(`先启用依赖 ${dep}`);
+        await activate(dep);
+      } catch (e) { e.dep = dep; throw e; }
+    };
+    const withDeps = async (main) => { for (const dep of deps) await ensure(dep); return main(); };
+    const work = action === 'activate' ? withDeps(() => activate(pid))
       : action === 'remove' ? remove(pid)
       : action === 'download' ? download(pid, progress)
-      : action === 'install' ? download(pid, progress).then(() => activate(pid))
+      : action === 'install' ? withDeps(() => download(pid, progress).then(() => activate(pid)))
       : Promise.reject(new Error('EXT_ACTION'));
-    work.then(() => { lastJob = { id, pid, action, running: false, ok: true }; },
-      (e) => { lastJob = { id, pid, action, running: false, ok: false, error: e.message }; })
+    work.then(() => { saveLastJob({ id, pid, action, running: false, ok: true }); },
+      (e) => { saveLastJob({ id, pid, action, running: false, ok: false, error: e.message, dep: e.dep ?? null, at: Date.now() }); })
       .finally(() => { job = null; });
     return id;
   }

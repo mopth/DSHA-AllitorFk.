@@ -46,8 +46,8 @@ export function registerExtensionRoutes(scoped, options = {}) {
       const ACTIONS = { '/api/activate': 'activate', '/api/remove': 'remove', '/api/download': 'download', '/api/install': 'install' };
       if (ACTIONS[sub]) {
         if (!String(req.headers['content-type'] ?? '').startsWith('application/json')) return json(res, 415, { error: 'EXT_CONTENT_TYPE' });
-        const { id } = await readJson(req);
-        const job = manager.start(ACTIONS[sub], String(id ?? ''));
+        const { id, withDeps } = await readJson(req);
+        const job = manager.start(ACTIONS[sub], String(id ?? ''), { withDeps: withDeps === true });
         return json(res, 202, { job });
       }
       if (sub === '/api/import') {

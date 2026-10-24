@@ -36,6 +36,14 @@ public final class ExtensionsActivity extends AppCompatActivity {
   private String base;
   private ValueCallback<Uri[]> pending;
   private boolean viaAuth;
+  private static final long START_TIMEOUT_MS = 180_000L;
+  private final Handler handler = new Handler(Looper.getMainLooper());
+  private LinearLayout root;
+  private android.widget.Button startButton;
+  private boolean opened;
+  private boolean starting;
+  private boolean restoring;
+  private long startedAt;
 
   @Override
   protected void onCreate(Bundle state) {
@@ -47,15 +55,107 @@ public final class ExtensionsActivity extends AppCompatActivity {
     root.addView(status);
     setContentView(root);
     setTitle(UiText.choose("扩展中心", "Extensions"));
+    startButton = new android.widget.Button(this);
+    startButton.setText(UiText.choose("启动服务", "Start service"));
+    startButton.setVisibility(android.view.View.GONE);
+    startButton.setOnClickListener(v -> startService());
+    LinearLayout.LayoutParams lp =
+        new LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+    lp.setMargins(32, 0, 32, 24);
+    root.addView(startButton, lp);
+    this.root = root;
+    tryOpen(true);
+  }
+
+  /**
+   * Web 服务没在跑（或进程重启后还没接回已运行的实例）时不再停在空白页：先尝试只读接回，
+   * 接不回就给出一键「启动服务」，启动成功后自动进入扩展中心。
+   */
+  private void tryOpen(boolean allowRestore) {
+    if (opened || isFinishing() || isDestroyed()) return;
     HarnessController controller = HarnessController.get(this);
     String authUrl = controller.getWebAuthUrl();
-    base = authUrl == null || authUrl.isEmpty() ? null : WebPreviewPolicy.loopbackBaseUrl(authUrl);
-    if (base == null) {
-      status.setText(UiText.choose("请先启动 Web 服务，再打开扩展中心。", "Start the web service first."));
+    String loopback =
+        authUrl == null || authUrl.isEmpty() ? null : WebPreviewPolicy.loopbackBaseUrl(authUrl);
+    if (loopback != null) {
+      proceed(controller, authUrl, loopback);
       return;
     }
+    if (allowRestore && controller.needsWebSessionRestore()) {
+      status.setText(UiText.choose("正在连接已运行的 Web 服务…", "Reconnecting to the running web service…"));
+      restoring = true;
+      controller.restoreRunningWebSession(
+          () ->
+              handler.post(
+                  () -> {
+                    restoring = false;
+                    tryOpen(false);
+                  }));
+      return;
+    }
+    if (starting) return;
+    status.setText(
+        UiText.choose(
+            "Web 服务没有运行。扩展中心要靠它来下载和启用扩展包，点下面的按钮启动（与首页的「启动」相同）。",
+            "The web service is not running. The Extensions page needs it; tap below to start it (same as Start on the home screen)."));
+    startButton.setEnabled(true);
+    startButton.setVisibility(android.view.View.VISIBLE);
+  }
+
+  private void startService() {
+    startButton.setEnabled(false);
+    starting = true;
+    startedAt = android.os.SystemClock.elapsedRealtime();
+    status.setText(UiText.choose("正在启动 Web 服务…", "Starting the web service…"));
+    boolean queued =
+        FirstRunWebStart.enqueueVisible(
+            this,
+            false,
+            false,
+            msg ->
+                runOnUiThread(
+                    () -> {
+                      if (!opened && msg != null && !msg.isEmpty())
+                        status.setText(com.deepseekharness.app.util.UiStateText.render(msg));
+                    }));
+    if (!queued) {
+      starting = false;
+      status.setText(UiText.choose("没能启动 Web 服务，请回首页点「启动」。", "Could not start the web service; use Start on the home screen."));
+      startButton.setEnabled(true);
+      return;
+    }
+    handler.postDelayed(this::waitForService, 1000);
+  }
+
+  private void waitForService() {
+    if (opened || isFinishing() || isDestroyed()) return;
+    String authUrl = HarnessController.get(this).getWebAuthUrl();
+    if (authUrl != null && !authUrl.isEmpty()) {
+      starting = false;
+      tryOpen(false);
+      return;
+    }
+    if (android.os.SystemClock.elapsedRealtime() - startedAt > START_TIMEOUT_MS) {
+      starting = false;
+      status.setText(
+          UiText.choose(
+              "Web 服务三分钟内没有就绪。请回首页查看启动状态，就绪后再打开扩展中心，或再点一次。",
+              "The web service was not ready within 3 minutes. Check the home screen, or tap again."));
+      startButton.setEnabled(true);
+      startButton.setVisibility(android.view.View.VISIBLE);
+      return;
+    }
+    handler.postDelayed(this::waitForService, 1000);
+  }
+
+  private void proceed(HarnessController controller, String authUrl, String loopback) {
+    opened = true;
+    base = loopback;
+    root.removeView(startButton);
+    LinearLayout root = this.root;
     status.setText(UiText.choose("正在准备扩展包…", "Preparing extension packs…"));
-    Handler main = new Handler(Looper.getMainLooper());
+    Handler main = handler;
     new Thread(
             () -> {
               String error =
@@ -167,7 +267,15 @@ public final class ExtensionsActivity extends AppCompatActivity {
   }
 
   @Override
+  protected void onResume() {
+    super.onResume();
+    // 用户可能去首页启动了服务再回来：直接进入。
+    if (!opened && !starting && !restoring && root != null) tryOpen(false);
+  }
+
+  @Override
   protected void onDestroy() {
+    handler.removeCallbacksAndMessages(null);
     if (pending != null) pending.onReceiveValue(null);
     if (web != null) {
       ((ViewGroup) web.getParent()).removeView(web);

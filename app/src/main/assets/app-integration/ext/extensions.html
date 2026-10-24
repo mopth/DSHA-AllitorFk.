@@ -14,6 +14,7 @@ h1{font-size:20px;margin:0 0 4px}h2{font-size:15px;color:var(--mut);margin:22px 
 button{font:inherit;border:0;border-radius:9px;padding:7px 12px;background:var(--acc);color:#fff;min-width:64px}button.sec{background:transparent;color:var(--warn);border:1px solid var(--warn)}
 button:disabled{opacity:.45}.right{display:flex;flex-direction:column;gap:6px;align-items:flex-end}
 pre{white-space:pre-wrap;word-break:break-all;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px;font-size:12px;max-height:220px;overflow:auto}
+/* 卡片上的错误提示 */.err{margin-top:6px;padding:6px 8px;border-radius:8px;background:#fee2e2;color:#991b1b;font-size:13px}
 label.import,a.dl{font-size:12px;color:var(--acc);text-decoration:none}.guide{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:13px}.guide ol{margin:4px 0 0;padding-left:20px}progress{width:140px}input[type=file]{display:none}
 </style></head><body>
 <h1 id="title">扩展中心</h1>
@@ -48,9 +49,31 @@ const MSG={EXT_BASE_TOOLS_MISMATCH:T('基底工具集版本与扩展包不匹配
   EXT_BUSY:T('已有任务在执行，请稍等','Another task is running; please wait'),
   EXT_NO_SPACE:T('手机存储空间不够，请清理一些空间后再试。','Not enough storage space; free some space and try again.'),
   EXT_NETWORK:T('网络连接失败。请检查网络后再点一次，已下载的部分会接着下；也可以改用「在浏览器中下载」。','Network error. Check your connection and tap again; it will resume. You can also use “Download in browser”.'),
-  EXT_REQUIRES:T('需要先启用依赖的扩展包','Enable the required pack first'),
+  EXT_REQUIRES:T('需要先装好依赖的扩展包','The required packs must be installed first'),
+  EXT_REQUIRES_CYCLE:T('扩展目录里的依赖关系有误，无法安装','The catalog has a dependency loop; cannot install'),
+  EXT_ALREADY_ACTIVE:T('这个扩展包已经启用了','This pack is already enabled'),
+  EXT_NOT_ACTIVE:T('这个扩展包还没有启用','This pack is not enabled'),
+  EXT_REQUIRED_BY:T('还有其它扩展包依赖它，请先移除这些包','Other packs depend on it; remove them first'),
+  EXT_REMOVE_WOULD_TOUCH:T('移除会影响其它软件，已停止，未做改动','Removing would affect other software; stopped without changes'),
+  EXT_MANIFEST_MISMATCH:T('扩展包内容与 App 目录不一致，已拒绝。请重新下载。','The pack does not match the app catalog; refused. Please download it again.'),
+  EXT_VERSION_DRIFT:T('安装出的软件版本不对，已全部回滚','Installed versions did not match; everything was rolled back'),
+  EXT_PREFIX_EXISTS:T('目标目录已存在（可能是上次没装完），请先移除后再启用','The target folder already exists (maybe a previous attempt); remove it and try again'),
+  EXT_CMD_FAILED:T('安装命令执行失败，已回滚。任务日志里有详细输出。','An install command failed and was rolled back. See the task log for details.'),
+  EXT_UNKNOWN:T('App 目录里没有这个扩展包','This pack is not in the app catalog'),
+  EXT_ID:T('扩展包名称无效','Invalid pack name'),
+  EXT_FORBIDDEN:T('请求被拒绝，请关闭扩展中心后重新打开','Request refused; close and reopen the Extensions page'),
   EXT_DOWNLOAD_BASE:T('下载地址配置无效，已拒绝','Invalid download location; refused')};
-const msg=e=>{const k=String(e).split(':')[0];return MSG[k]?MSG[k]+' ('+e+')':String(e)};
+const pname=id=>{const p=state&&state.packs.find(x=>x.id===id);return p?zh(p.name)+'（'+id+'）':id};
+function msg(e,dep){const t=String(e),k=t.split(':')[0],rest=t.slice(k.length+1);
+  let m=MSG[k]?MSG[k]:T('操作失败：','Failed: ')+t;
+  if((k==='EXT_REQUIRES'||k==='EXT_REQUIRED_BY')&&rest)m+=T('：',': ')+rest.split(',').map(pname).join(T('、',', '));
+  if(dep)m=T('依赖 ','Dependency ')+pname(dep)+T(' 没装好：',' failed: ')+m;
+  return MSG[k]?m+' ('+t+')':m}
+// 还缺哪些依赖（先依赖后本包），与服务端 missingDeps 同序。
+function needs(p){const out=[];const by=id=>state.packs.find(x=>x.id===id);
+  const visit=(q,path)=>{for(const r of (q.requires||[])){const d=by(r);if(!d||path.includes(r))continue;if(d.active||out.includes(r))continue;visit(d,path.concat(r));out.push(r)}};
+  visit(p,[p.id]);return out}
+const cardErr={};
 function render(){
   const s=state,list=$('#list');list.textContent='';
   const banner=$('#banner');banner.style.display=s.baseOk?'none':'block';banner.textContent=s.baseOk?'':msg(s.baseError);
@@ -63,7 +86,7 @@ function render(){
       const m=document.createElement('div');m.className='main';
       const n=document.createElement('div');n.className='name';n.textContent=zh(p.name)+'  '+(p.version||'');
       const d=document.createElement('div');d.className='meta';d.textContent=zh(p.summary);
-      const z=document.createElement('div');z.className='meta';z.textContent=T('文件 ','File ')+mb(p.bytes)+T(' · 安装后约 ',' · about ')+mb(p.installedBytes)+T('',' installed')+(p.requires.length?T(' · 依赖 ',' · needs ')+p.requires.join(', '):'');
+      const z=document.createElement('div');z.className='meta';z.textContent=T('文件 ','File ')+mb(p.bytes)+T(' · 安装后约 ',' · about ')+mb(p.installedBytes)+T('',' installed')+(p.requires.length?T(' · 依赖 ',' · needs ')+p.requires.map(r=>{const d=s.packs.find(x=>x.id===r);return r+(d&&d.active?' ✓':T('（未启用）',' (not enabled)'))}).join(', '):'');
       m.append(n,d,z);
       const tags=[[p.active?T('已启用','Enabled'):(p.available?T('可启用','Ready'):T('未下载','Not downloaded')),p.active?'on':''],...(p.agpl?[['AGPL-3.0','agpl']]:[]),...p.licenses.map(l=>[l,''])];
       for(const [t,cls] of tags){const e=document.createElement('span');e.className='tag '+cls;e.textContent=t;m.append(e)}
@@ -75,6 +98,9 @@ function render(){
       if(mine&&busy&&s.job.total){const g=document.createElement('progress');g.max=s.job.total;g.value=s.job.done;const t=document.createElement('span');t.className='meta';t.textContent=mb(s.job.done)+' / '+mb(s.job.total);r.append(g,t)}
       if(!p.active&&p.url){const a=document.createElement('a');a.className='dl';a.href=p.url;a.textContent=T('在浏览器中下载','Download in browser');r.append(a)}
       if(!p.active){const l=document.createElement('label');l.className='import';l.textContent=p.available?T('重新导入','Re-import'):T('从文件导入','Import from file');const i=document.createElement('input');i.type='file';i.accept='.dshx,application/octet-stream';i.onchange=()=>importFile(p,i.files[0]);l.append(i);r.append(l)}
+      const failedHere=s.job&&!busy&&s.job.ok===false&&s.job.pid===p.id;
+      const em=cardErr[p.id]||(failedHere?msg(s.job.error,s.job.dep):'');
+      if(em){const e=document.createElement('div');e.className='err';e.textContent=em;m.append(e)}
       c.append(m,r);list.append(c);
     }
   }
@@ -85,7 +111,15 @@ async function act(action,p){
   if(action==='remove'&&!confirm(T('移除「'+zh(p.name)+'」？其安装的软件包会被清理（与其它扩展共用的保留）。','Remove “'+zh(p.name)+'”? Its packages are cleaned up (shared ones are kept).')))return;
   if((action==='activate'||action==='install')&&p.agpl&&!confirm(T('该扩展包含 AGPL-3.0 组件（ghostscript），继续？','This pack contains AGPL-3.0 software (ghostscript). Continue?')))return;
   if(action==='install'&&!confirm(T('将下载 '+mb(p.bytes)+' 并安装「'+zh(p.name)+'」，建议使用 Wi-Fi。继续？','This downloads '+mb(p.bytes)+' and installs “'+zh(p.name)+'”. Wi-Fi recommended. Continue?')))return;
-  try{await post(action,{id:p.id})}catch(e){alert(msg(e.message))}refresh();
+  const body={id:p.id};
+  if(action==='activate'||action==='install'){const miss=needs(p);
+    if(miss.length){const dl=miss.map(id=>state.packs.find(x=>x.id===id)).filter(d=>!d.available).reduce((a,d)=>a+d.bytes,0);
+      const names=miss.map(pname).join(T('、',', '));
+      if(!confirm(T('「'+zh(p.name)+'」需要先装好：'+names+'。'+(dl?'将先下载 '+mb(dl)+'（建议使用 Wi-Fi），':'')+'再依次启用。现在一起装吗？',
+        '“'+zh(p.name)+'” needs: '+names+'. '+(dl?'This first downloads '+mb(dl)+' (Wi-Fi recommended), then ':'It will ')+'enable them in order. Continue?')))return;
+      body.withDeps=true}}
+  delete cardErr[p.id];
+  try{await post(action,body)}catch(e){cardErr[p.id]=msg(e.message)}refresh();
 }
 async function importFile(p,f){
   if(!f)return;$('#log').textContent=T('正在导入 ','Importing ')+f.name+' ('+mb(f.size)+T('），会自动校验 sha256…','), sha256 is checked automatically…');
