@@ -5,6 +5,11 @@ body{font:14px system-ui,sans-serif;margin:0;padding:12px;background:#111;color:
 button{background:#2a62d6;color:#fff;border:0;border-radius:6px;padding:6px 10px;margin:2px}button.deny{background:#555}button.warn{background:#b33}
 .ok{color:#6c6}.bad{color:#e66}a{color:#8ab4ff}</style></head><body>
 <h1 style="font-size:18px">AllitorFk 控制台</h1>
+<details class="card"><summary>新手引导</summary><ol>
+<li>在「扩展中心」安装 allitor-tools，并在 DSH 添加 MCP 服务器：命令 <code>allitor-mcp</code>。</li>
+<li>AI 需要浏览网页或发布预览时会发起请求，出现在下方；你点「批准」才生效，可随时撤销。</li>
+<li>预览页点「框选」拖出区域并写批注，批注会追加到当前会话输入框（不会自动发送）。</li>
+<li>插件兼容性列出各插件 engines.dsh 与当前核心是否匹配。</li></ol></details>
 <h2>AI 接管授权</h2><div id="tk" class="muted">加载中…</div><button class="warn" id="revokeAll">全部撤销</button>
 <h2>静态页预览</h2><div id="pv" class="muted"></div>
 <h2>框选批注</h2><div id="an" class="muted"></div>

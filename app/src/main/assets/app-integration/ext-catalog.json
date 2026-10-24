@@ -440,9 +440,9 @@
   {
    "id": "allitor-tools",
    "file": "allitor-tools.dshx",
-   "sha256": "b857e7f88cf42487724a4271f4242bca61bf1f5e23f6aa0cb433f1ba5f6d369d",
-   "bytes": 6729,
-   "installedBytes": 10484,
+   "sha256": "da9ff361dc314a901e04209708093457426249bab5e4a9fd62db8a1da4afe48e",
+   "bytes": 7787,
+   "installedBytes": 12579,
    "name": {
     "zh": "AllitorFk 代理工具（MCP）",
     "en": "AllitorFk agent tools (MCP)"
@@ -462,5 +462,5 @@
    ]
   }
  ],
- "packsSha256": "86c13c545606b934d72f52c6f757f269c14a32a545b9ee55109fffe8354d3f5d"
+ "packsSha256": "dddf6dae7cfac1fe769f2c2848cf2d2c4d87db0b44e3742216afba42567fa26a"
 }

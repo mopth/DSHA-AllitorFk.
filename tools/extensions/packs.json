@@ -612,7 +612,7 @@
           "kind": "local",
           "path": "tools/allitor-mcp/dist/allitor-mcp-tree.tar",
           "url": "https://github.com/mopth/DSHA-AllitorFk./tree/allitorfk/rc3/tools/allitor-mcp",
-          "sha256": "2b6ab5f6ed085c7e49d07c98f52c3e5af7c09af68ed62bd2b683c783d3e7096e",
+          "sha256": "eb9459f9f92a2bea52dd79ddddd0764447f9118bf4b299ab1af6a61b96c9094f",
           "strip": "allitor-mcp/",
           "license": "MIT (AllitorFk, own code)",
           "licenseFile": "LICENSE"
@@ -620,10 +620,12 @@
       ],
       "version": "0.1.0",
       "bins": [
-        "bin/allitor-mcp"
+        "bin/allitor-mcp",
+        "bin/allitor-build-check"
       ],
       "smoke": [
-        "allitor-mcp --version"
+        "allitor-mcp --version",
+        "allitor-build-check --version"
       ]
     }
   ]

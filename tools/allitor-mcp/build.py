@@ -13,6 +13,7 @@ def add(t, name, data, mode):
 def main():
     OUT.parent.mkdir(exist_ok=True); buf = io.BytesIO()
     with tarfile.open(fileobj=buf, mode='w', format=tarfile.PAX_FORMAT) as t:
+        add(t, 'allitor-mcp/bin/allitor-build-check', (HERE/'src/build-check.sh').read_bytes(), 0o755)
         add(t, 'allitor-mcp/bin/allitor-mcp', BIN, 0o755)
         for n in sorted(FILES): add(t, n, FILES[n].read_bytes(), 0o644)
     OUT.write_bytes(buf.getvalue())

@@ -2589,6 +2589,17 @@
         "node24"
       ],
       "environment": {}
+    },
+    {
+      "path": "tools/test-allitor-build-check.py",
+      "stage": "fast",
+      "reason": "AllitorFk F1 compile retry/self-check",
+      "args": [],
+      "timeoutSeconds": 120,
+      "requires": [
+        "python39"
+      ],
+      "environment": {}
     }
   ],
   "historicalExcluded": [
