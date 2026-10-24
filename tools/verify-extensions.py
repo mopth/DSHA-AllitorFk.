@@ -63,6 +63,9 @@ CHECKS = {
                " && kpsewhich ctex.sty >/dev/null && echo texlive-pdf-ok",
     'ghostscript': "gs --version",
     'devtools': "gdb --version | sed -n 1p && strace -V | sed -n 1p && rg --version | sed -n 1p && fdfind --version && tmux -V && git lfs version && autoconf --version | sed -n 1p",
+    'assetstudio-mcp': "assetstudio-mcp --version && printf '%s\\n' '{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"tools/list\"}' | assetstudio-mcp --stdio > /tmp/am.out && grep -c list_assets /tmp/am.out",
+    'allitor-tools': "allitor-mcp --version && allitor-build-check --version && allitor-build-check --expect /etc/os-release -- true"
+                     " && printf '%s\\n' '{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"tools/list\"}' | allitor-mcp > /tmp/al.out && grep -c browser_open /tmp/al.out",
 }
 # 运行输出里必须出现的文字（防止“命令成功但没真跑”）。
 EXPECT = {'dev-base': 'hello-g++', 'clang': 'tidy-ok', 'jdk21': 'hello-java', 'android-build': 'apk-signed-ok', 'texlive': 'texlive-pdf-ok', 'go': 'hello-go', 'rust': 'hello-rust', 'kotlin': 'hello-kotlin',
