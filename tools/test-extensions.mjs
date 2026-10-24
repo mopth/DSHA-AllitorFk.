@@ -137,72 +137,138 @@ try {
     for (const p of real.packs) assert.equal(packUrl(real, p), real.download.base + '/' + p.id + '.dshx');
 
     const stream = (buf, chunk = 65536) => (async function* () { for (let i = 0; i < buf.length; i += chunk) yield buf.subarray(i, i + chunk); })();
+    const ok200 = (buf, extra = {}) => ({ status: 200, headers: { 'content-length': String(buf.length), ...extra }, body: stream(buf) });
+    const ok206 = (from, extra) => ({ status: 206, headers: { 'content-range': `bytes ${from}-${body.length - 1}/${body.length}`, 'content-length': String(body.length - from), ...extra }, body: stream(body.subarray(from)) });
     let calls = [];
-    const mk = (fetchImpl, free = () => 1e12) => createExtensionManager({ root: dir, stateDir: join(dir, 'state'), catalogPath, fetch: fetchImpl, sleep: async () => {}, freeBytes: free });
+    const mk = (fetchImpl, more = {}) => createExtensionManager({ root: dir, stateDir: join(dir, 'state'), catalogPath, fetch: fetchImpl, sleep: async () => {}, freeBytes: () => 1e12, ...more });
     const packs = join(dir, 'state/packs');
-    const reset = () => { fs.rmSync(join(dir, 'state'), { recursive: true, force: true }); calls = []; };
+    const PART = join(packs, `.demo.${sha.slice(0, 8)}.download`);
+    const reset = () => { fs.rmSync(join(dir, 'state'), { recursive: true, force: true }); calls = []; writeCat(); };
+    const digestOf = (f) => createHash('sha256').update(fs.readFileSync(f)).digest('hex');
 
-    // 1) 正常下载 + 进度
+    // 1) 正常下载 + 进度 + manual 重定向参数
     reset();
     let progress = [];
-    let m = mk(async (url, opt) => { calls.push([url, opt.headers.range]); return { status: 200, body: stream(body) }; });
+    let m = mk(async (url, opt) => { calls.push([url, opt.headers.range, opt.redirect]); return ok200(body); });
     assert.equal(await m.download('demo', (d, t) => progress.push([d, t])), 'downloaded');
-    assert.deepEqual(calls, [[base + '/demo.dshx', undefined]]);
-    assert.equal(createHash('sha256').update(fs.readFileSync(join(packs, 'demo.dshx'))).digest('hex'), sha);
+    assert.deepEqual(calls, [[base + '/demo.dshx', undefined, 'manual']]);
+    assert.equal(digestOf(join(packs, 'demo.dshx')), sha);
     assert.deepEqual(progress.at(-1), [body.length, body.length]);
-    assert.equal(await m.download('demo'), 'present', 'already present and verified');
+    assert.equal(await m.download('demo'), 'present');
 
-    // 2) sha256 不符：拒绝并删除，不留下最终文件
+    // 2) 合法重定向链（github.com → release-assets）可跟随；到其它主机 / http / userinfo / 端口 / 超过 3 跳一律拒绝
+    reset();
+    const asset = 'https://release-assets.githubusercontent.com/x/demo?sig=1';
+    m = mk(async (url) => { calls.push(url); return url.startsWith(base) ? { status: 302, headers: { location: asset }, body: null } : ok200(body); });
+    assert.equal(await m.download('demo'), 'downloaded');
+    assert.deepEqual(calls, [base + '/demo.dshx', asset]);
+    for (const loc of ['https://evil.example/demo.dshx', 'http://objects.githubusercontent.com/x', 'https://u:p@objects.githubusercontent.com/x',
+      'https://objects.githubusercontent.com:8443/x', 'https://github.com.evil.example/x']) {
+      reset();
+      let fetched = [];
+      m = mk(async (url) => { fetched.push(url); return url.startsWith(base) ? { status: 302, headers: { location: loc }, body: null } : ok200(body); });
+      await assert.rejects(m.download('demo'), /EXT_DOWNLOAD_REDIRECT/, loc);
+      assert.equal(fetched.length, 1, 'never contacted ' + loc);
+      assert.ok(!fs.existsSync(join(packs, 'demo.dshx')));
+    }
+    reset();
+    m = mk(async () => ({ status: 302, headers: { location: base + '/demo.dshx' }, body: null }));
+    await assert.rejects(m.download('demo'), /EXT_DOWNLOAD_REDIRECT:TOO_MANY/);
+
+    // 3) sha256 不符：拒绝并删除
     reset();
     const evil = Buffer.from(body); evil[5] ^= 1;
-    m = mk(async () => ({ status: 200, body: stream(evil) }));
+    m = mk(async () => ok200(evil));
     await assert.rejects(m.download('demo'), /EXT_PACK_DIGEST/);
-    assert.ok(!fs.existsSync(join(packs, 'demo.dshx')) && !fs.existsSync(join(packs, '.demo.dshx.download')));
+    assert.ok(!fs.existsSync(join(packs, 'demo.dshx')) && !fs.existsSync(PART));
 
-    // 3) 超长：EXT_PACK_SIZE
+    // 4) 超长正文与超大 Content-Length：EXT_PACK_SIZE
     reset();
-    m = mk(async () => ({ status: 200, body: stream(Buffer.concat([body, Buffer.alloc(10)])) }));
+    m = mk(async () => ({ status: 200, headers: {}, body: stream(Buffer.concat([body, Buffer.alloc(10)])) }));
     await assert.rejects(m.download('demo'), /EXT_PACK_SIZE/);
+    reset();
+    fs.mkdirSync(packs, { recursive: true }); fs.writeFileSync(PART, body.subarray(0, 1000));
+    m = mk(async () => ({ status: 206, headers: { 'content-range': `bytes 1000-${body.length - 1}/${body.length}`, 'content-length': String(body.length) }, body: stream(body.subarray(1000)) }));
+    await assert.rejects(m.download('demo'), /EXT_PACK_SIZE/, 'content-length larger than remaining');
 
-    // 4) 断网：重试 3 次后 EXT_NETWORK，已下部分保留；再次调用用 Range 续传（206）
+    // 5) 断网：重试 3 次后 EXT_NETWORK，已下部分保留；再次调用用 Range 续传，Content-Range 吻合才接上
     reset();
     let n = 0;
-    m = mk(async (url, opt) => { n++; calls.push(opt.headers.range);
-      if (!opt.headers.range) return { status: 200, body: (async function* () { yield body.subarray(0, 100000); throw new Error('ECONNRESET'); })() };
+    m = mk(async (url, opt) => { n++;
+      if (!opt.headers.range) return { status: 200, headers: {}, body: (async function* () { yield body.subarray(0, 100000); throw new Error('ECONNRESET'); })() };
       throw new Error('ENOTFOUND'); });
     await assert.rejects(m.download('demo'), /EXT_NETWORK/);
     assert.equal(n, 3);
-    assert.equal(fs.statSync(join(packs, '.demo.dshx.download')).size, 100000);
-    m = mk(async (url, opt) => { calls.push(opt.headers.range); assert.equal(opt.headers.range, 'bytes=100000-'); return { status: 206, body: stream(body.subarray(100000)) }; });
+    assert.equal(fs.statSync(PART).size, 100000);
+    m = mk(async (url, opt) => { assert.equal(opt.headers.range, 'bytes=100000-'); return ok206(100000); });
     assert.equal(await m.download('demo'), 'downloaded');
-    assert.equal(createHash('sha256').update(fs.readFileSync(join(packs, 'demo.dshx'))).digest('hex'), sha);
+    assert.equal(digestOf(join(packs, 'demo.dshx')), sha);
 
-    // 5) 服务器不支持 Range（回 200）：从头重下
+    // 6) 206 但 Content-Range 不吻合（起点/总长不对或缺失）：丢弃已下部分，从 0 重下
+    for (const bad of [`bytes 0-${body.length - 1}/${body.length}`, `bytes 1000-${body.length - 1}/${body.length + 5}`, undefined]) {
+      reset();
+      fs.mkdirSync(packs, { recursive: true }); fs.writeFileSync(PART, Buffer.alloc(1000, 9));
+      calls = [];
+      m = mk(async (url, opt) => { calls.push(opt.headers.range);
+        if (opt.headers.range) return { status: 206, headers: bad ? { 'content-range': bad } : {}, body: stream(body.subarray(1000)) };
+        return ok200(body); });
+      assert.equal(await m.download('demo'), 'downloaded', String(bad));
+      assert.deepEqual(calls, ['bytes=1000-', undefined]);
+      assert.equal(digestOf(join(packs, 'demo.dshx')), sha);
+    }
+
+    // 7) 服务器不支持 Range（回 200）：从头重下
     reset();
-    fs.mkdirSync(packs, { recursive: true });
-    fs.writeFileSync(join(packs, '.demo.dshx.download'), Buffer.alloc(5000, 1));
-    m = mk(async () => ({ status: 200, body: stream(body) }));
+    fs.mkdirSync(packs, { recursive: true }); fs.writeFileSync(PART, Buffer.alloc(5000, 1));
+    m = mk(async () => ok200(body));
     assert.equal(await m.download('demo'), 'downloaded');
 
-    // 6) HTTP 404 → EXT_NETWORK:HTTP_404
+    // 8) 连接挂起：空闲超时中止并重试，最终 EXT_NETWORK:TIMEOUT_IDLE，任务锁随之释放；总时长上限
     reset();
-    m = mk(async () => ({ status: 404, body: null }));
+    n = 0;
+    const hang = (signal) => (async function* () { yield body.subarray(0, 10); await new Promise((_, reject) => signal.addEventListener('abort', () => reject(new Error('aborted')))); })();
+    m = mk(async (url, opt) => { n++; return { status: 200, headers: {}, body: hang(opt.signal) }; }, { idleMs: 40 });
+    const t0 = Date.now();
+    await assert.rejects(m.download('demo'), /EXT_NETWORK:TIMEOUT_IDLE/);
+    assert.equal(n, 3); assert.ok(Date.now() - t0 < 5000);
+    reset();
+    m = mk(async (url, opt) => new Promise((_, reject) => opt.signal.addEventListener('abort', () => reject(new Error('aborted')))), { idleMs: 10_000, totalMs: 60 });
+    await assert.rejects(m.download('demo'), /EXT_NETWORK:TIMEOUT_TOTAL/);
+    reset();
+    m = mk(async (url, opt) => ({ status: 200, headers: {}, body: hang(opt.signal) }), { idleMs: 40 });
+    m.start('download', 'demo');
+    assert.equal(m.busy(), true);
+    for (let k = 0; k < 100 && m.busy(); k++) await new Promise(r => setTimeout(r, 20));
+    assert.equal(m.busy(), false, 'lock released after hung download');
+    assert.match(m.list().job.error, /EXT_NETWORK:TIMEOUT_IDLE/);
+
+    // 9) HTTP 404 → EXT_NETWORK:HTTP_404；空间预检不发请求；目录地址被改到别处拒绝
+    reset();
+    m = mk(async () => ({ status: 404, headers: {}, body: null }));
     await assert.rejects(m.download('demo'), /EXT_NETWORK:HTTP_404/);
-
-    // 7) 空间预检：下载前就拒绝，不发请求
     reset();
     let fetched = false;
-    m = mk(async () => { fetched = true; return { status: 200, body: stream(body) }; }, () => 1000);
+    m = mk(async () => { fetched = true; return ok200(body); }, { freeBytes: () => 1000 });
     await assert.rejects(m.download('demo'), /EXT_NO_SPACE/);
     assert.equal(fetched, false);
 
-    // 8) 目录里的地址被改到别处：拒绝
+    // 10) 不跟随符号链接：packs 目录或 .download 是链接时拒绝写入
+    reset();
+    const elsewhere = join(dir, 'elsewhere'); fs.mkdirSync(elsewhere, { recursive: true });
+    fs.mkdirSync(join(dir, 'state'), { recursive: true }); fs.symlinkSync(elsewhere, packs);
+    m = mk(async () => ok200(body));
+    await assert.rejects(m.download('demo'), /EXT_PACKS_DIR/);
+    reset();
+    fs.mkdirSync(packs, { recursive: true }); fs.symlinkSync(join(elsewhere, 'target'), PART);
+    await assert.rejects(m.download('demo'), /EXT_PACKS_DIR/);
+    assert.ok(!fs.existsSync(join(elsewhere, 'target')));
+
     reset();
     fs.writeFileSync(catalogPath, JSON.stringify({ base: {}, download: { base: 'https://evil.example/x' }, packs: [{ id: 'demo', file: 'demo.dshx', sha256: sha, bytes: body.length, installedBytes: 1, requires: [] }] }));
     m = mk(async () => { throw new Error('should not fetch'); });
     await assert.rejects(m.download('demo'), /EXT_DOWNLOAD_BASE/);
     await assert.rejects(m.download('nope'), /EXT_UNKNOWN/);
-    console.log('ok   download: pinned URL, progress, sha256 reject, size cap, retry+resume (Range/206), 200 restart, HTTP error, space precheck, base pinning');
+    console.log('ok   download: pinned URL, manual redirects (3 hops, host allow-list), sha256 reject, size caps, retry+resume with exact Content-Range, restart, idle/total timeouts release the lock, HTTP error, space precheck, no symlink follow, base pinning');
   } finally { rmSync(dir, { recursive: true, force: true }); }
 
   // 路由：download/install 与 activate 同等保护，且只把 id 交给 manager（请求里的 URL 被忽略）。

@@ -3,7 +3,7 @@
 // 移除只清理本包新装且已无人依赖的包（apt 模拟结果必须是该集合的子集），基底升级过的库保留。
 import { spawn } from 'node:child_process';
 import { createHash, randomBytes } from 'node:crypto';
-import { createReadStream, createWriteStream, existsSync, mkdirSync, readFileSync, renameSync, rmSync, statfsSync,
+import { constants, openSync, createReadStream, createWriteStream, existsSync, mkdirSync, readFileSync, renameSync, rmSync, statfsSync,
   writeFileSync, symlinkSync, readlinkSync, lstatSync, unlinkSync, cpSync, readdirSync, statSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { extractDshx, verifySums } from './dshx.js';
@@ -13,6 +13,7 @@ const ID = /^[a-z0-9][a-z0-9-]{0,31}$/;
 // 一键下载只认这个固定前缀：本 fork 的 Release 资产；目录（随 APK 内置）是信任根。
 export const RELEASE_PREFIX = 'https://github.com/mopth/DSHA-AllitorFk./releases/download/';
 const TAG = /^[A-Za-z0-9][A-Za-z0-9._-]{0,100}$/;
+const DOWNLOAD_HOSTS = new Set(['github.com', 'objects.githubusercontent.com', 'release-assets.githubusercontent.com']);
 
 /** 由目录算出某包的下载地址；目录里的 base 不在固定前缀下或文件名不合规时拒绝。 */
 export function packUrl(cat, entry) {
@@ -308,8 +309,9 @@ export function createExtensionManager(options = {}) {
   }
 
   /**
-   * 一键下载：从固定 Release 地址拉取，断点续传（Range），失败自动重试；落盘前按目录核对大小与 sha256，
-   * 不符即删除并拒绝。同一个 .download 文件保留到下次，可手动“重试”接着下。
+   * 一键下载：从固定 Release 地址拉取。手动跟随最多 3 次重定向（每跳 https、主机白名单、无 userinfo/端口）；
+   * 空闲 60 秒无数据或超过总时长即中止（不会一直占着任务锁）；断点续传只接受与已下字节完全吻合的
+   * Content-Range，否则从头下；落盘前按内置目录核对大小与 sha256，不符即删除并拒绝。
    */
   async function download(pid, onProgress = () => {}) {
     if (!ID.test(pid)) throw new Error('EXT_ID');
@@ -318,41 +320,77 @@ export function createExtensionManager(options = {}) {
     if (!entry) throw new Error('EXT_UNKNOWN');
     const url = packUrl(cat, entry);
     mkdirSync(packsDir, { recursive: true, mode: 0o700 });
+    const dirStat = lstatSync(packsDir);
+    if (dirStat.isSymbolicLink() || !dirStat.isDirectory()) throw new Error('EXT_PACKS_DIR');
     const final = join(packsDir, entry.file);
-    if (existsSync(final) && statSync(final).size === entry.bytes && await sha256File(final) === entry.sha256) return 'present';
-    const part = join(packsDir, `.${entry.file}.download`);
-    let have = 0;
-    try { have = statSync(part).size; } catch {}
+    const finalStat = (() => { try { return lstatSync(final); } catch { return null; } })();
+    if (finalStat && finalStat.isFile() && finalStat.size === entry.bytes && await sha256File(final) === entry.sha256) return 'present';
+    const part = join(packsDir, `.${entry.id}.${entry.sha256.slice(0, 8)}.download`);
+    const partSize = () => { try { const st = lstatSync(part); if (!st.isFile()) throw new Error('EXT_PACKS_DIR'); return st.size; } catch (e) { if (e.message === 'EXT_PACKS_DIR') throw e; return 0; } };
+    let have = partSize();
     if (have > entry.bytes) { rmSync(part, { force: true }); have = 0; }
     const need = entry.bytes - have + 256 * MB;
     const free = freeBytes(home);
     if (free < need) throw new Error(`EXT_NO_SPACE:need=${Math.ceil(need / MB)}MB,free=${Math.floor(free / MB)}MB`);
+    const idleMs = options.idleMs ?? 60_000;
+    const deadline = Date.now() + (options.totalMs ?? 2 * 3600_000);
     let lastError = null;
     for (let attempt = 1; attempt <= 3; attempt++) {
+      const ctl = new AbortController();
+      let idle = null;
+      const kick = () => { clearTimeout(idle); idle = setTimeout(() => ctl.abort(new Error('EXT_NETWORK:TIMEOUT_IDLE')), idleMs); };
+      const total = setTimeout(() => ctl.abort(new Error('EXT_NETWORK:TIMEOUT_TOTAL')), Math.max(0, deadline - Date.now()));
       try {
-        try { have = statSync(part).size; } catch { have = 0; }
+        if (Date.now() >= deadline) throw new Error('EXT_NETWORK:TIMEOUT_TOTAL');
+        have = partSize();
         if (have < entry.bytes) {
           say(`下载 ${entry.file}（${attempt > 1 ? '第 ' + attempt + ' 次，' : ''}${have ? '从 ' + Math.floor(have / MB) + ' MB 续传' : '从头开始'}）…`);
-          const headers = have ? { range: `bytes=${have}-` } : {};
-          const res = await fetchImpl(url, { headers, redirect: 'follow' });
-          if (res.status === 200 && have) { have = 0; rmSync(part, { force: true }); }
-          else if (res.status !== 200 && res.status !== 206) throw new Error('EXT_NETWORK:HTTP_' + res.status);
+          kick();
+          let res = await fetchFollow(url, have ? { range: `bytes=${have}-` } : {}, ctl.signal);
+          if (res.status === 206) {
+            const m = /^bytes (\d+)-(\d+)\/(\d+)$/.exec(header(res, 'content-range') ?? '');
+            if (!have || !m || Number(m[1]) !== have || Number(m[2]) !== entry.bytes - 1 || Number(m[3]) !== entry.bytes) {
+              say('服务器返回的续传范围不对，改为从头下载');
+              await cancelBody(res);
+              rmSync(part, { force: true }); have = 0;
+              kick();
+              res = await fetchFollow(url, {}, ctl.signal);
+            }
+          }
+          if (res.status === 200 && have) { rmSync(part, { force: true }); have = 0; }
+          if (res.status !== 200 && res.status !== 206) { await cancelBody(res); throw new Error('EXT_NETWORK:HTTP_' + res.status); }
+          const length = header(res, 'content-length');
+          if (length !== null && length !== undefined && Number(length) > entry.bytes - have) {
+            await cancelBody(res); rmSync(part, { force: true });
+            throw new Error('EXT_PACK_SIZE');
+          }
           if (!res.body) throw new Error('EXT_NETWORK:EMPTY');
-          await new Promise((resolve, reject) => {
-            const out = createWriteStream(part, { flags: have ? 'a' : 'w', mode: 0o600 });
-            out.on('error', reject);
-            (async () => {
-              let got = have;
-              for await (const chunk of res.body) {
-                got += chunk.length;
-                if (got > entry.bytes) throw new Error('EXT_PACK_SIZE');
-                if (!out.write(chunk)) await new Promise(r => out.once('drain', r));
-                onProgress(got, entry.bytes);
-              }
-            })().then(() => out.end(resolve), (e) => { out.destroy(); reject(e); });
-          });
+          const flags = constants.O_WRONLY | constants.O_CREAT | constants.O_NOFOLLOW | (have ? constants.O_APPEND : constants.O_TRUNC);
+          const fd = openSync(part, flags, 0o600);
+          const out = createWriteStream(null, { fd });
+          try {
+            let got = have;
+            const aborted = new Promise((_, reject) => ctl.signal.addEventListener('abort', () => reject(ctl.signal.reason), { once: true }));
+            aborted.catch(() => {});
+            const iterator = res.body[Symbol.asyncIterator]();
+            for (;;) {
+              const step = await Promise.race([iterator.next(), aborted]);
+              if (step.done) break;
+              kick();
+              got += step.value.length;
+              if (got > entry.bytes) throw new Error('EXT_PACK_SIZE');
+              if (!out.write(step.value)) await Promise.race([new Promise(r => out.once('drain', r)), aborted]);
+              onProgress(got, entry.bytes);
+            }
+            await new Promise((resolve, reject) => { out.on('error', reject); out.end(resolve); });
+          } catch (error) {
+            out.destroy();
+            try { await iteratorReturn(res.body); } catch {}
+            throw error;
+          }
         }
-        const size = statSync(part).size;
+        clearTimeout(idle);
+        const size = partSize();
         say('核对 sha256…');
         if (size !== entry.bytes || await sha256File(part) !== entry.sha256) {
           rmSync(part, { force: true });
@@ -363,15 +401,54 @@ export function createExtensionManager(options = {}) {
         say('下载完成并通过校验：' + entry.file);
         return 'downloaded';
       } catch (error) {
-        lastError = error;
-        const code = String(error.message ?? error);
-        if (code.startsWith('EXT_PACK_DIGEST') || code.startsWith('EXT_PACK_SIZE')) { rmSync(part, { force: true }); throw error; }
+        lastError = ctl.signal.aborted && ctl.signal.reason ? ctl.signal.reason : error;
+        const code = String(lastError.message ?? lastError);
+        if (/^EXT_(PACK_DIGEST|PACK_SIZE|PACKS_DIR|DOWNLOAD_REDIRECT|DOWNLOAD_BASE)/.test(code)) {
+          if (!code.startsWith('EXT_PACKS_DIR')) rmSync(part, { force: true });
+          throw lastError;
+        }
         say('下载中断：' + code);
+        if (code === 'EXT_NETWORK:TIMEOUT_TOTAL') break;
         if (attempt < 3) await sleep(1500 * attempt);
+      } finally {
+        clearTimeout(idle); clearTimeout(total);
       }
     }
     const code = String(lastError?.message ?? lastError);
     throw new Error(code.startsWith('EXT_') ? code : 'EXT_NETWORK:' + code);
+  }
+
+  function header(res, name) {
+    const h = res.headers;
+    if (!h) return null;
+    if (typeof h.get === 'function') return h.get(name);
+    return h[name] ?? h[name.toLowerCase()] ?? null;
+  }
+
+  async function cancelBody(res) {
+    try { if (res.body?.cancel) await res.body.cancel(); else await iteratorReturn(res.body); } catch {}
+  }
+
+  async function iteratorReturn(body) {
+    const it = body?.[Symbol.asyncIterator]?.();
+    if (it?.return) await it.return();
+  }
+
+  /** 手动跟随重定向：最多 3 跳；每跳必须是 https、白名单主机、无 userinfo、默认端口。 */
+  async function fetchFollow(start, headers, signal) {
+    let current = start;
+    for (let hop = 0; hop <= 3; hop++) {
+      const u = new URL(current);
+      if (u.protocol !== 'https:' || !DOWNLOAD_HOSTS.has(u.hostname) || u.username || u.password || u.port)
+        throw new Error('EXT_DOWNLOAD_REDIRECT:' + u.protocol + '//' + u.host);
+      const res = await fetchImpl(u.href, { headers, redirect: 'manual', signal });
+      if (![301, 302, 303, 307, 308].includes(res.status)) return res;
+      await cancelBody(res);
+      const next = header(res, 'location');
+      if (!next) throw new Error('EXT_NETWORK:REDIRECT_NO_LOCATION');
+      current = new URL(next, u).href;
+    }
+    throw new Error('EXT_DOWNLOAD_REDIRECT:TOO_MANY');
   }
 
   function list() {
