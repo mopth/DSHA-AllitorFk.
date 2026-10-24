@@ -11,6 +11,7 @@ button{background:#2a62d6;color:#fff;border:0;border-radius:6px;padding:6px 10px
 <li>预览页点「框选」拖出区域并写批注，批注会追加到当前会话输入框（不会自动发送）。</li>
 <li>插件兼容性列出各插件 engines.dsh 与当前核心是否匹配。</li></ol></details>
 <h2>AI 接管授权</h2><div id="tk" class="muted">加载中…</div><button class="warn" id="revokeAll">全部撤销</button>
+<h2>浏览器登录会话（按站点隔离）</h2><div id="bs" class="muted"></div><button class="warn" id="clearAll">清除全部会话</button>
 <h2>静态页预览</h2><div id="pv" class="muted"></div>
 <h2>框选批注</h2><div id="an" class="muted"></div>
 <h2>插件兼容性 (engines.dsh)</h2><div id="pl" class="muted"></div>
@@ -21,13 +22,16 @@ async function post(p,b){const r=await fetch(B+p,{method:'POST',headers:{'conten
 function tkRow(t){const left=t.expiresAt?Math.max(0,Math.round((t.expiresAt-Date.now())/60000))+' 分钟':'';
  let a='';if(t.state==='pending')a=`<button data-d="${esc(t.id)}" data-ap="1">批准</button><button class="deny" data-d="${esc(t.id)}" data-ap="0">拒绝</button>`;
  else if(t.state==='granted')a=`<button class="warn" data-r="${esc(t.id)}">撤销</button>`;
- return `<div class="card"><b>${esc(t.scopeLabel||t.scope)}</b> · ${esc(t.state)} ${esc(left)} · ${esc(t.minutes)} 分钟<br><span class="muted">理由：${esc(t.reason)}</span><br>${a}</div>`;}
-async function load(){const s=await (await fetch(B+'/api/state')).json();
+ return `<div class="card"><b>${esc(t.scope)}</b> <span class="muted">${esc((SC[t.scope]||{}).zh||'')}</span><b></b> · ${esc(t.state)} ${esc(left)} · ${esc(t.minutes)} 分钟<br><span class="muted">理由：${esc(t.reason)}</span><br>${a}</div>`;}
+let SC={};
+async function load(){const s=await (await fetch(B+'/api/state')).json();SC=s.scopes||{};
  tk.innerHTML=s.takeover.length?s.takeover.map(tkRow).join(''):'暂无请求。AI 需先请求，你批准后才可操作，可随时撤销。';
  pv.innerHTML=s.previews.length?s.previews.map(p=>`<div class="card">${esc(p.dir)}<br><a href="${B}/annotate/${esc(p.id)}" target="_blank" rel="noopener">打开并框选批注</a> <button class="deny" data-s="${esc(p.id)}">停止</button></div>`).join(''):'暂无预览';
+ bs.innerHTML=(s.browserSessions||[]).length?s.browserSessions.map(x=>`<div class="card">${esc(x.site)} · ${esc(x.cookies)} 个 Cookie <button class="deny" data-cs="${esc(x.site)}">清除</button></div>`).join(''):'暂无（Chromium 档案另存于 /root/.dsh/allitor/browser-profiles，清除全部时一并删除）';
  an.innerHTML=s.annotations.length?s.annotations.map(a=>`<div class="card">${esc(a.path)}：${esc(a.note)}</div>`).join(''):'暂无';
  pl.innerHTML=`<div class="muted">当前 dsh ${esc(s.plugins.dshVersion||'?')}</div>`+s.plugins.plugins.map(p=>`<div class="card"><b>${esc(p.name)}</b> ${esc(p.version)} <span class="${p.state==='incompatible'?'bad':'ok'}">${esc(p.message)}</span></div>`).join('');}
-document.addEventListener('click',e=>{const d=e.target.dataset;if(d.d)post('/api/takeover/decide',{id:d.d,approve:d.ap==='1'});if(d.r)post('/api/takeover/revoke',{id:d.r});if(d.s)post('/api/preview/stop',{id:d.s});});
+document.addEventListener('click',e=>{const d=e.target.dataset;if(d.d)post('/api/takeover/decide',{id:d.d,approve:d.ap==='1'});if(d.r)post('/api/takeover/revoke',{id:d.r});if(d.s)post('/api/preview/stop',{id:d.s});if(d.cs)post('/api/browser/sessions/clear',{site:d.cs});});
+clearAll.onclick=()=>post('/api/browser/sessions/clear',{site:'*'});
 revokeAll.onclick=()=>post('/api/takeover/revoke',{all:true});
 load();setInterval(load,4000);
 </script></body></html>

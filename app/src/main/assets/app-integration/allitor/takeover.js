@@ -5,6 +5,7 @@ import { randomUUID } from 'node:crypto';
 
 export const SCOPES = {
   browser: { zh: '代你浏览网页（只读取公开 http/https 页面，不带你的登录 Cookie）', maxMinutes: 120 },
+  browser_full: { zh: '完整浏览器：执行网页 JS、提交 POST 表单、按站点隔离的登录会话、截图、下载到沙箱（仍禁止内网/回环）', maxMinutes: 60 },
   preview: { zh: '在沙箱里发布静态页面预览（只读所选目录）', maxMinutes: 240 },
 };
 

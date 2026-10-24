@@ -2611,6 +2611,17 @@
         "node24"
       ],
       "environment": {}
+    },
+    {
+      "path": "tools/test-allitor-browser-full.mjs",
+      "stage": "fast",
+      "reason": "AllitorFk browser_full: POST, per-site sessions, downloads, egress proxy, optional Chromium",
+      "args": [],
+      "timeoutSeconds": 120,
+      "requires": [
+        "node24"
+      ],
+      "environment": {}
     }
   ],
   "historicalExcluded": [

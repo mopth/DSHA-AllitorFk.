@@ -388,6 +388,21 @@
       "executable": false
     },
     {
+      "asset": "app-integration/allitor/cdp.js",
+      "target": "root/dsha-app-integration/allitor/cdp.js",
+      "executable": false
+    },
+    {
+      "asset": "app-integration/allitor/egress-proxy.js",
+      "target": "root/dsha-app-integration/allitor/egress-proxy.js",
+      "executable": false
+    },
+    {
+      "asset": "app-integration/allitor/sessions.js",
+      "target": "root/dsha-app-integration/allitor/sessions.js",
+      "executable": false
+    },
+    {
       "asset": "app-integration/allitor/allitor.html",
       "target": "root/dsha-app-integration/allitor/allitor.html",
       "executable": false

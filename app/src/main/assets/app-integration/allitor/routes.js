@@ -6,6 +6,9 @@ import { createTakeover, SCOPES } from './takeover.js';
 import { createPreviews, PREVIEW_CSP } from './preview.js';
 import { createAnnotations, annotationText } from './annotations.js';
 import { createBrowser } from './browser.js';
+import { createSessions } from './sessions.js';
+import { createChromiumEngine } from './cdp.js';
+import { startEgressProxy } from './egress-proxy.js';
 import { checkEngines } from './engines.js';
 import { startAgentChannel } from './agent.js';
 
@@ -39,8 +42,13 @@ export function createAllitor(options = {}) {
   const takeover = options.takeover ?? createTakeover();
   const previews = options.previews ?? createPreviews(options.previewOptions);
   const annotations = options.annotations ?? createAnnotations();
-  const browser = options.browser ?? createBrowser({ allowed: () => takeover.granted('browser'), fetchPage: options.fetchPage });
-  takeover.subscribe(() => { if (!takeover.granted('browser')) browser.reset(); });
+  const sessions = options.sessions ?? createSessions();
+  let proxy = null;
+  const engine = options.engine !== undefined ? options.engine : createChromiumEngine({ profilesDir: options.profilesDir ?? '/root/.dsh/allitor/browser-profiles',
+    downloadsDir: options.downloadsDir ?? '/root/allitor-downloads', proxyPort: async () => (proxy ??= await startEgressProxy()).port });
+  const browser = options.browser ?? createBrowser({ allowed: () => takeover.granted('browser'), allowedFull: () => takeover.granted('browser_full'),
+    fetchPage: options.fetchPage, sessions, engine, downloadsDir: options.downloadsDir ?? '/root/allitor-downloads' });
+  takeover.subscribe(() => { if (!takeover.granted('browser') && !takeover.granted('browser_full')) browser.reset(); });
   const ops = {
     'takeover.request': a => takeover.request(a),
     'takeover.status': a => takeover.status(a.id),
@@ -49,11 +57,13 @@ export function createAllitor(options = {}) {
       const p = previews.start(a.dir, { entry: a.entry }); return { ...p, path: `${BASE}/annotate/${p.id}`, raw: `${BASE}/preview/${p.id}/` }; },
     'preview.stop': a => ({ stopped: previews.stop(a.id) }),
     'annotations.take': () => annotations.take('agent').map(a => ({ ...a, text: annotationText(a) })),
-    'browser.open': a => browser.open(a.url), 'browser.read': a => browser.read(a), 'browser.links': a => browser.links(a),
+    'browser.open': a => browser.open(a.url, { engine: a.engine === 'chromium' ? 'chromium' : 'text' }), 'browser.read': a => browser.read(a), 'browser.links': a => browser.links(a),
     'browser.follow': a => browser.follow(a), 'browser.back': () => browser.back(), 'browser.find': a => browser.find(a),
     'browser.forms': () => browser.forms(), 'browser.submit': a => browser.submit(a), 'browser.status': () => browser.status(),
+    'browser.download': a => browser.download(a), 'browser.eval': a => browser.evaluate(a), 'browser.screenshot': () => browser.screenshot(),
+    'browser.sessions': () => browser.sessions(), 'browser.session_clear': a => browser.clearSession(a),
   };
-  return { takeover, previews, annotations, browser, ops };
+  return { takeover, previews, annotations, browser, sessions, ops, close() { browser.reset(); proxy?.close(); } };
 }
 
 export function registerAllitorRoutes(scoped, options = {}) {
@@ -85,12 +95,13 @@ export function registerAllitorRoutes(scoped, options = {}) {
       }
       if (req.method === 'GET' && sub === '/api/state')
         return json(res, 200, { scopes: SCOPES, takeover: core.takeover.list(), previews: core.previews.list(), annotations: core.annotations.all(),
-          plugins: options.scanPlugins ? options.scanPlugins() : scanPlugins() });
+          plugins: options.scanPlugins ? options.scanPlugins() : scanPlugins(), browserSessions: core.sessions.list(), browser: core.browser.status() });
       const blocked = writeGate(req);
       if (blocked) return json(res, blocked[0], { error: blocked[1] });
       const body = await readJson(req);
       if (sub === '/api/takeover/decide') return json(res, 200, core.takeover.decide(body.id, body.approve === true));
       if (sub === '/api/takeover/revoke') { if (body.all === true) { core.takeover.revokeAll(); return json(res, 200, { ok: true }); } return json(res, 200, core.takeover.revoke(body.id)); }
+      if (sub === '/api/browser/sessions/clear') return json(res, 200, await core.browser.clearSession({ site: typeof body.site === 'string' ? body.site : '*' }));
       if (sub === '/api/preview/stop') return json(res, 200, { stopped: core.previews.stop(body.id) });
       if (sub === '/api/annotations') return json(res, 200, core.annotations.add(body));
       if (sub === '/api/annotations/take') return json(res, 200, core.annotations.take('client').map(a => ({ id: a.id, text: annotationText(a) })));
@@ -101,5 +112,5 @@ export function registerAllitorRoutes(scoped, options = {}) {
     }
   };
   const off = scoped.webServer.register({ kind: 'prefix', path: BASE, handler });
-  return () => { channel?.close(); typeof off === 'function' && off(); };
+  return () => { channel?.close(); core.close?.(); typeof off === 'function' && off(); };
 }

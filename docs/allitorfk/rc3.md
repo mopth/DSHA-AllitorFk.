@@ -18,10 +18,12 @@
 - 控制台与 API 走现有 authorizeIndex Cookie；写操作再要求同源 Origin、`x-dsha-allitor: 1` 与 JSON。
 - AI 侧经 `/root/.dsh/allitor/agent.sock`（目录 0700，令牌 0600），无任何批准接口；授权只在 Web 进程内存。
 - 预览文件以 128 位能力 ID 提供（沙箱 iframe 不携带 SameSite=Strict Cookie），CSP `sandbox`、只读、拒绝符号链接与私有目录。
-- 文本浏览器只允许公网 http(s)，DNS 解析后拒绝私网/回环，仅 GET 表单，无 Cookie/JS。
+- 浏览器两档授权：`browser`（只读 GET）与 `browser_full`（≤60 分钟：POST 表单、按站点隔离的登录会话、下载到 `/root/allitor-downloads`（50 MiB 上限）、Chromium 引擎下执行 JS 与截图）。
+  - 文本引擎：DNS 解析后拒绝私网/回环；隐藏字段与密码值不回显给 AI。
+  - Chromium 引擎（设备上存在 Chromium 时，或设 `ALLITOR_CHROMIUM`）：每站点独立 user-data-dir，全部流量经本机公网专用出口代理（`--proxy-bypass-list=<-loopback>`，回环也走代理并被拒），禁用 QUIC 与非代理 UDP 的 WebRTC。
+  - 控制台可按站点或全部清除会话（同时删除 Chromium 档案）。
 
 ## 未完成（子集）
-- 浏览器：无 JS 执行、POST、登录态、截图、下载。
 - F3 工具耗时卡片、F4 max_tokens 截断提示：需改 DSH 前端打包产物，未做。
 - D1 核心热更新回滚：仅有现成 recovery runtime；未做在线热更新。
 - F2 加密备份、D2 设备/Shell 权限分级：基线已有（PortableBackupCrypto AES-256-GCM + CredentialProjection；DeviceGrants/NativeConsentPolicy），未重写。
