@@ -2,10 +2,10 @@ plugins {
     id 'com.android.application'
 }
 
-// 三个 flavor：standard（minSdk 30）、full（minSdk 30，另内置 full:true 的离线扩展包 dev-base、jdk21）、
-// low（minSdk 23，只有它携带兼容旧 Android 的 Gecko 内核）。功能和离线环境三者共用。
+// 两个 flavor：standard（minSdk 30）与 low（minSdk 23，只有它携带兼容旧 Android 的 Gecko 内核）。
+// 功能和离线环境两者共用；离线扩展包不进 APK，从 Release 下载或在扩展中心一键下载。
 // AllitorFk：显示名 / APK 文件名 / Release 名的唯一来源（改名只改这一行）。
-// APK 文件 = <名>.apk，Full 版 = <名>-full.apk，Low 版 = <名>-low.apk；applicationId 另见 defaultConfig，不随此变。
+// APK 文件 = <名>.apk，Low 版 = <名>-low.apk；applicationId 另见 defaultConfig，不随此变。
 ext.dshaReleaseName = 'dsha-AllitorFk.-dsh0.2.1-rc.2'
 // 是否启用官方 dsha.cc 更新源：待老板决定，默认关闭。
 ext.dshaOfficialUpdateFeed = (project.findProperty('dsha.officialUpdateFeed') ?: 'false') == 'true'
@@ -75,13 +75,6 @@ android {
         standard {
             dimension 'androidSupport'
             minSdk 30
-            buildConfigField 'boolean', 'LOW_ANDROID', 'false'
-        }
-        // Full：与 standard 同代码，额外内置 dev-base 与 jdk21 离线扩展包（ext-packs/*.dshx）。
-        full {
-            dimension 'androidSupport'
-            minSdk 30
-            versionNameSuffix 'full'
             buildConfigField 'boolean', 'LOW_ANDROID', 'false'
         }
         low {
@@ -168,9 +161,6 @@ android {
         main.assets.setSrcDirs([layout.buildDirectory.dir("generated/standardAssets").get().asFile,
                 layout.buildDirectory.dir("generated/recoveryAssets").get().asFile])
         main.java.srcDir(layout.buildDirectory.dir("generated/uiLanguage").get().asFile)
-        full.java.srcDir('src/standard/java')
-        full.res.srcDir('src/standard/res')
-        full.assets.srcDir(layout.buildDirectory.dir("generated/fullAssets").get().asFile)
         // Both browser test entry points load one test-only HTML fixture.
         debug.assets.srcDir(rootProject.file("tools/fixtures/web-state"))
         androidTest.assets.srcDir(rootProject.file("tools/fixtures/web-state"))
@@ -192,10 +182,10 @@ def verifyPublishCertificate = tasks.register("verifyPublishCertificate") {
     }
 }
 tasks.configureEach {
-    if (!unsignedPackage && name.matches("(package|validateSigning|assemble)(Standard|Full|Low)Release")) dependsOn(verifyPublishCertificate)
+    if (!unsignedPackage && name.matches("(package|validateSigning|assemble)(Standard|Low)Release")) dependsOn(verifyPublishCertificate)
 }
 tasks.register('signPublishRelease') {
-    if (!unsignedPackage) dependsOn(verifyPublishCertificate, 'assembleStandardRelease', 'assembleFullRelease', 'assembleLowRelease')
+    if (!unsignedPackage) dependsOn(verifyPublishCertificate, 'assembleStandardRelease', 'assembleLowRelease')
     doFirst {
         if (unsignedPackage) throw new GradleException('未签名 CI 模式不能执行正式发布任务')
     }
@@ -330,9 +320,7 @@ def prepareRecoveryAssets = tasks.register("prepareRecoveryAssets", Exec) {
             "--shared-assets", layout.buildDirectory.dir("generated/standardAssets").get().asFile.absolutePath)
 }
 tasks.configureEach {
-    if (name.matches("merge(Standard|Full|Low).*Assets")) dependsOn(prepareRecoveryAssets)
-    // Full 的生成资产目录被 merge/lint 等多个任务读取：凡 Full 变体任务都先准备扩展包。
-    if (name.contains("Full") && name != "prepareFullExtPacks" && !name.startsWith("namedApk")) dependsOn("prepareFullExtPacks")
+    if (name.matches("merge(Standard|Low).*Assets")) dependsOn(prepareRecoveryAssets)
 }
 
 def verifyBackupDependencies = tasks.register("verifyBackupDependencies") {
@@ -406,8 +394,6 @@ dependencies {
     implementation 'com.google.android.material:material:1.11.0'
     standardImplementation 'dev.rikka.shizuku:api:13.1.5'
     standardImplementation 'dev.rikka.shizuku:provider:13.1.5'
-    fullImplementation 'dev.rikka.shizuku:api:13.1.5'
-    fullImplementation 'dev.rikka.shizuku:provider:13.1.5'
     // 13.1.5 从 API 24 起可用；兼容版以 12.2.0 的相同 Binder 协议支持 Android 6。
     lowImplementation 'dev.rikka.shizuku:api:12.2.0'
     lowImplementation 'dev.rikka.shizuku:provider:12.2.0'
@@ -434,43 +420,13 @@ tasks.withType(Test).configureEach {
 }
 
 // AllitorFk：把 AGP 产物按 dshaReleaseName 另存一份（不改 AGP 原始输出）。
-// Full 版内置扩展包：只从 tools/build-extensions.py 的产物目录取 full:true 的包，并按目录 sha256 核对。
-tasks.register('prepareFullExtPacks') {
-    def catalogFile = file('src/main/assets/app-integration/ext-catalog.json')
-    def packDir = file(System.getenv('DSHA_EXT_PACKS') ?: layout.buildDirectory.dir('ext-packs').get().asFile.absolutePath)
-    def rootDir = layout.buildDirectory.dir('generated/fullAssets').get().asFile
-    def outDir = new File(rootDir, 'ext-packs')
-    inputs.file(catalogFile)
-    outputs.dir(rootDir)
-    doLast {
-        def catalog = new groovy.json.JsonSlurper().parse(catalogFile)
-        project.delete(rootDir)
-        outDir.mkdirs()
-        def bundled = catalog.packs.findAll { it.full }
-        if (bundled.isEmpty()) throw new GradleException('扩展目录里没有 full:true 的包')
-        bundled.each { pack ->
-            def source = new File(packDir, pack.file)
-            if (!source.isFile() || source.length() != (pack.bytes as long))
-                throw new GradleException("缺少 Full 内置扩展包（先运行 tools/build-extensions.py）：${pack.file}")
-            def hash = java.security.MessageDigest.getInstance('SHA-256')
-            source.withInputStream { input ->
-                byte[] buffer = new byte[1 << 20]; int count
-                while ((count = input.read(buffer)) != -1) hash.update(buffer, 0, count)
-            }
-            if (hash.digest().encodeHex().toString() != pack.sha256)
-                throw new GradleException("Full 内置扩展包摘要与目录不符：${pack.file}")
-            java.nio.file.Files.copy(source.toPath(), new File(outDir, pack.file).toPath())
-        }
-    }
-}
-
-['Standard', 'Full', 'Low'].each { flavor ->
+['Standard', 'Low'].each { flavor ->
     ['Debug', 'Release'].each { type ->
         def copyTask = tasks.register("namedApk${flavor}${type}", Copy) {
             from(layout.buildDirectory.dir("outputs/apk/${flavor.toLowerCase()}/${type.toLowerCase()}")) { include '*.apk' }
             into(layout.buildDirectory.dir('outputs/allitorfk'))
             rename { String ignored ->
-                dshaReleaseName + (flavor == 'Low' ? '-low' : flavor == 'Full' ? '-full' : '') + (type == 'Debug' ? '-debug' : '') + '.apk'
+                dshaReleaseName + (flavor == 'Low' ? '-low' : '') + (type == 'Debug' ? '-debug' : '') + '.apk'
             }
         }
         tasks.matching { it.name == "assemble${flavor}${type}" }.configureEach { finalizedBy(copyTask) }

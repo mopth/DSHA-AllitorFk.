@@ -10,6 +10,19 @@ import { extractDshx, verifySums } from './dshx.js';
 
 const MB = 1024 * 1024;
 const ID = /^[a-z0-9][a-z0-9-]{0,31}$/;
+// 一键下载只认这个固定前缀：本 fork 的 Release 资产；目录（随 APK 内置）是信任根。
+export const RELEASE_PREFIX = 'https://github.com/mopth/DSHA-AllitorFk./releases/download/';
+const TAG = /^[A-Za-z0-9][A-Za-z0-9._-]{0,100}$/;
+
+/** 由目录算出某包的下载地址；目录里的 base 不在固定前缀下或文件名不合规时拒绝。 */
+export function packUrl(cat, entry) {
+  const base = cat?.download?.base;
+  if (typeof base !== 'string' || !base.startsWith(RELEASE_PREFIX)) throw new Error('EXT_DOWNLOAD_BASE');
+  const tag = base.slice(RELEASE_PREFIX.length);
+  if (!TAG.test(tag)) throw new Error('EXT_DOWNLOAD_BASE');
+  if (!/^[a-z0-9][a-z0-9-]{0,31}\.dshx$/.test(entry.file) || entry.file !== entry.id + '.dshx') throw new Error('EXT_ID');
+  return RELEASE_PREFIX + tag + '/' + entry.file;
+}
 
 export function createExtensionManager(options = {}) {
   const root = options.root ?? '/';
@@ -21,6 +34,8 @@ export function createExtensionManager(options = {}) {
   const stateFile = join(home, 'state.json');
   const log = [];
   let job = null;
+  const fetchImpl = options.fetch ?? globalThis.fetch;
+  const sleep = options.sleep ?? ((ms) => new Promise(r => setTimeout(r, ms)));
   let lastJob = null;
 
   const catalog = () => JSON.parse(readFileSync(catalogPath, 'utf8'));
@@ -65,6 +80,7 @@ export function createExtensionManager(options = {}) {
   }
 
   function freeBytes(path) {
+    if (options.freeBytes) return options.freeBytes(path);
     const s = statfsSync(path);
     return Number(s.bavail) * Number(s.bsize);
   }
@@ -291,6 +307,73 @@ export function createExtensionManager(options = {}) {
     } finally { rmSync(temp, { force: true }); }
   }
 
+  /**
+   * 一键下载：从固定 Release 地址拉取，断点续传（Range），失败自动重试；落盘前按目录核对大小与 sha256，
+   * 不符即删除并拒绝。同一个 .download 文件保留到下次，可手动“重试”接着下。
+   */
+  async function download(pid, onProgress = () => {}) {
+    if (!ID.test(pid)) throw new Error('EXT_ID');
+    const cat = catalog();
+    const entry = cat.packs.find(p => p.id === pid);
+    if (!entry) throw new Error('EXT_UNKNOWN');
+    const url = packUrl(cat, entry);
+    mkdirSync(packsDir, { recursive: true, mode: 0o700 });
+    const final = join(packsDir, entry.file);
+    if (existsSync(final) && statSync(final).size === entry.bytes && await sha256File(final) === entry.sha256) return 'present';
+    const part = join(packsDir, `.${entry.file}.download`);
+    let have = 0;
+    try { have = statSync(part).size; } catch {}
+    if (have > entry.bytes) { rmSync(part, { force: true }); have = 0; }
+    const need = entry.bytes - have + 256 * MB;
+    const free = freeBytes(home);
+    if (free < need) throw new Error(`EXT_NO_SPACE:need=${Math.ceil(need / MB)}MB,free=${Math.floor(free / MB)}MB`);
+    let lastError = null;
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        try { have = statSync(part).size; } catch { have = 0; }
+        if (have < entry.bytes) {
+          say(`下载 ${entry.file}（${attempt > 1 ? '第 ' + attempt + ' 次，' : ''}${have ? '从 ' + Math.floor(have / MB) + ' MB 续传' : '从头开始'}）…`);
+          const headers = have ? { range: `bytes=${have}-` } : {};
+          const res = await fetchImpl(url, { headers, redirect: 'follow' });
+          if (res.status === 200 && have) { have = 0; rmSync(part, { force: true }); }
+          else if (res.status !== 200 && res.status !== 206) throw new Error('EXT_NETWORK:HTTP_' + res.status);
+          if (!res.body) throw new Error('EXT_NETWORK:EMPTY');
+          await new Promise((resolve, reject) => {
+            const out = createWriteStream(part, { flags: have ? 'a' : 'w', mode: 0o600 });
+            out.on('error', reject);
+            (async () => {
+              let got = have;
+              for await (const chunk of res.body) {
+                got += chunk.length;
+                if (got > entry.bytes) throw new Error('EXT_PACK_SIZE');
+                if (!out.write(chunk)) await new Promise(r => out.once('drain', r));
+                onProgress(got, entry.bytes);
+              }
+            })().then(() => out.end(resolve), (e) => { out.destroy(); reject(e); });
+          });
+        }
+        const size = statSync(part).size;
+        say('核对 sha256…');
+        if (size !== entry.bytes || await sha256File(part) !== entry.sha256) {
+          rmSync(part, { force: true });
+          throw new Error('EXT_PACK_DIGEST');
+        }
+        renameSync(part, final);
+        onProgress(entry.bytes, entry.bytes);
+        say('下载完成并通过校验：' + entry.file);
+        return 'downloaded';
+      } catch (error) {
+        lastError = error;
+        const code = String(error.message ?? error);
+        if (code.startsWith('EXT_PACK_DIGEST') || code.startsWith('EXT_PACK_SIZE')) { rmSync(part, { force: true }); throw error; }
+        say('下载中断：' + code);
+        if (attempt < 3) await sleep(1500 * attempt);
+      }
+    }
+    const code = String(lastError?.message ?? lastError);
+    throw new Error(code.startsWith('EXT_') ? code : 'EXT_NETWORK:' + code);
+  }
+
   function list() {
     const cat = catalog();
     const state = readState();
@@ -298,9 +381,10 @@ export function createExtensionManager(options = {}) {
     try { baseCheck(cat); } catch (e) { baseOk = false; baseError = e.message; }
     return {
       base: cat.base, baseOk, baseError, freeBytes: (() => { try { return freeBytes(home); } catch { return null; } })(),
-      job: job ? { id: job.id, pid: job.pid, action: job.action, running: true } : lastJob,
+      job: job ? { id: job.id, pid: job.pid, action: job.action, running: true, done: job.done ?? 0, total: job.total ?? 0 } : lastJob,
+      downloadBase: (() => { try { return packUrl(cat, { id: 'x', file: 'x.dshx' }).slice(0, -6); } catch { return null; } })(),
       packs: cat.packs.map(p => ({ id: p.id, name: p.name, summary: p.summary, category: p.category, version: p.version,
-        bytes: p.bytes, installedBytes: p.installedBytes, requires: p.requires, agpl: p.agpl, licenses: p.licenses,
+        url: (() => { try { return packUrl(cat, p); } catch { return null; } })(), bytes: p.bytes, installedBytes: p.installedBytes, requires: p.requires, agpl: p.agpl, licenses: p.licenses,
         available: existsSync(join(packsDir, p.file)), active: !!state.active[p.id], activeAt: state.active[p.id]?.at ?? null })),
     };
   }
@@ -310,7 +394,12 @@ export function createExtensionManager(options = {}) {
     const id = randomBytes(6).toString('hex');
     log.length = 0;
     job = { id, pid, action };
-    const work = action === 'activate' ? activate(pid) : remove(pid);
+    const progress = (done, total) => { if (job && job.id === id) { job.done = done; job.total = total; } };
+    const work = action === 'activate' ? activate(pid)
+      : action === 'remove' ? remove(pid)
+      : action === 'download' ? download(pid, progress)
+      : action === 'install' ? download(pid, progress).then(() => activate(pid))
+      : Promise.reject(new Error('EXT_ACTION'));
     work.then(() => { lastJob = { id, pid, action, running: false, ok: true }; },
       (e) => { lastJob = { id, pid, action, running: false, ok: false, error: e.message }; })
       .finally(() => { job = null; });
@@ -321,5 +410,5 @@ export function createExtensionManager(options = {}) {
     try { for (const d of readdirSync(join(home, 'staging'))) rmSync(join(home, 'staging', d), { recursive: true, force: true }); } catch {}
   }
 
-  return { list, activate, remove, start, importStream, cleanupStaging, log: () => log.slice(), busy: () => !!job };
+  return { list, activate, remove, download, start, importStream, cleanupStaging, log: () => log.slice(), busy: () => !!job };
 }

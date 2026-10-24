@@ -111,3 +111,137 @@ try {
 } finally {
   rmSync(work, { recursive: true, force: true });
 }
+
+// 一键下载：固定 Release 地址、断点续传、重试、sha256 拒绝、空间预检；路由保护；页面引导与错误提示。
+{
+  const { createHash } = await import('node:crypto');
+  const fs = await import('node:fs');
+  const { createExtensionManager, packUrl, RELEASE_PREFIX } = await import('../app/src/main/assets/app-integration/ext/manager.js');
+  const dir = mkdtempSync(join(tmpdir(), 'dshx-dl-'));
+  try {
+    const body = Buffer.alloc(300000, 7); for (let i = 0; i < body.length; i++) body[i] = (i * 31) & 255;
+    const sha = createHash('sha256').update(body).digest('hex');
+    const base = RELEASE_PREFIX + 'dsha-AllitorFk.-dsh0.2.1-rc.2';
+    const catalogPath = join(dir, 'cat.json');
+    const writeCat = (extra = {}) => fs.writeFileSync(catalogPath, JSON.stringify({ base: {}, download: { base }, packs: [
+      { id: 'demo', file: 'demo.dshx', sha256: sha, bytes: body.length, installedBytes: 1, requires: [], ...extra }] }));
+    writeCat();
+    assert.equal(packUrl({ download: { base } }, { id: 'demo', file: 'demo.dshx' }), base + '/demo.dshx');
+    for (const bad of ['https://evil.example/releases/download/t', 'https://github.com/mopth/DSHA-AllitorFk./releases/download/../x',
+      'http://github.com/mopth/DSHA-AllitorFk./releases/download/t', RELEASE_PREFIX + 't/sub', undefined])
+      assert.throws(() => packUrl({ download: { base: bad } }, { id: 'demo', file: 'demo.dshx' }), /EXT_DOWNLOAD_BASE/, String(bad));
+    assert.throws(() => packUrl({ download: { base } }, { id: 'demo', file: '../demo.dshx' }), /EXT_ID/);
+    // 真实目录里每个包都能算出固定地址。
+    const real = JSON.parse(readFileSync(new URL('../app/src/main/assets/app-integration/ext-catalog.json', import.meta.url), 'utf8'));
+    assert.equal(real.packs.length, 16);
+    for (const p of real.packs) assert.equal(packUrl(real, p), real.download.base + '/' + p.id + '.dshx');
+
+    const stream = (buf, chunk = 65536) => (async function* () { for (let i = 0; i < buf.length; i += chunk) yield buf.subarray(i, i + chunk); })();
+    let calls = [];
+    const mk = (fetchImpl, free = () => 1e12) => createExtensionManager({ root: dir, stateDir: join(dir, 'state'), catalogPath, fetch: fetchImpl, sleep: async () => {}, freeBytes: free });
+    const packs = join(dir, 'state/packs');
+    const reset = () => { fs.rmSync(join(dir, 'state'), { recursive: true, force: true }); calls = []; };
+
+    // 1) 正常下载 + 进度
+    reset();
+    let progress = [];
+    let m = mk(async (url, opt) => { calls.push([url, opt.headers.range]); return { status: 200, body: stream(body) }; });
+    assert.equal(await m.download('demo', (d, t) => progress.push([d, t])), 'downloaded');
+    assert.deepEqual(calls, [[base + '/demo.dshx', undefined]]);
+    assert.equal(createHash('sha256').update(fs.readFileSync(join(packs, 'demo.dshx'))).digest('hex'), sha);
+    assert.deepEqual(progress.at(-1), [body.length, body.length]);
+    assert.equal(await m.download('demo'), 'present', 'already present and verified');
+
+    // 2) sha256 不符：拒绝并删除，不留下最终文件
+    reset();
+    const evil = Buffer.from(body); evil[5] ^= 1;
+    m = mk(async () => ({ status: 200, body: stream(evil) }));
+    await assert.rejects(m.download('demo'), /EXT_PACK_DIGEST/);
+    assert.ok(!fs.existsSync(join(packs, 'demo.dshx')) && !fs.existsSync(join(packs, '.demo.dshx.download')));
+
+    // 3) 超长：EXT_PACK_SIZE
+    reset();
+    m = mk(async () => ({ status: 200, body: stream(Buffer.concat([body, Buffer.alloc(10)])) }));
+    await assert.rejects(m.download('demo'), /EXT_PACK_SIZE/);
+
+    // 4) 断网：重试 3 次后 EXT_NETWORK，已下部分保留；再次调用用 Range 续传（206）
+    reset();
+    let n = 0;
+    m = mk(async (url, opt) => { n++; calls.push(opt.headers.range);
+      if (!opt.headers.range) return { status: 200, body: (async function* () { yield body.subarray(0, 100000); throw new Error('ECONNRESET'); })() };
+      throw new Error('ENOTFOUND'); });
+    await assert.rejects(m.download('demo'), /EXT_NETWORK/);
+    assert.equal(n, 3);
+    assert.equal(fs.statSync(join(packs, '.demo.dshx.download')).size, 100000);
+    m = mk(async (url, opt) => { calls.push(opt.headers.range); assert.equal(opt.headers.range, 'bytes=100000-'); return { status: 206, body: stream(body.subarray(100000)) }; });
+    assert.equal(await m.download('demo'), 'downloaded');
+    assert.equal(createHash('sha256').update(fs.readFileSync(join(packs, 'demo.dshx'))).digest('hex'), sha);
+
+    // 5) 服务器不支持 Range（回 200）：从头重下
+    reset();
+    fs.mkdirSync(packs, { recursive: true });
+    fs.writeFileSync(join(packs, '.demo.dshx.download'), Buffer.alloc(5000, 1));
+    m = mk(async () => ({ status: 200, body: stream(body) }));
+    assert.equal(await m.download('demo'), 'downloaded');
+
+    // 6) HTTP 404 → EXT_NETWORK:HTTP_404
+    reset();
+    m = mk(async () => ({ status: 404, body: null }));
+    await assert.rejects(m.download('demo'), /EXT_NETWORK:HTTP_404/);
+
+    // 7) 空间预检：下载前就拒绝，不发请求
+    reset();
+    let fetched = false;
+    m = mk(async () => { fetched = true; return { status: 200, body: stream(body) }; }, () => 1000);
+    await assert.rejects(m.download('demo'), /EXT_NO_SPACE/);
+    assert.equal(fetched, false);
+
+    // 8) 目录里的地址被改到别处：拒绝
+    reset();
+    fs.writeFileSync(catalogPath, JSON.stringify({ base: {}, download: { base: 'https://evil.example/x' }, packs: [{ id: 'demo', file: 'demo.dshx', sha256: sha, bytes: body.length, installedBytes: 1, requires: [] }] }));
+    m = mk(async () => { throw new Error('should not fetch'); });
+    await assert.rejects(m.download('demo'), /EXT_DOWNLOAD_BASE/);
+    await assert.rejects(m.download('nope'), /EXT_UNKNOWN/);
+    console.log('ok   download: pinned URL, progress, sha256 reject, size cap, retry+resume (Range/206), 200 restart, HTTP error, space precheck, base pinning');
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+
+  // 路由：download/install 与 activate 同等保护，且只把 id 交给 manager（请求里的 URL 被忽略）。
+  {
+    const calls = []; let handler;
+    const fakeManager = { cleanupStaging() {}, list: () => ({ packs: [] }), log: () => [], busy: () => false,
+      start: (action, id) => { calls.push([action, id]); return 'j'; }, importStream: async () => {} };
+    registerExtensionRoutes({ webServer: { register: (r) => { handler = r.handler; return () => {}; } },
+      connection: { authorizeIndex: (req, res) => { if (req.headers.cookie === 'ok') return true; res.writeHead(401); res.end(); return false; } } }, { manager: fakeManager });
+    const server = createServer((req, res) => handler(req, res));
+    await new Promise(r => server.listen(0, '127.0.0.1', r));
+    const base = `http://127.0.0.1:${server.address().port}`;
+    const go = (path, headers, body = JSON.stringify({ id: 'dev-base', url: 'https://evil.example/x.dshx' })) => fetch(base + path, { method: 'POST', body, headers }).then(r => r.status);
+    const good = { cookie: 'ok', 'content-type': 'application/json', origin: base, 'x-dsha-ext': '1' };
+    try {
+      for (const route of ['download', 'install']) {
+        const p = '/__dsha/extensions/api/' + route;
+        assert.equal(await go(p, { ...good, cookie: '' }), 401, route + ' no cookie');
+        assert.equal(await go(p, { ...good, origin: 'http://evil.example' }), 403, route + ' cross origin');
+        assert.equal(await go(p, { ...good, 'x-dsha-ext': '' }), 403, route + ' no custom header');
+        assert.equal(await go(p, { ...good, 'content-type': 'text/plain' }), 415, route + ' simple content type');
+        assert.equal(calls.length, 0);
+        assert.equal(await go(p, good), 202);
+        assert.deepEqual(calls.pop(), [route, 'dev-base']);
+      }
+      assert.equal(await fetch(base + '/__dsha/extensions/api/download', { headers: { cookie: 'ok' } }).then(r => r.status), 405, 'GET is not a download trigger');
+      console.log('ok   routes: download/install behind authorizeIndex + Origin + x-dsha-ext + JSON; only id is used');
+    } finally { server.close(); }
+  }
+
+  // 页面：中英文引导、文件大小、自动校验说明、三类白话错误、两种安装方式。
+  {
+    const page = readFileSync(new URL('../app/src/main/assets/app-integration/ext/extensions.html', import.meta.url), 'utf8');
+    for (const text of ['下载并安装', 'Download & install', '在浏览器中下载', 'Download in browser', '从文件导入', 'Import from file',
+      '「下载」文件夹', 'Downloads folder', '自动核对 sha256', 'checked automatically', "T('文件 ','File ')",
+      'EXT_NETWORK:', 'EXT_PACK_DIGEST:', 'EXT_NO_SPACE:', '网络连接失败', 'Network error', '校验没通过', 'failed its check', '存储空间不够', 'Not enough storage',
+      "post(action,{id:p.id})", 'a.href=p.url', '重试下载并安装', '<progress'.slice(1)])
+      assert.ok(page.includes(text), 'page missing: ' + text);
+    assert.ok(!/Full 版/.test(page), 'no Full wording');
+    console.log('ok   page: zh/en how-to (A one tap, B browser + import), sizes, auto hash check, plain errors');
+  }
+}

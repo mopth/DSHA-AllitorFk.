@@ -19,12 +19,14 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import com.deepseekharness.app.core.HarnessController;
 import com.deepseekharness.app.runtime.ExtensionPacks;
+import com.deepseekharness.app.util.ExtensionReleaseLinks;
 import com.deepseekharness.app.util.UiText;
 import com.deepseekharness.app.util.WebPreviewPolicy;
 
 /**
  * 扩展中心：独立 WebView 只加载本机 dsh 的 /__dsha/extensions（官方 BrowserAuth 签名 Cookie 鉴权），
  * 不挂任何 JS 桥；导入扩展包走系统文件选择器，由页面流式上传到容器内校验。
+ * 唯一放行到外部的导航：本 fork Release 的 .dshx 资产地址（{@link ExtensionReleaseLinks}），交给系统浏览器下载。
  */
 public final class ExtensionsActivity extends AppCompatActivity {
   private static final String PATH = "/__dsha/extensions";
@@ -101,6 +103,21 @@ public final class ExtensionsActivity extends AppCompatActivity {
           }
 
           private boolean route(WebView view, Uri uri) {
+            String text = uri.toString();
+            if (ExtensionReleaseLinks.isReleaseAsset(text)) {
+              try {
+                startActivity(
+                    new Intent(Intent.ACTION_VIEW, Uri.parse(text))
+                        .addCategory(Intent.CATEGORY_BROWSABLE));
+              } catch (RuntimeException noBrowser) {
+                android.widget.Toast.makeText(
+                        ExtensionsActivity.this,
+                        UiText.choose("没有可用的浏览器", "No browser available"),
+                        android.widget.Toast.LENGTH_LONG)
+                    .show();
+              }
+              return true;
+            }
             boolean sameOrigin = uri.toString().startsWith(base);
             // 鉴权链接 303 回到 "/" 时改去扩展页；其余离开本页的导航一律拦截。
             if (sameOrigin && "/".equals(uri.getPath()) && viaAuth) {

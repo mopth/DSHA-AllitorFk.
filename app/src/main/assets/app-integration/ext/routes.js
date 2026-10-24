@@ -41,10 +41,13 @@ export function registerExtensionRoutes(scoped, options = {}) {
       if (req.method === 'GET' && sub === '/api/state') return json(res, 200, { ...manager.list(), log: manager.log().slice(-120) });
       if (req.method !== 'POST') return json(res, 405, { error: 'EXT_METHOD' });
       if (!sameOrigin(req) || req.headers['x-dsha-ext'] !== '1') return json(res, 403, { error: 'EXT_FORBIDDEN' });
-      if (sub === '/api/activate' || sub === '/api/remove') {
+      // 下载/下载并安装与启用/移除同一套保护：authorizeIndex + 同源 Origin + x-dsha-ext + JSON。
+      // 地址只由内置目录决定（请求体只给 id），不接受任何外部 URL。
+      const ACTIONS = { '/api/activate': 'activate', '/api/remove': 'remove', '/api/download': 'download', '/api/install': 'install' };
+      if (ACTIONS[sub]) {
         if (!String(req.headers['content-type'] ?? '').startsWith('application/json')) return json(res, 415, { error: 'EXT_CONTENT_TYPE' });
         const { id } = await readJson(req);
-        const job = manager.start(sub.endsWith('activate') ? 'activate' : 'remove', String(id ?? ''));
+        const job = manager.start(ACTIONS[sub], String(id ?? ''));
         return json(res, 202, { job });
       }
       if (sub === '/api/import') {

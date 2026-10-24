@@ -331,7 +331,10 @@ def main():
         row = build_pack(pack, lock, data, args.cache, args.out)
         print(json.dumps({k: row[k] for k in ('id', 'bytes', 'installedBytes', 'sha256', 'debs')}), flush=True)
         rows.append(row)
-    catalog = {'schema': 1, 'base': data['base'], 'packs': rows,
+    dl = data.get('download', {}).get('base', '')
+    if not re.fullmatch(r'https://github\.com/mopth/DSHA-AllitorFk\./releases/download/[A-Za-z0-9][A-Za-z0-9._-]{0,100}', dl):
+        raise ValueError('EXT_DOWNLOAD_BASE')
+    catalog = {'schema': 1, 'base': data['base'], 'download': {'base': dl}, 'packs': rows,
                'packsSha256': extlib.digest(extlib.PACKS)}
     CATALOG.write_text(json.dumps(catalog, indent=1, ensure_ascii=False) + '\n', encoding='utf-8')
 

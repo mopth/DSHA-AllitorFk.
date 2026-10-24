@@ -14,25 +14,43 @@ h1{font-size:20px;margin:0 0 4px}h2{font-size:15px;color:var(--mut);margin:22px 
 button{font:inherit;border:0;border-radius:9px;padding:7px 12px;background:var(--acc);color:#fff;min-width:64px}button.sec{background:transparent;color:var(--warn);border:1px solid var(--warn)}
 button:disabled{opacity:.45}.right{display:flex;flex-direction:column;gap:6px;align-items:flex-end}
 pre{white-space:pre-wrap;word-break:break-all;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px;font-size:12px;max-height:220px;overflow:auto}
-label.import{font-size:12px;color:var(--acc)}input[type=file]{display:none}
+label.import,a.dl{font-size:12px;color:var(--acc);text-decoration:none}.guide{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:13px}.guide ol{margin:4px 0 0;padding-left:20px}progress{width:140px}input[type=file]{display:none}
 </style></head><body>
-<h1>扩展中心</h1>
-<p class="sub">全部离线：扩展包随 Full 版内置或从文件导入，安装前按内置目录逐一核对 sha256，并绑定当前 Ubuntu 基底版本。</p>
+<h1 id="title">扩展中心</h1>
+<div class="guide" id="guide"></div>
 <div class="banner" id="banner"></div>
 <div id="list"></div>
 <h2>任务日志</h2><pre id="log">（空闲）</pre>
-<p class="sub">许可：各包内 Ubuntu 组件按其 copyright 文件授权，源码获取方式见 /opt/dsha-ext/licenses/&lt;包&gt;/SOURCES.json；ghostscript 为 AGPL-3.0；不含 unrar 等非自由组件。</p>
+<p class="sub" id="lic">许可：各包内 Ubuntu 组件按其 copyright 文件授权，源码获取方式见 /opt/dsha-ext/licenses/&lt;包&gt;/SOURCES.json；ghostscript 为 AGPL-3.0；不含 unrar 等非自由组件。</p>
 <script>
 'use strict';
-const CATS=[['lang','语言与编译链'],['media','媒体与文档'],['devtools','开发工具']];
+const EN=!/^zh/i.test(navigator.language||'zh');
+const T=(zh,en)=>EN?en:zh;
+const CATS=[['lang',T('语言与编译链','Languages & toolchains')],['media',T('媒体与文档','Media & documents')],['devtools',T('开发工具','Developer tools')]];
+function guide(){const g=$('#guide');g.textContent='';
+  const h=document.createElement('b');h.textContent=T('怎么安装扩展包','How to install a pack');
+  const ol=document.createElement('ol');
+  for(const t of [T('方式 A（最省事）：点「下载并安装」，App 自动下载、校验并安装。断网后再点一次会接着下载。','Option A (easiest): tap “Download & install”. The app downloads, checks and installs it. If the network drops, tap again to resume.'),
+    T('方式 B：点「在浏览器中下载」，下载完成后在手机「下载」文件夹里能找到 .dshx 文件；回到这里点「从文件导入」，选中这个 .dshx，再点「启用」。','Option B: tap “Download in browser”. When it finishes, the .dshx is in your Downloads folder; come back, tap “Import from file”, pick the .dshx, then tap “Enable”.'),
+    T('每个包都会自动核对 sha256（以 App 内置目录为准），不符就拒绝，不会安装被篡改或下坏的文件。','Every pack is checked automatically against the sha256 in the app’s built-in catalog; a mismatch is rejected, so a damaged or tampered file is never installed.')]){const li=document.createElement('li');li.textContent=t;ol.append(li)}
+  g.append(h,ol);}
 const $=s=>document.querySelector(s);
 const mb=b=>b>=1073741824?(b/1073741824).toFixed(1)+' GB':Math.max(1,Math.round(b/1048576))+' MB';
 const zh=o=>o&&(o.zh||o.en)||'';
 let state=null;
 async function api(path,opt){const r=await fetch('/__dsha/extensions/api/'+path,Object.assign({credentials:'same-origin',cache:'no-store'},opt||{}));const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||('HTTP '+r.status));return j}
 function post(path,body){return api(path,{method:'POST',headers:{'content-type':'application/json','x-dsha-ext':'1'},body:JSON.stringify(body)})}
-const MSG={EXT_BASE_TOOLS_MISMATCH:'基底工具集版本与扩展包不匹配，已拒绝安装',EXT_BASE_ROOTFS_MISMATCH:'Ubuntu 基底版本与扩展包不匹配，已拒绝安装',EXT_PACK_DIGEST:'扩展包校验失败（sha256 不符）',EXT_PACK_MISSING:'扩展包文件不存在，请先导入',EXT_BUSY:'已有任务在执行',EXT_NO_SPACE:'存储空间不足'};
-const msg=e=>{const k=String(e).split(':')[0];return (MSG[k]||'')+(MSG[k]?'（'+e+'）':e)};
+const MSG={EXT_BASE_TOOLS_MISMATCH:T('基底工具集版本与扩展包不匹配，已拒绝安装','The base tools do not match this pack; install refused'),
+  EXT_BASE_ROOTFS_MISMATCH:T('Ubuntu 基底版本与扩展包不匹配，已拒绝安装','The Ubuntu base does not match this pack; install refused'),
+  EXT_PACK_DIGEST:T('文件校验没通过（sha256 不符），已删除。可能是下载损坏或文件不对，请重新下载。','The file failed its check (sha256 mismatch) and was deleted. It may be damaged or the wrong file; please download it again.'),
+  EXT_PACK_SIZE:T('文件大小不对，已删除，请重新下载。','The file size is wrong and it was deleted; please download it again.'),
+  EXT_PACK_MISSING:T('还没有这个扩展包文件，请先下载或导入','This pack has not been downloaded or imported yet'),
+  EXT_BUSY:T('已有任务在执行，请稍等','Another task is running; please wait'),
+  EXT_NO_SPACE:T('手机存储空间不够，请清理一些空间后再试。','Not enough storage space; free some space and try again.'),
+  EXT_NETWORK:T('网络连接失败。请检查网络后再点一次，已下载的部分会接着下；也可以改用「在浏览器中下载」。','Network error. Check your connection and tap again; it will resume. You can also use “Download in browser”.'),
+  EXT_REQUIRES:T('需要先启用依赖的扩展包','Enable the required pack first'),
+  EXT_DOWNLOAD_BASE:T('下载地址配置无效，已拒绝','Invalid download location; refused')};
+const msg=e=>{const k=String(e).split(':')[0];return MSG[k]?MSG[k]+' ('+e+')':String(e)};
 function render(){
   const s=state,list=$('#list');list.textContent='';
   const banner=$('#banner');banner.style.display=s.baseOk?'none':'block';banner.textContent=s.baseOk?'':msg(s.baseError);
@@ -45,30 +63,37 @@ function render(){
       const m=document.createElement('div');m.className='main';
       const n=document.createElement('div');n.className='name';n.textContent=zh(p.name)+'  '+(p.version||'');
       const d=document.createElement('div');d.className='meta';d.textContent=zh(p.summary);
-      const z=document.createElement('div');z.className='meta';z.textContent='包 '+mb(p.bytes)+' · 安装后约 '+mb(p.installedBytes)+(p.requires.length?' · 依赖 '+p.requires.join('、'):'');
+      const z=document.createElement('div');z.className='meta';z.textContent=T('文件 ','File ')+mb(p.bytes)+T(' · 安装后约 ',' · about ')+mb(p.installedBytes)+T('',' installed')+(p.requires.length?T(' · 依赖 ',' · needs ')+p.requires.join(', '):'');
       m.append(n,d,z);
-      const tags=[[p.active?'已启用':(p.available?'可启用':'未导入'),p.active?'on':''],...(p.agpl?[['AGPL-3.0','agpl']]:[]),...p.licenses.map(l=>[l,''])];
+      const tags=[[p.active?T('已启用','Enabled'):(p.available?T('可启用','Ready'):T('未下载','Not downloaded')),p.active?'on':''],...(p.agpl?[['AGPL-3.0','agpl']]:[]),...p.licenses.map(l=>[l,''])];
       for(const [t,cls] of tags){const e=document.createElement('span');e.className='tag '+cls;e.textContent=t;m.append(e)}
       const r=document.createElement('div');r.className='right';
-      if(p.active){const b=document.createElement('button');b.className='sec';b.textContent='移除';b.disabled=busy;b.onclick=()=>act('remove',p);r.append(b)}
-      else if(p.available){const b=document.createElement('button');b.textContent='启用';b.disabled=busy||!s.baseOk;b.onclick=()=>act('activate',p);r.append(b)}
-      if(!p.active){const l=document.createElement('label');l.className='import';l.textContent=p.available?'重新导入':'从文件导入';const i=document.createElement('input');i.type='file';i.accept='.dshx,application/octet-stream';i.onchange=()=>importFile(p,i.files[0]);l.append(i);r.append(l)}
+      const mine=s.job&&s.job.pid===p.id;
+      if(p.active){const b=document.createElement('button');b.className='sec';b.textContent=T('移除','Remove');b.disabled=busy;b.onclick=()=>act('remove',p);r.append(b)}
+      else if(p.available){const b=document.createElement('button');b.textContent=T('启用','Enable');b.disabled=busy||!s.baseOk;b.onclick=()=>act('activate',p);r.append(b)}
+      else{const failed=mine&&!busy&&s.job.ok===false;const b=document.createElement('button');b.className='install';b.textContent=failed?T('重试下载并安装','Retry download & install'):T('下载并安装','Download & install');b.disabled=busy||!s.baseOk||!p.url;b.onclick=()=>act('install',p);r.append(b)}
+      if(mine&&busy&&s.job.total){const g=document.createElement('progress');g.max=s.job.total;g.value=s.job.done;const t=document.createElement('span');t.className='meta';t.textContent=mb(s.job.done)+' / '+mb(s.job.total);r.append(g,t)}
+      if(!p.active&&p.url){const a=document.createElement('a');a.className='dl';a.href=p.url;a.textContent=T('在浏览器中下载','Download in browser');r.append(a)}
+      if(!p.active){const l=document.createElement('label');l.className='import';l.textContent=p.available?T('重新导入','Re-import'):T('从文件导入','Import from file');const i=document.createElement('input');i.type='file';i.accept='.dshx,application/octet-stream';i.onchange=()=>importFile(p,i.files[0]);l.append(i);r.append(l)}
       c.append(m,r);list.append(c);
     }
   }
   const lines=(s.log||[]).join('\n');
-  $('#log').textContent=(busy?'进行中：'+s.job.action+' '+s.job.pid+'\n':(s.job?(s.job.ok?'完成：':'失败：'+msg(s.job.error)+'\n')+'':''))+(lines||'（空闲）');
+  $('#log').textContent=(busy?T('进行中：','Running: ')+s.job.action+' '+s.job.pid+'\n':(s.job?(s.job.ok?T('完成：','Done: '):T('失败：','Failed: ')+msg(s.job.error)+'\n')+'':''))+(lines||T('（空闲）','(idle)'));
 }
 async function act(action,p){
-  if(action==='remove'&&!confirm('移除「'+zh(p.name)+'」？其安装的软件包会被清理（与其它扩展共用的保留）。'))return;
-  if(action==='activate'&&p.agpl&&!confirm('该扩展包含 AGPL-3.0 组件（ghostscript），继续启用？'))return;
+  if(action==='remove'&&!confirm(T('移除「'+zh(p.name)+'」？其安装的软件包会被清理（与其它扩展共用的保留）。','Remove “'+zh(p.name)+'”? Its packages are cleaned up (shared ones are kept).')))return;
+  if((action==='activate'||action==='install')&&p.agpl&&!confirm(T('该扩展包含 AGPL-3.0 组件（ghostscript），继续？','This pack contains AGPL-3.0 software (ghostscript). Continue?')))return;
+  if(action==='install'&&!confirm(T('将下载 '+mb(p.bytes)+' 并安装「'+zh(p.name)+'」，建议使用 Wi-Fi。继续？','This downloads '+mb(p.bytes)+' and installs “'+zh(p.name)+'”. Wi-Fi recommended. Continue?')))return;
   try{await post(action,{id:p.id})}catch(e){alert(msg(e.message))}refresh();
 }
 async function importFile(p,f){
-  if(!f)return;$('#log').textContent='正在导入 '+f.name+'（'+mb(f.size)+'），导入时会校验 sha256…';
+  if(!f)return;$('#log').textContent=T('正在导入 ','Importing ')+f.name+' ('+mb(f.size)+T('），会自动校验 sha256…','), sha256 is checked automatically…');
   try{await api('import?id='+encodeURIComponent(p.id),{method:'POST',headers:{'content-type':'application/octet-stream','x-dsha-ext':'1'},body:f})}catch(e){alert(msg(e.message))}refresh();
 }
 let timer=null;
 async function refresh(){clearTimeout(timer);try{state=await api('state');render()}catch(e){$('#banner').style.display='block';$('#banner').textContent=String(e.message)}timer=setTimeout(refresh,state&&state.job&&state.job.running?1000:5000)}
+document.documentElement.lang=EN?'en':'zh-CN';document.title=T('扩展中心','Extensions');$('#title').textContent=document.title;guide();
+if(EN)$('#lic').textContent='Licenses: Ubuntu components follow their copyright files; source locations are in /opt/dsha-ext/licenses/<pack>/SOURCES.json. ghostscript is AGPL-3.0. No non-free components such as unrar.';
 refresh();
 </script></body></html>

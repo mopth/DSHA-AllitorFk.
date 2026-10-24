@@ -11,9 +11,9 @@
 | 基线 | 官方 DSHA build190（`0.2.1-rc.2`），提交 `c750348a4d4b18edcb165a93b4ca66403b040b4c` |
 | 包名 | `dsha.AllitorFk_.dsh0_2_1_rc_2`（官方 build190 的包名是 `dsh.android.client`，两者不同，可以同时安装） |
 | 显示名 / 文件名 | `dsha-AllitorFk.-dsh0.2.1-rc.2` |
-| 安装包 | 标准版 `dsha-AllitorFk.-dsh0.2.1-rc.2.apk`（安卓 11+）；Full 版 `dsha-AllitorFk.-dsh0.2.1-rc.2-full.apk`（安卓 11+，内置 dev-base 与 jdk21 两个离线扩展）；低版本 `dsha-AllitorFk.-dsh0.2.1-rc.2-low.apk`（安卓 6+）；均为 arm64 |
+| 安装包 | 标准版 `dsha-AllitorFk.-dsh0.2.1-rc.2.apk`（安卓 11+）；低版本 `dsha-AllitorFk.-dsh0.2.1-rc.2-low.apk`（安卓 6+）；均为 arm64。Full 版已取消：16 个 .dshx 作为 Release 附件，扩展中心可导入或一键下载 |
 | 签名 | 与官方不同（能与官方共存靠的是包名不同，与签名无关）。以后每次发布都要用同一把签名密钥，私钥绝不进仓库 |
-| 发布状态 | **尚未发布** |
+| 发布状态 | 测试版 Release 已发布（测试签名，未经真机验证） |
 
 ## 🧩 已做内容
 1. **改包名与官方共存**：只改 `applicationId`，并同步改掉 `app/src/main` 里写死包名的地方；provider authorities 跟随 `${applicationId}`。
@@ -27,7 +27,8 @@
 - [x] 代码改动（本地提交；累计改动可用 `git diff main allitorfk --` 查看）。
 - [x] 本地构建三个 APK、单元测试、扩展包在 qemu chroot 里逐包启用/运行/移除验证。
 - [ ] 真机测试（报告放 `reports/`）。
-- [ ] 发布。
+- [x] 测试版 Release（两个 APK + 16 个 .dshx）。
+- [ ] 扩展中心一键下载（本地分支 allitorfk/phase4，待评审）。
 
 已核实（只读核对 build190）：
 - build190 已有 `low` 版本（minSdk 23）和 `WebPortPolicy`（fix4 的 Web 端口修复）。

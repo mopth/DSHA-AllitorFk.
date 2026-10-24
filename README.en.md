@@ -6,7 +6,7 @@
 
 ## ⬇️ Download: not released yet
 
-> No AllitorFk package has been published yet (it builds locally; no on-device testing yet). Once released, the Releases page of this repository will offer three arm64 packages: `dsha-AllitorFk.-dsh0.2.1-rc.2.apk` (standard, Android 11+), `dsha-AllitorFk.-dsh0.2.1-rc.2-full.apk` (Full, Android 11+, with the developer-base and JDK 21 offline extensions built in) and `dsha-AllitorFk.-dsh0.2.1-rc.2-low.apk` (low, Android 6+); the other offline extension packs (.dshx) will be release attachments.
+> A test Release `dsha-AllitorFk.-dsh0.2.1-rc.2` is published (test signing, no on-device testing yet): two arm64 packages, `dsha-AllitorFk.-dsh0.2.1-rc.2.apk` (standard, Android 11+) and `dsha-AllitorFk.-dsh0.2.1-rc.2-low.apk` (low, Android 6+), plus all 16 offline extension packs (.dshx). Download the .dshx you need and import it in the app's Extensions page; one-tap “Download & install” in the Extensions page is new on this branch and not released yet.
 
 > ⚠️ **Disclaimer: this is an unofficial fork of [DSH-APP/DSHA](https://github.com/DSH-APP/DSHA). It is not an official release, has not been reviewed by the upstream author, and is not affiliated with them. Use at your own risk.**
 > - **Based on**: official DSHA build190 (`0.2.1-rc.2`), commit `c750348a`.
