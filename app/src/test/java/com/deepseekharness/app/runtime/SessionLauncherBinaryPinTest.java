@@ -38,7 +38,16 @@ public class SessionLauncherBinaryPinTest {
                     .toPath()),
             StandardCharsets.UTF_8);
     assertTrue(java.contains("\"--birth-handshake\""));
-    // Java must not start depending on launcher V2 flags without swapping the binary.
-    assertTrue(!java.contains("\"--control\""));
+    // No Java/Kotlin source may start depending on launcher V2 flags without swapping the binary.
+    java.util.List<String> offenders = new java.util.ArrayList<>();
+    try (var files = Files.walk(file("src/main/java").toPath())) {
+      for (var f : (Iterable<java.nio.file.Path>) files::iterator) {
+        String n = f.toString();
+        if (!Files.isRegularFile(f) || !(n.endsWith(".java") || n.endsWith(".kt"))) continue;
+        if (new String(Files.readAllBytes(f), StandardCharsets.UTF_8).contains("--control"))
+          offenders.add(n);
+      }
+    }
+    assertTrue("--control used by " + offenders, offenders.isEmpty());
   }
 }
