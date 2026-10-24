@@ -11,7 +11,7 @@ import { createChromiumEngine } from './cdp.js';
 import { startEgressProxy } from './egress-proxy.js';
 import { checkEngines } from './engines.js';
 import { startAgentChannel } from './agent.js';
-import { nativeConfirm, questionFor } from './native-confirm.js';
+import { createNativeApprover } from './native-confirm.js';
 
 export const BASE = '/__dsha/allitor';
 const PAGE_CSP = "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; frame-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'self'";
@@ -69,6 +69,8 @@ export function createAllitor(options = {}) {
 
 export function registerAllitorRoutes(scoped, options = {}) {
   const core = options.core ?? createAllitor(options);
+  // Verification key pinned now, at web start, before any agent turn can swap the file.
+  const approve = options.confirm ?? createNativeApprover(options.approver);
   let channel = null;
   if (options.agent !== false) { try { channel = startAgentChannel({ dir: options.agentDir, ops: core.ops }); } catch (error) { console.warn('allitor agent channel disabled:', error?.message); } }
   const handler = async (req, res) => {
@@ -106,7 +108,7 @@ export function registerAllitorRoutes(scoped, options = {}) {
         if (!pending || pending.state !== 'pending') return json(res, 409, { error: 'TAKEOVER_NOT_PENDING' });
         // A forged cookie is possible from inside proot; only a human tap on the native dialog approves.
         let ok = false;
-        try { ok = await (options.confirm ?? nativeConfirm)(questionFor(pending, SCOPES)); }
+        try { ok = await approve(pending); }
         catch (error) { return json(res, 503, { error: String(error.message).slice(0, 200) }); }
         if (!ok) { core.takeover.decide(body.id, false); return json(res, 403, { error: 'TAKEOVER_NATIVE_DENIED' }); }
         return json(res, 200, core.takeover.decide(body.id, true));

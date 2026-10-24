@@ -30,6 +30,7 @@ public final class BridgeRoutes {
     OPEN(false),
     VIBRATE(false),
     ASK(false),
+    ALLITOR_APPROVE(false),
     VERSION(false),
     HELP(false),
     PLUGINS(false),
@@ -82,6 +83,7 @@ public final class BridgeRoutes {
     add(routes, "/app/open", Route.OPEN);
     add(routes, "/app/vibrate", Route.VIBRATE);
     add(routes, "/app/ask", Route.ASK);
+    add(routes, "/app/allitor/approve", Route.ALLITOR_APPROVE);
     add(routes, "/app/version", Route.VERSION);
     add(routes, "/app/help", Route.HELP);
     add(routes, "/app/plugins", Route.PLUGINS);

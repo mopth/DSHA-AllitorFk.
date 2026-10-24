@@ -99,7 +99,7 @@ assert.equal(core.takeover.status(req1.id).state, 'denied');
 const req1b = await call('takeover.request', { scope: 'preview', reason: '预览', minutes: 5 }, agentDir);
 confirmAnswer = true;
 assert.equal((await fetch(base + '/api/takeover/decide', { method: 'POST', headers: H, body: JSON.stringify({ id: req1b.id, approve: true }) })).status, 200);
-assert.match(confirmQs.at(-1), /AI 自述理由（未经核实）：预览/);
+assert.match(confirmQs.at(-1).reason, /预览/); assert.ok(confirmQs.at(-1).id && confirmQs.at(-1).minutes);
 const started = await call('preview.start', { dir: join(root, 'site') }, agentDir);
 const prev = await fetch(`http://127.0.0.1:${port}${started.raw}`); // capability URL, no cookie
 assert.equal(prev.status, 200); assert.match(prev.headers.get('content-security-policy'), /^sandbox allow-scripts/);

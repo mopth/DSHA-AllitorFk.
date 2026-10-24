@@ -2633,6 +2633,17 @@
         "node24"
       ],
       "environment": {}
+    },
+    {
+      "path": "tools/test-allitor-native-approval.mjs",
+      "stage": "fast",
+      "reason": "rc3 T2 signed native approval attack paths",
+      "args": [],
+      "timeoutSeconds": 120,
+      "requires": [
+        "node24"
+      ],
+      "environment": {}
     }
   ],
   "historicalExcluded": [

@@ -240,6 +240,7 @@ public final class HttpShellService {
     routes.put(BridgeRoutes.Route.OPEN, (s, r) -> s.appOpen(r.path));
     routes.put(BridgeRoutes.Route.VIBRATE, (s, r) -> s.appVibrate(r.path));
     routes.put(BridgeRoutes.Route.ASK, (s, r) -> s.appAsk(r.path));
+    routes.put(BridgeRoutes.Route.ALLITOR_APPROVE, (s, r) -> s.appAllitorApprove(r.path));
     routes.put(BridgeRoutes.Route.VERSION, (s, r) -> s.appVersion());
     routes.put(BridgeRoutes.Route.HELP, (s, r) -> s.appHelp());
     routes.put(BridgeRoutes.Route.PLUGINS, (s, r) -> s.appPlugins(r.path));
@@ -438,6 +439,7 @@ public final class HttpShellService {
         boolean replace = token == null || token.isEmpty();
         if (replace) token = java.util.UUID.randomUUID().toString().replace("-", "");
         com.deepseekharness.app.util.BridgeCredentialFiles.publish(fs, tf, token, replace);
+        publishApprovalKey(tf);
         authToken = token;
         com.deepseekharness.app.util.SensitiveData.registerKnownSecret(token);
         return authToken;
@@ -2181,6 +2183,57 @@ public final class HttpShellService {
   }
 
   /** /app/ask?q=问题&options=选项A|选项B|选项C ：弹窗问用户，阻塞等回答（最多 3 个选项，120 秒超时） */
+  /** rc.3 T2: dedicated native takeover approval; returns a Keystore signature on a real tap. */
+  private String appAllitorApprove(String path) {
+    String q = queryOf(path);
+    com.deepseekharness.app.util.AllitorApproval a;
+    try {
+      a =
+          com.deepseekharness.app.util.AllitorApproval.parse(
+              getParam(q, "id", ""),
+              getParam(q, "scope", ""),
+              getParam(q, "minutes", ""),
+              getParam(q, "nonce", ""),
+              getParam(q, "reason", ""));
+    } catch (IllegalArgumentException bad) {
+      return "[ERR] " + bad.getMessage();
+    }
+    final String approve = "批准", deny = "拒绝";
+    String ask;
+    try {
+      ask =
+          "/app/ask?q="
+              + java.net.URLEncoder.encode(a.question(), "UTF-8")
+              + "&options="
+              + java.net.URLEncoder.encode(approve + "|" + deny, "UTF-8");
+    } catch (java.io.UnsupportedEncodingException e) {
+      return "[ERR] ENCODING";
+    }
+    String answer = appAsk(ask);
+    try {
+      if (approve.equals(answer))
+        return a.reply(true, com.deepseekharness.app.util.AllitorApprovalKey::sign);
+      if (deny.equals(answer)) return a.reply(false, null);
+      return "[ERR] NO_DECISION " + answer;
+    } catch (Exception e) {
+      return "[ERR] APPROVAL_SIGN_FAILED";
+    }
+  }
+
+  /** Publishes the approval verification key next to the bridge token (public data only). */
+  private static void publishApprovalKey(java.io.File tokenFile) {
+    try {
+      if (tokenFile == null || tokenFile.getParentFile() == null) return;
+      String spki = com.deepseekharness.app.util.AllitorApprovalKey.publicSpkiBase64();
+      var fs = new com.deepseekharness.app.backup.AndroidBackupFileSystem();
+      java.io.File root = tokenFile.getParentFile();
+      fs.atomic(root, ".allitor_approval_pub", spki.getBytes(java.nio.charset.StandardCharsets.US_ASCII));
+      fs.mode(fs.child(root, ".allitor_approval_pub"), 0644);
+    } catch (Throwable ignored) {
+      // web side fails closed without the key
+    }
+  }
+
   private String appAsk(String path) {
     return appAsk(path, 120_000, fixtureAskObserver);
   }
