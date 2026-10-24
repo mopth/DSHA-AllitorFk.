@@ -2644,6 +2644,17 @@
         "node24"
       ],
       "environment": {}
+    },
+    {
+      "path": "tools/test-allitor-session-autoclear.mjs",
+      "stage": "fast",
+      "reason": "rc3 browser_full session autoclear + trailing-dot",
+      "args": [],
+      "timeoutSeconds": 120,
+      "requires": [
+        "node24"
+      ],
+      "environment": {}
     }
   ],
   "historicalExcluded": [

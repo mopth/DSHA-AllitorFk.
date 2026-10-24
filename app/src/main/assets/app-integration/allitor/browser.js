@@ -76,7 +76,7 @@ export function checkUrl(raw) {
   if (u.username || u.password) throw new Error('BROWSER_CREDENTIALS_IN_URL');
   const host = u.hostname.replace(/^\[|\]$/g, '');
   if (net.isIP(host) && privateAddress(host)) throw new Error('BROWSER_PRIVATE_ADDRESS');
-  if (/^(localhost|.*\.localhost|.*\.local|.*\.internal)$/i.test(host)) throw new Error('BROWSER_PRIVATE_ADDRESS');
+  if (/^(localhost|.*\.localhost|.*\.local|.*\.internal)\.*$/i.test(host)) throw new Error('BROWSER_PRIVATE_ADDRESS');
   u.hash = '';
   return u;
 }

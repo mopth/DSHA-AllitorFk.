@@ -10,7 +10,7 @@ function resolvePublic(host) {
   return new Promise((resolve, reject) => {
     const h = host.replace(/^\[|\]$/g, '');
     if (net.isIP(h)) return privateAddress(h) ? reject(new Error('BROWSER_PRIVATE_ADDRESS')) : resolve(h);
-    if (/^(localhost|.*\.localhost|.*\.local|.*\.internal)$/i.test(h)) return reject(new Error('BROWSER_PRIVATE_ADDRESS'));
+    if (/^(localhost|.*\.localhost|.*\.local|.*\.internal)\.*$/i.test(h)) return reject(new Error('BROWSER_PRIVATE_ADDRESS'));
     guardedLookup(h, {}, (e, address) => e ? reject(e) : resolve(address));
   });
 }

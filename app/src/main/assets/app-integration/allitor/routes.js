@@ -64,7 +64,16 @@ export function createAllitor(options = {}) {
     'browser.download': a => browser.download(a), 'browser.eval': a => browser.evaluate(a), 'browser.screenshot': () => browser.screenshot(),
     'browser.sessions': () => browser.sessions(), 'browser.session_clear': a => { if (!takeover.granted('browser_full')) throw new Error('BROWSER_FULL_NOT_AUTHORIZED'); return browser.clearSession(a); },
   };
-  return { takeover, previews, annotations, browser, sessions, ops, close() { browser.reset(); proxy?.close(); } };
+  // browser_full ended (revoked or expired): wipe per-site logins/cookies so nothing outlives the grant.
+  let fullWas = takeover.granted('browser_full');
+  const watchFull = () => {
+    const now = takeover.granted('browser_full');
+    if (fullWas && !now) Promise.resolve().then(() => browser.clearSession({ site: '*' })).catch(() => {});
+    fullWas = now;
+  };
+  const unsubscribe = takeover.subscribe(watchFull);
+  const sweep = setInterval(watchFull, options.fullSweepMs ?? 15_000); sweep.unref?.();
+  return { takeover, previews, annotations, browser, sessions, ops, watchFull, close() { unsubscribe(); clearInterval(sweep); browser.reset(); proxy?.close(); } };
 }
 
 export function registerAllitorRoutes(scoped, options = {}) {
