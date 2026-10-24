@@ -414,9 +414,9 @@
   {
    "id": "assetstudio-mcp",
    "file": "assetstudio-mcp.dshx",
-   "sha256": "a376eb104b00f1fb516e2f27fcde82944c5bb8bd235aa0c9bbb667f3e93e21b2",
-   "bytes": 2283174,
-   "installedBytes": 2454276,
+   "sha256": "c4c71b8bb2848a19f51c41929eedd56bb602a82f0a520ba7c7be4a11a92d8332",
+   "bytes": 2283397,
+   "installedBytes": 2456002,
    "name": {
     "zh": "AssetStudio MCP（Unity 资源）",
     "en": "AssetStudio MCP (Unity assets)"
@@ -462,5 +462,5 @@
    ]
   }
  ],
- "packsSha256": "ee9ef26f9626da39b79fa61badc4bc4640639c64abdc56af723596a0f413fd6a"
+ "packsSha256": "daba8a074e68e26b34f9b33879c8df99b7a913bc071da5beca5685d0103a4e99"
 }
