@@ -6,13 +6,10 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
 
-@RunWith(RobolectricTestRunner.class)
 public class ExtensionReleaseLinksTest {
   private static final String BASE =
       "https://github.com/mopth/DSHA-AllitorFk./releases/download/dsha-AllitorFk.-dsh0.2.1-rc.2/";
@@ -30,7 +27,7 @@ public class ExtensionReleaseLinksTest {
       "",
       BASE + "dev-base.dshx?x=1",
       BASE + "dev-base.dshx#f",
-      BASE + "dsha-AllitorFk.-dsh0.2.1-rc.2.apk",
+      BASE + "DSHA-AllitorFk.-dsh0.2.1-rc.2.apk",
       BASE + "Dev-Base.dshx",
       BASE + "../x.dshx",
       "https://github.com/mopth/DSHA-AllitorFk./releases/download/../x/dev-base.dshx",
@@ -52,14 +49,17 @@ public class ExtensionReleaseLinksTest {
   public void everyCatalogPackUrlIsAllowed() throws Exception {
     File f = new File("src/main/assets/app-integration/ext-catalog.json");
     if (!f.exists()) f = new File("app", f.getPath());
-    JSONObject catalog = new JSONObject(new String(Files.readAllBytes(f.toPath()), StandardCharsets.UTF_8));
-    String base = catalog.getJSONObject("download").getString("base");
-    assertTrue(base.startsWith(ExtensionReleaseLinks.PREFIX));
-    JSONArray packs = catalog.getJSONArray("packs");
-    assertTrue(packs.length() >= 16);
-    for (int i = 0; i < packs.length(); i++) {
-      String url = base + "/" + packs.getJSONObject(i).getString("file");
+    String text = new String(Files.readAllBytes(f.toPath()), StandardCharsets.UTF_8);
+    Matcher base = Pattern.compile("\"download\":\\s*\\{\\s*\"base\":\\s*\"([^\"]+)\"").matcher(text);
+    assertTrue(base.find());
+    assertTrue(base.group(1).startsWith(ExtensionReleaseLinks.PREFIX));
+    Matcher file = Pattern.compile("\"file\":\\s*\"([^\"]+)\"").matcher(text);
+    int count = 0;
+    while (file.find()) {
+      String url = base.group(1) + "/" + file.group(1);
       assertTrue(url, ExtensionReleaseLinks.isReleaseAsset(url));
+      count++;
     }
+    assertTrue(count >= 16);
   }
 }

@@ -10,8 +10,9 @@
 |---|---|
 | 基线 | 官方 DSHA build190（`0.2.1-rc.2`），提交 `c750348a4d4b18edcb165a93b4ca66403b040b4c` |
 | 包名 | `dsha.AllitorFk_.dsh0_2_1_rc_2`（官方 build190 的包名是 `dsh.android.client`，两者不同，可以同时安装） |
-| 显示名 / 文件名 | `dsha-AllitorFk.-dsh0.2.1-rc.2` |
-| 安装包 | 标准版 `dsha-AllitorFk.-dsh0.2.1-rc.2.apk`（安卓 11+）；低版本 `dsha-AllitorFk.-dsh0.2.1-rc.2-low.apk`（安卓 6+）；均为 arm64。Full 版已取消：16 个 .dshx 作为 Release 附件，扩展中心可导入或一键下载 |
+| 显示名 | 手机上显示 `DSHA-AllitorFk.`（不带版本号） |
+| 文件名 | `DSHA-AllitorFk.-dsh0.2.1-rc.2`（APK 与以后的 Release 标题；已发布的测试版 Release 仍是小写 `dsha-…`，不改动） |
+| 安装包 | 标准版 `DSHA-AllitorFk.-dsh0.2.1-rc.2.apk`（安卓 11+）；低版本 `DSHA-AllitorFk.-dsh0.2.1-rc.2-low.apk`（安卓 6+）；均为 arm64。Full 版已取消：16 个 .dshx 作为 Release 附件，扩展中心可导入或一键下载 |
 | 签名 | 与官方不同（能与官方共存靠的是包名不同，与签名无关）。以后每次发布都要用同一把签名密钥，私钥绝不进仓库 |
 | 发布状态 | 测试版 Release 已发布（测试签名，未经真机验证） |
 

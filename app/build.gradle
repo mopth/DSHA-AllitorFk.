@@ -6,7 +6,9 @@ plugins {
 // 功能和离线环境两者共用；离线扩展包不进 APK，从 Release 下载或在扩展中心一键下载。
 // AllitorFk：显示名 / APK 文件名 / Release 名的唯一来源（改名只改这一行）。
 // APK 文件 = <名>.apk，Low 版 = <名>-low.apk；applicationId 另见 defaultConfig，不随此变。
-ext.dshaReleaseName = 'dsha-AllitorFk.-dsh0.2.1-rc.2'
+ext.dshaReleaseName = 'DSHA-AllitorFk.-dsh0.2.1-rc.2'
+// 手机上显示的应用名（不带版本号）；包名 applicationId 不变。
+ext.dshaDisplayName = 'DSHA-AllitorFk.'
 // 是否启用官方 dsha.cc 更新源：待老板决定，默认关闭。
 ext.dshaOfficialUpdateFeed = (project.findProperty('dsha.officialUpdateFeed') ?: 'false') == 'true'
 if (!(dshaReleaseName ==~ /[A-Za-z0-9][A-Za-z0-9._-]{0,100}/))
@@ -57,10 +59,10 @@ android {
         minSdk 30
         targetSdk 37
         buildConfigField 'String', 'BUNDLED_PNPM_VERSION', '"' + bundledTools.pnpm.version + '"'
-        buildConfigField 'String', 'DISPLAY_NAME', '"' + dshaReleaseName + '"'
+        buildConfigField 'String', 'DISPLAY_NAME', '"' + dshaDisplayName + '"'
         // AllitorFk 默认不访问官方 dsha.cc 更新源（不同包名无法覆盖安装，只会产生误导提示）。
         buildConfigField 'boolean', 'OFFICIAL_UPDATE_FEED', String.valueOf(dshaOfficialUpdateFeed)
-        resValue 'string', 'app_name', dshaReleaseName
+        resValue 'string', 'app_name', dshaDisplayName
         versionCode 190
         // DSHA 修订号 + 固定的北京时间戳 + 内置 DSH 版本；同一交付重建不变。
         versionName "0.2.1-rc.2-20261022.2100-dsh0.2.1-rc.2-AllitorFk"
@@ -80,7 +82,7 @@ android {
         low {
             dimension 'androidSupport'
             minSdk 23
-            versionNameSuffix 'low'
+            versionNameSuffix '-low'
             buildConfigField 'boolean', 'LOW_ANDROID', 'true'
         }
     }
