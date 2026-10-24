@@ -5234,59 +5234,33 @@ exports.COMPAT_CSS = `@media (max-width: 1023px) and (pointer: coarse) {
     background: transparent !important;
   }
 
-  /* ---------- agent preset 模式选择菜单：手机端紧凑底部弹层 ----------
-     The official agent-preset menu (role=menu, portal mounted on body) uses
-     position:fixed + max-height:820px + bottom:12px, so on a phone it
-     stretches from the trigger down to 12px above the screen bottom —
-     effectively filling the screen. Turn it into a polished bottom sheet:
-     cap the height, center it horizontally (the official max-width 360px
-     left-anchors at left:12px, leaving 12/18px asymmetric gaps), add a
-     drag-handle affordance, breathing room, and softer top radius; the
-     inner viewport keeps scrolling. Scoped to the agent-preset item class
-     (cubgiG_*) so other role=menu dropdowns (model/access mode) are
-     untouched. Desktop ≥1024px is outside the media query, so it keeps the
-     official large dropdown. */
-  /* agent-preset 菜单依赖 @deepseek-ai/dsh-client-ui-agent-preset 的 CSS Module 哈希 (cubgiG_*)，升级该包时需验证此选择器是否仍有效 */
+  /* ---------- agent preset 模式选择菜单：锚定小卡片（AllitorFk DSHA_PRESET_POPOVER_V1） ----------
+     与工作区下拉同一个宿主 Menu（portal + position:fixed，top/left 由宿主按 chip 计算并夹在
+     视口 12px 内）。不覆盖 top/left，只撤掉任何底部钉死/居中，收成内容宽度。 */
   [role="menu"]:has([class*="cubgiG_item"]) {
-    top: auto !important;
-    left: 50% !important;
+    bottom: auto !important;
     right: auto !important;
-    bottom: 12px !important;
-    transform: translateX(-50%) !important;
-    width: min(100% - 24px, 360px) !important;
-    max-width: 360px !important;
-    max-height: min(55dvh, 440px) !important;
-    padding: 30px 6px 10px !important;
-    border-radius: 16px !important;
+    transform: none !important;
+    width: max-content !important;
+    min-width: 0 !important;
+    max-width: min(280px, calc(100vw - 24px)) !important;
+    max-height: min(60dvh, 360px) !important;
   }
-  [role="menu"]:has([class*="cubgiG_item"])::before {
-    content: '';
-    position: absolute;
-    top: 10px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 36px;
-    height: 4px;
-    border-radius: 999px;
-    background: var(--dsw-alias-border-l2, rgba(0, 0, 0, .22)) !important;
-    pointer-events: none;
+  [role="menu"]:has([class*="cubgiG_item"])::before { content: none !important; }
+  [role="menu"] [class*="cubgiG_item"] { max-width: 232px !important; min-width: 0 !important; }
+  [role="menu"] [class*="cubgiG_itemDesc"] {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
   }
-  /* 菜单内部滚动条：默认 WebKit 滚动条在竖屏太粗,会占 ~15px 宽度把文字描述
-     挤窄,导致描述换行/截断不自然。压成 4px 细条(与表情网格一致),文字区域
-     恢复自适应宽度。 */
   [role="menu"]:has([class*="cubgiG_item"]) [class*="_viewport_"] {
     scrollbar-width: thin !important;
     scrollbar-color: var(--dsw-alias-label-tertiary, rgba(0, 0, 0, .3)) transparent !important;
   }
-  [role="menu"]:has([class*="cubgiG_item"]) [class*="_viewport_"]::-webkit-scrollbar {
-    width: 4px !important;
-  }
+  [role="menu"]:has([class*="cubgiG_item"]) [class*="_viewport_"]::-webkit-scrollbar { width: 4px !important; }
   [role="menu"]:has([class*="cubgiG_item"]) [class*="_viewport_"]::-webkit-scrollbar-thumb {
     background: var(--dsw-alias-label-tertiary, rgba(0, 0, 0, .3)) !important;
     border-radius: 999px !important;
-  }
-  [role="menu"]:has([class*="cubgiG_item"]) [class*="_viewport_"]::-webkit-scrollbar-track {
-    background: transparent !important;
   }
 
 /* 搜索框底部间距修复 */

@@ -103,6 +103,41 @@ export function applyMobileClientPatches(bytes) {
     max-height: 100%;
   }
 `;
+  // AllitorFk：模式（agent preset）菜单不再改成全宽底部弹层。上游把宿主 Menu 的
+  // 锚定位置覆盖成 bottom:12px + 居中 + 拖拽条，盖住输入框；这里还原成与「工作区」下拉、
+  // 推理等级菜单同一个宿主 Menu 组件的锚定小卡片（宿主按 chip 计算 top/left 并夹在视口内），
+  // 只收窄宽度、限制高度、描述单行。行为（选中、关闭、拒绝提示）不变。
+  replaceRange('  /* ---------- agent preset 模式选择菜单：手机端紧凑底部弹层 ----------', '/* 搜索框底部间距修复 */',
+    `  /* ---------- agent preset 模式选择菜单：锚定小卡片（AllitorFk DSHA_PRESET_POPOVER_V1） ----------
+     与工作区下拉同一个宿主 Menu（portal + position:fixed，top/left 由宿主按 chip 计算并夹在
+     视口 12px 内）。不覆盖 top/left，只撤掉任何底部钉死/居中，收成内容宽度。 */
+  [role="menu"]:has([class*="cubgiG_item"]) {
+    bottom: auto !important;
+    right: auto !important;
+    transform: none !important;
+    width: max-content !important;
+    min-width: 0 !important;
+    max-width: min(280px, calc(100vw - 24px)) !important;
+    max-height: min(60dvh, 360px) !important;
+  }
+  [role="menu"]:has([class*="cubgiG_item"])::before { content: none !important; }
+  [role="menu"] [class*="cubgiG_item"] { max-width: 232px !important; min-width: 0 !important; }
+  [role="menu"] [class*="cubgiG_itemDesc"] {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+  [role="menu"]:has([class*="cubgiG_item"]) [class*="_viewport_"] {
+    scrollbar-width: thin !important;
+    scrollbar-color: var(--dsw-alias-label-tertiary, rgba(0, 0, 0, .3)) transparent !important;
+  }
+  [role="menu"]:has([class*="cubgiG_item"]) [class*="_viewport_"]::-webkit-scrollbar { width: 4px !important; }
+  [role="menu"]:has([class*="cubgiG_item"]) [class*="_viewport_"]::-webkit-scrollbar-thumb {
+    background: var(--dsw-alias-label-tertiary, rgba(0, 0, 0, .3)) !important;
+    border-radius: 999px !important;
+  }
+
+`);
   replace('  /* ---------- sidebar panel enter / exit (see effects/panel-exit.ts) ----------',
     css + '  /* ---------- sidebar panel enter / exit (see effects/panel-exit.ts) ----------');
   return source;
