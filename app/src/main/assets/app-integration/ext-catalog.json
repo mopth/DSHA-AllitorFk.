@@ -436,7 +436,31 @@
    "licenses": [
     "MIT (AssetStudio, AssetStudio Mobile core, brotli dec) + Apache-2.0 (Kotlin stdlib); see licenses/"
    ]
+  },
+  {
+   "id": "allitor-tools",
+   "file": "allitor-tools.dshx",
+   "sha256": "b857e7f88cf42487724a4271f4242bca61bf1f5e23f6aa0cb433f1ba5f6d369d",
+   "bytes": 6729,
+   "installedBytes": 10484,
+   "name": {
+    "zh": "AllitorFk 代理工具（MCP）",
+    "en": "AllitorFk agent tools (MCP)"
+   },
+   "summary": {
+    "zh": "stdio MCP：请求接管授权、静态页预览、取回框选批注、受限文本浏览器。仅经本机 0600 令牌 Unix 套接字与控制台通信；所有操作须你在 /__dsha/allitor 批准，可随时撤销",
+    "en": "stdio MCP: takeover requests, static preview, box-select annotations, restricted text browser. Talks only to the console over a 0600-token Unix socket; every action needs your approval at /__dsha/allitor and can be revoked"
+   },
+   "category": "devtools",
+   "version": "0.1.0",
+   "requires": [],
+   "agpl": false,
+   "debs": 0,
+   "upstream": true,
+   "licenses": [
+    "MIT (AllitorFk, own code)"
+   ]
   }
  ],
- "packsSha256": "3713290f12371b20637c9db123fa72ca46570202ec78db6c3086db767cbf84cd"
+ "packsSha256": "86c13c545606b934d72f52c6f757f269c14a32a545b9ee55109fffe8354d3f5d"
 }

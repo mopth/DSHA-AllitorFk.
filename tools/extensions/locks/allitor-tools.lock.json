@@ -1,0 +1,41 @@
+{
+ "format": 1,
+ "id": "allitor-tools",
+ "base": {
+  "rootfsVersion": "10",
+  "toolsLockSha256": "5f75c41bb6a543143e4a05d78fc13f0abf54367c1f4454526a9266e119299c1e",
+  "statusSha256": "f4edc364d3d98514ae7567063645013b2e36f3eb3493ce0076fcc270e4b248b2",
+  "dshVersion": "0.2.1-rc.3"
+ },
+ "sources": [
+  {
+   "suite": "noble",
+   "inReleaseSha256": "cdb2f31d809f589719a53c6ad15f255b27569c4059542ada282aaa21b8e164b0",
+   "date": "Thu, 25 Apr 2024 15:10:33 UTC"
+  },
+  {
+   "suite": "noble-updates",
+   "inReleaseSha256": "4fcba3fb02086679f7e86677e320b92e0d076a8c02e30dc0abbbe06b67640db7",
+   "date": "Fri, 23 Oct 2026 20:23:43 UTC"
+  },
+  {
+   "suite": "noble-security",
+   "inReleaseSha256": "e56daa3c9903f06da8161b4f0e61a747aab215647f4bfabbecd5655631200f09",
+   "date": "Fri, 23 Oct 2026 13:38:44 UTC"
+  }
+ ],
+ "requires": [],
+ "seeds": [],
+ "packages": [],
+ "upstream": [
+  {
+   "kind": "local",
+   "path": "tools/allitor-mcp/dist/allitor-mcp-tree.tar",
+   "url": "https://github.com/mopth/DSHA-AllitorFk./tree/allitorfk/rc3/tools/allitor-mcp",
+   "sha256": "2b6ab5f6ed085c7e49d07c98f52c3e5af7c09af68ed62bd2b683c783d3e7096e",
+   "strip": "allitor-mcp/",
+   "license": "MIT (AllitorFk, own code)",
+   "licenseFile": "LICENSE"
+  }
+ ]
+}

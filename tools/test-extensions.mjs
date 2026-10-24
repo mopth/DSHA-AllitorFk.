@@ -133,7 +133,7 @@ try {
     assert.throws(() => packUrl({ download: { base } }, { id: 'demo', file: '../demo.dshx' }), /EXT_ID/);
     // 真实目录里每个包都能算出固定地址。
     const real = JSON.parse(readFileSync(new URL('../app/src/main/assets/app-integration/ext-catalog.json', import.meta.url), 'utf8'));
-    assert.equal(real.packs.length, 16);
+    assert.equal(real.packs.length, 18);
     for (const p of real.packs) assert.equal(packUrl(real, p), real.download.base + '/' + p.id + '.dshx');
 
     const stream = (buf, chunk = 65536) => (async function* () { for (let i = 0; i < buf.length; i += chunk) yield buf.subarray(i, i + chunk); })();
