@@ -2622,6 +2622,17 @@
         "node24"
       ],
       "environment": {}
+    },
+    {
+      "path": "tools/test-allitor-ssrf.mjs",
+      "stage": "fast",
+      "reason": "AllitorFk B1 SSRF IPv4/IPv6 classification",
+      "args": [],
+      "timeoutSeconds": 120,
+      "requires": [
+        "node24"
+      ],
+      "environment": {}
     }
   ],
   "historicalExcluded": [

@@ -10,16 +10,51 @@ import zlib from 'node:zlib';
 
 const MAX_BYTES = 2 * 1024 * 1024, MAX_REDIRECTS = 5, TIMEOUT_MS = 20_000, MAX_TEXT = 200_000;
 
-export function privateAddress(ip) {
-  if (net.isIPv4(ip)) {
-    const [a, b] = ip.split('.').map(Number);
-    return a === 0 || a === 10 || a === 127 || (a === 100 && b >= 64 && b <= 127) || (a === 169 && b === 254)
-      || (a === 172 && b >= 16 && b <= 31) || (a === 192 && b === 168) || (a === 192 && b === 0) || (a === 198 && (b === 18 || b === 19)) || a >= 224;
+// 16-byte classification (B1 fix): IPv4-mapped/compatible/NAT64/6to4 forms are reduced to their embedded
+// IPv4 address and checked against the IPv4 table; IPv6 special ranges are matched by prefix length.
+function v4Private(b) {
+  const [a, c] = b;
+  return a === 0 || a === 10 || a === 127 || (a === 100 && c >= 64 && c <= 127) || (a === 169 && c === 254)
+    || (a === 172 && c >= 16 && c <= 31) || (a === 192 && c === 168) || (a === 192 && c === 0) || (a === 198 && (c === 18 || c === 19))
+    || (a === 198 && c === 51 && b[2] === 100) || (a === 203 && c === 0 && b[2] === 113) || (a === 192 && c === 88 && b[2] === 99) || a >= 224;
+}
+function parseV4(s) {
+  const p = s.split('.'); if (p.length !== 4) return null;
+  const b = p.map(x => /^\d{1,3}$/.test(x) ? Number(x) : NaN); return b.every(x => x >= 0 && x <= 255) ? b : null;
+}
+export function parseV6(s) {
+  let v = String(s).toLowerCase().replace(/^\[|\]$/g, '').replace(/%.*$/, '');
+  if (!net.isIPv6(v)) return null;
+  let tail = [];
+  const lastColon = v.lastIndexOf(':');
+  if (v.slice(lastColon + 1).includes('.')) {
+    const b = parseV4(v.slice(lastColon + 1)); if (!b) return null;
+    tail = [(b[0] << 8) | b[1], (b[2] << 8) | b[3]]; v = v.slice(0, lastColon + 1) + (v.endsWith('::') ? '' : '0');
+    if (v.endsWith(':0') && !v.endsWith('::0')) v = v.slice(0, -2); else if (v.endsWith('::0')) v = v.slice(0, -1);
   }
-  const v = ip.toLowerCase();
-  if (v.startsWith('::ffff:')) return privateAddress(v.slice(7));
-  return v === '::' || v === '::1' || v.startsWith('fc') || v.startsWith('fd') || v.startsWith('fe8') || v.startsWith('fe9')
-    || v.startsWith('fea') || v.startsWith('feb') || v.startsWith('ff');
+  const [h, t = null] = v.split('::');
+  const hp = h ? h.split(':').filter(x => x !== '') : [], tp = t === null ? [] : t.split(':').filter(x => x !== '');
+  const words = t === null ? [...hp] : [...hp, ...Array(8 - hp.length - tp.length - tail.length).fill('0'), ...tp];
+  const all = [...words.map(x => parseInt(x, 16)), ...tail];
+  if (all.length !== 8 || all.some(x => !(x >= 0 && x <= 0xffff))) return null;
+  return Uint8Array.from(all.flatMap(w => [w >> 8, w & 0xff]));
+}
+const prefix = (b, bytes, bits) => { for (let i = 0; i < bits; i++) { const m = 0x80 >> (i % 8); if ((b[i >> 3] & m) !== (bytes[i >> 3] & m)) return false; } return true; };
+const P = (hex, bits) => ({ bytes: parseV6(hex), bits });
+const V6_BLOCKED = [P('::', 128), P('::1', 128), P('fc00::', 7), P('fe80::', 10), P('fec0::', 10), P('ff00::', 8), P('2001:db8::', 32),
+  P('100::', 64), P('2001::', 23), P('2001:10::', 28), P('2001:20::', 28)];
+const V6_EMBED = [P('::ffff:0:0', 96), P('::', 96), P('64:ff9b::', 96), P('::ffff:0:0:0', 96)];
+
+export function privateAddress(ip) {
+  const s = String(ip).replace(/^\[|\]$/g, '');
+  if (net.isIPv4(s)) return v4Private(parseV4(s));
+  const b = parseV6(s);
+  if (!b) return true; // unparseable: refuse
+  for (const p of V6_BLOCKED) if (prefix(b, p.bytes, p.bits)) return true;
+  for (const p of V6_EMBED) if (prefix(b, p.bytes, p.bits)) return v4Private(b.subarray(12, 16));
+  if (prefix(b, parseV6('64:ff9b:1::'), 48)) return true; // local-use NAT64 (RFC 8215)
+  if (prefix(b, parseV6('2002::'), 16)) return v4Private(b.subarray(2, 6)); // 6to4 embeds v4 in bits 16..47
+  return false;
 }
 
 export function guardedLookup(hostname, options, callback) {

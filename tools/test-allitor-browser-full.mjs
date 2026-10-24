@@ -72,6 +72,7 @@ const proxy = await startEgressProxy();
 const connect = target => new Promise(r => { const s = net.connect(proxy.port, '127.0.0.1', () => s.write(`CONNECT ${target} HTTP/1.1\r\nHost: ${target}\r\n\r\n`)); s.once('data', d => { r(d.toString().split('\r\n')[0]); s.destroy(); }); });
 assert.match(await connect(`127.0.0.1:${local.address().port}`), /403/);
 assert.match(await connect('10.0.0.1:443'), /403/);
+for (const t of ['[::ffff:127.0.0.1]:443', '[::ffff:7f00:1]:443', '[64:ff9b::a9fe:a9fe]:443', '[::127.0.0.1]:443', '[fe80::1]:443']) assert.match(await connect(t), /403/, t);
 assert.match(await connect(`localhost:${local.address().port}`), /403/);
 const plain = await new Promise(r => http.get({ host: '127.0.0.1', port: proxy.port, path: `http://127.0.0.1:${local.address().port}/` }, res => { r(res.statusCode); res.resume(); }));
 assert.equal(plain, 403);
