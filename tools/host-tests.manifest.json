@@ -2655,6 +2655,17 @@
         "node24"
       ],
       "environment": {}
+    },
+    {
+      "path": "tools/test-runtime-office-engine.py",
+      "stage": "fast",
+      "reason": "rc3 office wasm engine must ship in dsh-runtime.bin",
+      "args": [],
+      "timeoutSeconds": 120,
+      "requires": [
+        "python39"
+      ],
+      "environment": {}
     }
   ],
   "historicalExcluded": [

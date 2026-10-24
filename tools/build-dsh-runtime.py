@@ -615,6 +615,22 @@ def omitted(relative, foreign=()):
     return ''
 
 
+# Office conversion needs the WASM engine; npm silently skips this optional dependency when the
+# installing Node does not satisfy its engines (>=22.19). Never ship a runtime without it.
+OFFICE_ENGINE_FILES = (
+    '@deepseek-ai/libreoffice-kit-wasm/assets/soffice.wasm',
+    '@deepseek-ai/libreoffice-kit-wasm/assets/soffice.data',
+)
+OFFICE_ENGINE_MIN_BYTES = 1_000_000
+
+
+def require_office_engine(source):
+    for relative in OFFICE_ENGINE_FILES:
+        path = source / relative
+        if not path.is_file() or path.stat().st_size < OFFICE_ENGINE_MIN_BYTES:
+            raise ValueError('缺少 Office WASM 引擎 ' + relative + '：请用 Node>=22.19 且包含 optional 依赖执行 npm ci')
+
+
 def build(source, output, version):
     stable_chains, _ = load_chains(HOOKS.parent, version)
     seen_stable = set()
@@ -634,6 +650,7 @@ def build(source, output, version):
         raise ValueError('DeepSeek Messages 补丁没有锁定到本次 dsh 依赖树')
     if not (source / PACKAGE / 'lib/bin.js').is_file():
         raise ValueError('npm 包没有编译后的 dsh 入口')
+    require_office_engine(source)
     destructive_policy_files()
     output.parent.mkdir(parents=True, exist_ok=True)
     temporary = output.with_suffix(output.suffix + '.tmp')
