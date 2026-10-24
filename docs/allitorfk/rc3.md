@@ -4,7 +4,7 @@
 - applicationId `dsha.AllitorFk_.dsh0_2_1_rc_3`，标签 `DSHA-AllitorFk.`；无 sharedUserId，authorities 均随 `${applicationId}`。
 - 端口 3180 / 3181 / 3190（rc.2 用 3080 / 3081 / 3090），数据目录 `DSHA-AllitorFk-rc3` 独立。
 - 扩展目录为 rc.3 专用：base 三元组加入 `dshVersion`，rc.2 的 .dshx 会被拒绝。
-- 已知共享：深链 `dsha://install`、`https://dsha.cc/install` 与 rc.2/官方版相同，系统会弹出应用选择。
+- 深链：rc.3 独占 `dsha-rc3://install`；不再声明 `dsha://` 与 `https://dsha.cc/install`（仍可解析粘贴的旧链接）。
 
 ## 新手引导（F5）
 1. 首次启动完成环境安装后，打开 Web 界面。

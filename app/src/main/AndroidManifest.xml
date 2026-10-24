@@ -98,17 +98,12 @@
         <activity android:name=".vscreen.VirtualScreenActivity" android:exported="false" android:windowSoftInputMode="adjustResize" />
         <service android:name=".backup.DataProtectionService" android:exported="false" android:foregroundServiceType="dataSync" />
         <activity android:name=".ui.PluginInstallActivity" android:exported="true">
-            <intent-filter android:autoVerify="true">
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="https" android:host="dsha.cc" android:pathPrefix="/install" />
-            </intent-filter>
+            <!-- AllitorFk rc.3：独立深链 dsha-rc3://install，不再与 rc.2/官方版争用 dsha:// 与 dsha.cc。 -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="dsha" android:host="install" />
+                <data android:scheme="dsha-rc3" android:host="install" />
             </intent-filter>
         </activity>
         <provider android:name="androidx.core.content.FileProvider" android:authorities="${applicationId}.updates"

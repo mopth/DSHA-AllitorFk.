@@ -113,8 +113,9 @@ public final class CommunityActivity extends AppCompatActivity {
     if ("https".equals(scheme) && ("dsha.cc".equals(host) || "www.dsha.cc".equals(host)))
       return false;
     try {
-      if ("dsha".equals(scheme)) {
-        startActivity(new Intent(Intent.ACTION_VIEW, uri).setPackage(getPackageName()));
+      if ("dsha".equals(scheme) || "dsha-rc3".equals(scheme)) {
+        // 站内安装链接一律交给本包（显式 setPackage），不弹应用选择器。
+        startActivity(new Intent(Intent.ACTION_VIEW, uri.buildUpon().scheme("dsha-rc3").build()).setPackage(getPackageName()));
         return true;
       }
       if ("https".equals(scheme) || "http".equals(scheme))

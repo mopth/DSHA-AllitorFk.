@@ -28,7 +28,7 @@ public final class PluginInstallLink {
       if (value == null || value.length() > 12000) throw new IllegalArgumentException();
       URI uri = new URI(value);
       boolean custom =
-          "dsha".equalsIgnoreCase(uri.getScheme())
+          ("dsha-rc3".equalsIgnoreCase(uri.getScheme()) || "dsha".equalsIgnoreCase(uri.getScheme()))
               && "install".equalsIgnoreCase(uri.getHost())
               && (uri.getPath().isEmpty() || "/".equals(uri.getPath()));
       boolean web =

@@ -34,6 +34,10 @@ public class Rc3CoexistenceTest {
     assertEquals("DSHA-AllitorFk-rc3", AppIdentity.publicDirectoryName());
     String manifest = read("src/main/AndroidManifest.xml");
     assertFalse(manifest.contains("sharedUserId"));
+    // rc.3 owns dsha-rc3://install; it must not claim dsha:// or dsha.cc shared with rc.2/official.
+    assertTrue(manifest.contains("android:scheme=\"dsha-rc3\""));
+    assertFalse(manifest.contains("android:scheme=\"dsha\""));
+    assertFalse(manifest.contains("android:host=\"dsha.cc\""));
     Matcher m = Pattern.compile("android:authorities=\"([^\"]+)\"").matcher(manifest);
     int n = 0;
     while (m.find()) {

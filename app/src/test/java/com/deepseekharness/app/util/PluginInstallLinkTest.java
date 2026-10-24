@@ -26,6 +26,7 @@ public class PluginInstallLinkTest {
     assertEquals(
         "dsh-infinite-gen-3", PluginInstallLink.parse("https://dsha.cc/install/?" + query).name);
     assertTrue(PluginInstallLink.parse("dsha://install?" + query).url.endsWith("master.zip"));
+    assertTrue(PluginInstallLink.parse("dsha-rc3://install?" + query).url.endsWith("master.zip"));
     assertEquals(
         "dsh-web-mobile", PluginInstallLink.parse("dsha://install?builtin=dsh-web-mobile").builtin);
     assertEquals(
