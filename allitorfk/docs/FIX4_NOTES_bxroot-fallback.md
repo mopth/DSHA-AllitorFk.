@@ -19,7 +19,7 @@
 
 ## 3. 必须带过来的坑
 1. **未知结果不能重放。** 回退只在“确定失败”时触发；超时、状态不明一律不自动切换，否则会在半套环境上再装一遍。
-2. **`libdsha-session.so` 版本。** V1 不带 `--control`，会导致会话起不来。要用 `SessionLauncherBinaryTest` 卡住。
+2. **`libdsha-session.so` 版本要和 Java 配套。** fix3 冷安装失败，是因为把 V2 的 .so 和不配套的 Java 混用。build190 的 Java 只用 `--birth-handshake`，全树没有 Java 代码传 `--control`（唯一出现在 `tools/bxroot/test-linux.py`，那是 bxroot supervisor 的测试，与这个库无关）。所以 AllitorFk 保留官方 .so，用 `SessionLauncherBinaryPinTest` 锁定 sha256 和所需参数。
 3. **出生身份校验。** 在部分国产 ROM 上，`/proc` 和 getsid 读不到。照搬旧逻辑会直接判失败，要带上 fix2 的放宽和对应测试。
 4. **bxroot 失败的根因 fix4 也没查清。** 真机上仍然是 proot 下冷安装能成功。所以回退这一条必须有，宣传时不要说 bxroot 一定可用。
 5. **Low 包**：minSdk 23，带 GeckoView 143（`lowImplementation`），只有 arm64。standard 包 minSdk 30。两版都带 Shizuku（build190 中 standard 用 13.1.5，low 用 12.2.0）。build190 已自带 low 版本，在其基础上做即可。资产由 `tools/prepare-standard-assets.py` 生成，两版共用。
@@ -28,7 +28,7 @@
 - 改 `applicationId` 就够了，Java 命名空间 `com.deepseekharness.app` 不用动。Manifest 里 provider 的 authorities 用的都是 `${applicationId}`，会自动跟着变。
 - **写死的地方要改**：build190 的官方包名是 `dsh.android.client`，写死在 `app/build.gradle`（`applicationId`）、`util/AppIdentity.java`、`ui/BrowserOriginRestore.java`（广播 action，两个包同时装时会互相串）。`GuestDataResolver` 按正则取包名，没写死。
 - **发布检查会拦**：`ci/release-identity.json` 写死了 `dsh.android.client` 和 E7E3 证书指纹，`tools/` 下约 8 个发布检查脚本也写死了。新包名加新签名必须改这些检查，不能为了过检查把它关掉。
-- debug 审计、网站、测试脚本、文档里也有不少写死的旧包名：build190 在 `app/src/main` 之外约 94 行（58 个文件、共 97 处）出现 `dsh.android.client`，`app/src/main` 里另有 4 处【核：git grep c750348a】。这些不影响 APK，但会让测试失败或误导人。AllitorFk 已改掉 `app/src/main` 里的全部 4 处，其余约 80 处留在审计记录、文档和发布检查资料里。
+- debug 审计、网站、测试脚本、文档里也有不少写死的旧包名：build190 全树共 101 处 `dsh.android.client`，其中 `app/src/main` 4 处、其余 97 处（约 94 行、58 个文件）【核：git grep c750348a】。AllitorFk 改掉了 `app/src/main` 的 4 处和发布链上的 17 处（`app/build.gradle` 1、`ci/release-identity.json` 1、`tools/` 发布检查与测试脚本 15），其余 80 处（审计、网站、旧文档等，不影响 APK）保留未动；另有 5 处出现在本 fork 自己的说明文档里。
 - 签名：fix4 用的是 debug 签名。AllitorFk 能和官方共存靠的是包名不同，跟签名无关。但以后要覆盖升级，就得一直用同一把 key，所以第一次就要定好。私钥不能进仓库。
 
 ## 5. 版本号
