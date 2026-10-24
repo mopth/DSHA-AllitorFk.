@@ -4,7 +4,7 @@
 | [中文](README.md) | [English](README.en.md) | [AllitorFk 说明](allitorfk/README.md) | [MIT License](LICENSE) |
 |---|---|---|---|
 
-## ⬇️ 下载：尚未发布
+## ⬇️ 下载：测试版（未经真机验证）
 
 > 已发布测试版 Release `dsha-AllitorFk.-dsh0.2.1-rc.2`（测试签名，尚未做真机验证）：两个 arm64 安装包 `dsha-AllitorFk.-dsh0.2.1-rc.2.apk`（标准版，安卓 11+）和 `dsha-AllitorFk.-dsh0.2.1-rc.2-low.apk`（低版本，安卓 6+），以及全部 16 个离线扩展包（.dshx）。下载需要的 .dshx，在 App 的「扩展中心」里导入即可；扩展中心里的「下载并安装」一键下载在本分支新增，尚未发布。 从本分支起，手机上显示名为 `DSHA-AllitorFk.`，APK 文件名为 `DSHA-AllitorFk.-dsh0.2.1-rc.2.apk` / `-low.apk`（包名不变）。
 

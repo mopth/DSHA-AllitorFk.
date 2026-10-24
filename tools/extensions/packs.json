@@ -39,7 +39,6 @@
     {
       "id": "dev-base",
       "category": "lang",
-      "full": true,
       "name": {
         "zh": "开发基础包",
         "en": "Developer base"
@@ -141,7 +140,6 @@
     {
       "id": "jdk21",
       "category": "lang",
-      "full": true,
       "name": {
         "zh": "JDK 21 与 APK 签名",
         "en": "JDK 21 and APK signing"

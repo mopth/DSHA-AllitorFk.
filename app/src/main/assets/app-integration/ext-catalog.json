@@ -27,7 +27,6 @@
    "version": "12.10ubuntu1",
    "requires": [],
    "agpl": false,
-   "full": true,
    "debs": 103,
    "upstream": false,
    "licenses": [
@@ -54,7 +53,6 @@
     "dev-base"
    ],
    "agpl": false,
-   "full": false,
    "debs": 19,
    "upstream": true,
    "licenses": [
@@ -80,7 +78,6 @@
    "version": "21.0.12.1+1-1~24.04.4",
    "requires": [],
    "agpl": false,
-   "full": true,
    "debs": 21,
    "upstream": true,
    "licenses": [
@@ -108,7 +105,6 @@
     "dev-base"
    ],
    "agpl": false,
-   "full": false,
    "debs": 0,
    "upstream": true,
    "licenses": [
@@ -135,7 +131,6 @@
     "dev-base"
    ],
    "agpl": false,
-   "full": false,
    "debs": 0,
    "upstream": true,
    "licenses": [
@@ -162,7 +157,6 @@
     "jdk21"
    ],
    "agpl": false,
-   "full": false,
    "debs": 8,
    "upstream": true,
    "licenses": [
@@ -190,7 +184,6 @@
     "jdk21"
    ],
    "agpl": false,
-   "full": false,
    "debs": 0,
    "upstream": true,
    "licenses": [
@@ -217,7 +210,6 @@
     "jdk21"
    ],
    "agpl": false,
-   "full": false,
    "debs": 0,
    "upstream": true,
    "licenses": [
@@ -244,7 +236,6 @@
     "jdk21"
    ],
    "agpl": false,
-   "full": false,
    "debs": 32,
    "upstream": false,
    "licenses": [
@@ -269,7 +260,6 @@
    "version": "1:3.2~ubuntu1",
    "requires": [],
    "agpl": false,
-   "full": false,
    "debs": 20,
    "upstream": false,
    "licenses": [
@@ -294,7 +284,6 @@
    "version": "2:8.3+93ubuntu2",
    "requires": [],
    "agpl": false,
-   "full": false,
    "debs": 16,
    "upstream": false,
    "licenses": [
@@ -319,7 +308,6 @@
    "version": "7:6.1.1-3ubuntu5",
    "requires": [],
    "agpl": false,
-   "full": false,
    "debs": 218,
    "upstream": false,
    "licenses": [
@@ -344,7 +332,6 @@
    "version": "24.02.0-1ubuntu9.11",
    "requires": [],
    "agpl": false,
-   "full": false,
    "debs": 65,
    "upstream": false,
    "licenses": [
@@ -369,7 +356,6 @@
    "version": "2023.20240207-1",
    "requires": [],
    "agpl": false,
-   "full": false,
    "debs": 69,
    "upstream": false,
    "licenses": [
@@ -394,7 +380,6 @@
    "version": "10.02.1~dfsg1-0ubuntu7.10",
    "requires": [],
    "agpl": true,
-   "full": false,
    "debs": 42,
    "upstream": false,
    "licenses": [
@@ -419,7 +404,6 @@
    "version": "15.1-1ubuntu1~24.04.1",
    "requires": [],
    "agpl": false,
-   "full": false,
    "debs": 84,
    "upstream": false,
    "licenses": [
@@ -427,5 +411,5 @@
    ]
   }
  ],
- "packsSha256": "84f56b5a32af0633daf8ac5af1d3a8f7f5b62f38329a1d456939e1b67c3e5e0f"
+ "packsSha256": "51b9e4eab7f9cf48714e508b98c4ee60beeef49830b0cbd3af3f9de5f033d3ec"
 }

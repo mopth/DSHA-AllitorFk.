@@ -302,7 +302,7 @@ def build_pack(pack, lock, data, cache, out):
     return {'id': pid, 'file': target.name, 'sha256': extlib.digest(target), 'bytes': target.stat().st_size,
             'installedBytes': installed, 'name': pack['name'], 'summary': pack['summary'], 'category': pack['category'],
             'version': manifest['version'], 'requires': manifest['requires'], 'agpl': manifest['agpl'],
-            'full': bool(pack.get('full')), 'debs': len(rows), 'upstream': bool(tree.files),
+            'debs': len(rows), 'upstream': bool(tree.files),
             'licenses': sorted({e['license'] for e in licenses}) + (['Ubuntu (per-package copyright)'] if rows else [])}
 
 

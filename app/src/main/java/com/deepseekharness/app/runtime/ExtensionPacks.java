@@ -13,7 +13,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 /**
- * 离线扩展包的原生侧准备：只写基底身份（rootfs 版本与 APK 一致时）并把 Full 版内置的扩展包
+ * 离线扩展包的原生侧准备：只写基底身份（rootfs 版本与 APK 一致时）并把 APK 内置的扩展包（目前标准版与低版本都不内置，此步为空）
  * 落到容器 /root/.dsha-ext/packs。安装/移除完全由容器内 app-integration 完成（dpkg/apt）。
  */
 public final class ExtensionPacks {
@@ -27,7 +27,7 @@ public final class ExtensionPacks {
 
   private ExtensionPacks() {}
 
-  /** Full 版随 APK 内置的扩展包文件名（标准版/低版本为空）。 */
+  /** 随 APK 内置的扩展包文件名（目前为空：扩展包从 Release 下载或导入）。 */
   public static List<String> bundled(Context context) {
     List<String> out = new ArrayList<>();
     try {
