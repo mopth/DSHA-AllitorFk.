@@ -182,6 +182,9 @@ public final class ScreenActionExecutor {
       GestureDescription gesture = builder.build();
       if (!seen.region.equals(context.currentRegion()))
         return frameRefusal("STALE_FRAME", "TARGET_WINDOW_GEOMETRY_OR_OCCLUSION_CHANGED");
+      if (com.deepseekharness.app.util.SelfWindowGuard.approvalOpen()
+          || com.deepseekharness.app.DshaAccessibilityService.ownWindowVisible(context.service()))
+        return ScreenReply.refused("SELF_WINDOW_PROTECTED");
       if (!context.claimDispatch()) return ScreenReply.refused("SCREEN_RUN_CHANGED");
       CountDownLatch done = new CountDownLatch(1);
       AtomicInteger state = new AtomicInteger();

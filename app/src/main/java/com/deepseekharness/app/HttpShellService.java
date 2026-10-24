@@ -831,6 +831,15 @@ public final class HttpShellService {
     if ((route == BridgeRoutes.Route.CONFIRM || route == BridgeRoutes.Route.EXEC)
         && request.command.isEmpty()) return "[NO_CMD]";
     if (!bridgeCurrent(request.scope)) return "[STOPPED] BRIDGE_RUN_CHANGED";
+    // rc.3 T1: no UI/vscreen driving while an approval is open or on DSHA's own windows.
+    String selfRefusal =
+        com.deepseekharness.app.util.SelfWindowGuard.bridgeRefusal(
+            route == BridgeRoutes.Route.UI || route == BridgeRoutes.Route.VSCREEN,
+            com.deepseekharness.app.util.SelfWindowGuard.approvalOpen(),
+            route == BridgeRoutes.Route.UI && ForegroundActivity.current() != null,
+            null,
+            ctx.getPackageName());
+    if (selfRefusal != null) return "[ERR] " + selfRefusal;
     RouteHandler handler = ROUTE_HANDLERS.get(route);
     if (handler == null) throw new IllegalStateException("Missing bridge handler: " + route);
     return handler.handle(this, request);
@@ -1407,6 +1416,9 @@ public final class HttpShellService {
           return "[ERR] AMBIGUOUS_SCREEN_ACTION";
         operation = "tapText";
       }
+      if (com.deepseekharness.app.util.SelfWindowGuard.ownPackage(
+          target.packageName, ctx.getPackageName()))
+        return "[ERR] SELF_WINDOW_PROTECTED";
       var capability = screenRequest(scope, operation, target);
       ScreenAuthorization authorization =
           screenAuthorization(scope, operation, target.packageName, target, capability);
@@ -1495,6 +1507,8 @@ public final class HttpShellService {
               : promptTarget != null
                   ? promptTarget.packageName
                   : status.optBoolean("packageVerified") ? status.optString("package") : "";
+      if (com.deepseekharness.app.util.SelfWindowGuard.ownPackage(pkg, ctx.getPackageName()))
+        return vscreenNotSent("SELF_WINDOW_PROTECTED");
       var capability =
           existingCore || !callerCore.isEmpty()
               ? screenRequestEvidence(

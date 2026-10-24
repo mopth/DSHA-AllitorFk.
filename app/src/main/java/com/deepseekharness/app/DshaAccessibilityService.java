@@ -422,7 +422,38 @@ public class DshaAccessibilityService extends AccessibilityService {
     return target != null && target.matches(observeTarget(target.displayId));
   }
 
+  /** rc.3 T1: true when any visible window belongs to DSHA (dialogs included). */
+  public static boolean ownWindowVisible(DshaAccessibilityService service) {
+    if (service == null) return false;
+    String own = service.getPackageName();
+    try {
+      var active = service.getRootInActiveWindow();
+      if (active != null
+          && com.deepseekharness.app.util.SelfWindowGuard.ownPackage(active.getPackageName(), own))
+        return true;
+      var windows = service.getWindows();
+      if (windows != null)
+        for (var w : windows) {
+          if (w.getType() != android.view.accessibility.AccessibilityWindowInfo.TYPE_APPLICATION)
+            continue; // DSHA's own screen-control overlay is a system-type window, not a target
+          var r = w.getRoot();
+          if (r != null
+              && com.deepseekharness.app.util.SelfWindowGuard.ownPackage(r.getPackageName(), own))
+            return true;
+        }
+    } catch (RuntimeException e) {
+      return true; // fail closed
+    }
+    return false;
+  }
+
   public static void validateActionRoot(int display, AccessibilityNodeInfo root) {
+    DshaAccessibilityService self = instance;
+    if (com.deepseekharness.app.util.SelfWindowGuard.approvalOpen()
+        || (root != null
+            && self != null
+            && com.deepseekharness.app.util.SelfWindowGuard.ownPackage(
+                root.getPackageName(), self.getPackageName()))) throw new TargetChangedException();
     ActionAuthority authority = ACTION_AUTHORITY.get();
     if (authority != null
         && (!authority.live.getAsBoolean()

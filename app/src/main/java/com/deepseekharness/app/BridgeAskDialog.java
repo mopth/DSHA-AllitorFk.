@@ -27,6 +27,8 @@ final class BridgeAskDialog implements Application.ActivityLifecycleCallbacks {
     this.request = request;
   }
 
+  private boolean guarded;
+
   void show(String question, String[] options, String[] displayOptions) {
     main.post(
         () -> {
@@ -64,7 +66,11 @@ final class BridgeAskDialog implements Application.ActivityLifecycleCallbacks {
               close();
               return;
             }
+            com.deepseekharness.app.ui.SecureApprovalWindow.secure(dialog);
+            com.deepseekharness.app.util.SelfWindowGuard.approvalShown();
+            guarded = true;
             dialog.show();
+            com.deepseekharness.app.ui.SecureApprovalWindow.harden(dialog);
           } catch (RuntimeException error) {
             questions.cancel(request, BridgeQuestions.End.UNAVAILABLE);
             close();
@@ -79,6 +85,10 @@ final class BridgeAskDialog implements Application.ActivityLifecycleCallbacks {
   }
 
   private void dismiss() {
+    if (guarded) {
+      guarded = false;
+      com.deepseekharness.app.util.SelfWindowGuard.approvalGone();
+    }
     if (registered) {
       activity.getApplication().unregisterActivityLifecycleCallbacks(this);
       registered = false;
