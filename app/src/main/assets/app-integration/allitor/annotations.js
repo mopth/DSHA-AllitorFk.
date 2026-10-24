@@ -17,9 +17,10 @@ export function createAnnotations({ max = 64 } = {}) {
       list.push(a); while (list.length > max) list.shift();
       return a;
     },
-    /** consumer = 'client' (composer) or 'agent' (MCP tool); each consumer gets each note once */
+    /** consumer = 'client' (composer) or 'agent' (MCP tool); recorded for status only */
     take(consumer) {
-      const out = list.filter(a => !a.deliveredTo.includes(consumer));
+      // Each note is delivered exactly once, to whichever consumer takes it first (no duplicates).
+      const out = list.filter(a => a.deliveredTo.length === 0);
       for (const a of out) a.deliveredTo.push(consumer);
       return out.map(({ deliveredTo, ...a }) => a);
     },

@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "runtimeId": "8739564e9991278350d1eacb504fb137f6208dbb76cd2f9f8b8476bf7468cb5e",
+  "runtimeId": "219d307f59986f5a387b41c9e1652ddfdba2e867cd1497be6bc68d3171d18ee8",
   "baseVersion": "10",
   "dshVersion": "0.2.1-rc.3",
   "launcherContract": "DSHA_ARM64_V2",
@@ -426,7 +426,7 @@
     "app-integration/allitor/agent.js": "4bf76ab6c426754e40ee38ef9e190868652a3c55da10917c8eebfb5321e67e66",
     "app-integration/allitor/allitor.html": "569c066437623a60053fd9f449124d422ff0be5447b8dd9bb83cf4f9bdb3f2aa",
     "app-integration/allitor/annotate.html": "efa252c2e2dd6954cccc6b629c5821ad9dec3c6e8e2545478075060dc7718420",
-    "app-integration/allitor/annotations.js": "285a879e12800de4913ac23a2aff4947c5a33b3df1f997779f61ccbdbaaad73d",
+    "app-integration/allitor/annotations.js": "f599bd6c90eb3cd134d1c36947b17190520138b2eaf81aba8e22bc005c156fc6",
     "app-integration/allitor/browser.js": "d40b1f56001f46f0c45e5326467818d4e787e3c8b78722be1561963b0df4b338",
     "app-integration/allitor/engines.js": "235a047b04b3b501459c82a453e2180e52d4d966ea2e05300eeb25c894891e61",
     "app-integration/allitor/guard.js": "755eaaa11c3999fbbbf668996d2f256f213410f2ed52ca05dbccdec3931caf22",

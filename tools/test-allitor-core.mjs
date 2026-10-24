@@ -43,7 +43,7 @@ assert.equal(pv.read(p.id, 'link.txt').status, 403); assert.equal(pv.read('nope'
 // annotations: per-consumer single delivery
 const an = createAnnotations();
 an.add({ previewId: p.id, path: '/', rect: { x: 1, y: 2, w: 30, h: 40 }, viewport: { w: 360, h: 640 }, note: '按钮太小' });
-assert.equal(an.take('client').length, 1); assert.equal(an.take('client').length, 0); assert.equal(an.take('agent').length, 1);
+assert.equal(an.take('client').length, 1); assert.equal(an.take('client').length, 0); assert.equal(an.take('agent').length, 0, 'no duplicate delivery');
 assert.match(annotationText(an.all()[0]), /按钮太小/);
 
 // browser: SSRF guard + authorization
@@ -100,7 +100,7 @@ assert.equal((await fetch(base + '/preview/AAAAAAAAAAAAAAAAAAAAAA/')).status, 40
 assert.equal((await fetch(base + '/api/annotations', { method: 'POST', headers: H, body: JSON.stringify({ previewId: started.id, path: '/', rect: { x: 0, y: 0, w: 10, h: 10 }, viewport: { w: 100, h: 100 }, note: 'n1' }) })).status, 200);
 const taken = await (await fetch(base + '/api/annotations/take', { method: 'POST', headers: H, body: '{}' })).json();
 assert.equal(taken.length, 1); assert.match(taken[0].text, /n1/);
-assert.equal((await call('annotations.take', {}, agentDir)).length, 1);
+assert.equal((await call('annotations.take', {}, agentDir)).length, 0, 'already delivered to composer');
 await fetch(base + '/api/takeover/revoke', { method: 'POST', headers: H, body: '{"all":true}' });
 await assert.rejects(call('preview.start', { dir: join(root, 'site') }, agentDir), /NOT_AUTHORIZED/);
 writeFileSync(join(root, 'badtok'), 'x');
