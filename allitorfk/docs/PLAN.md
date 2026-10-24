@@ -111,3 +111,10 @@
 - texlive smoke now uses only texlive: xelatex+ctex → PDF non-empty, starts with %PDF-, kpsewhich ctex.sty → texlive-pdf-ok (pdffonts/pdftotext belong to documents).
 - Only tools/verify-extensions.py changed since the 06:45 APKs → no rebuild needed.
 - Not tested: real device (engines under the new package, extensions on the phone, coexistence with the official app).
+
+## Phase 4 (allitorfk/phase4, local, awaiting review) 2026-10-24 (UTC+8)
+- Release dsha-AllitorFk.-dsh0.2.1-rc.2 fixed: Full APK gone, notes say two versions, 16 .dshx uploaded (catalog/lock checked), SHA256SUMS = 2 APKs + 16 packs.
+- Extensions page: one-tap 下载并安装 (manager.download: pinned base from catalog download.base under https://github.com/mopth/DSHA-AllitorFk./releases/download/, Range resume, 3 retries, space precheck, size+sha256 against bundled catalog before rename), 在浏览器中下载 (native ExtensionReleaseLinks whitelist → ACTION_VIEW), zh/en how-to, plain errors. New routes /api/download and /api/install behind authorizeIndex + Origin + x-dsha-ext + JSON; offline import unchanged.
+- full flavor removed (only gradle referenced it; low risk). Naming: label DSHA-AllitorFk., files DSHA-AllitorFk.-dsh0.2.1-rc.2[-low].apk, versionName -AllitorFk[-low]. The download tag stays the published lowercase tag.
+- Tests: unit 2152/0 per variant; node test-extensions 6/6, native-ime PASS, mobile-compress 7/7; a live download of maven.dshx from the Release passed its sha check.
+- Not done: real device; the Release still has the old APKs (one-tap is not in them).
