@@ -2,9 +2,10 @@ plugins {
     id 'com.android.application'
 }
 
-// 两版共用功能和离线环境；只有 low 携带兼容旧 Android 的 Gecko 内核。
+// 三个 flavor：standard（minSdk 30）、full（minSdk 30，另内置 full:true 的离线扩展包 dev-base、jdk21）、
+// low（minSdk 23，只有它携带兼容旧 Android 的 Gecko 内核）。功能和离线环境三者共用。
 // AllitorFk：显示名 / APK 文件名 / Release 名的唯一来源（改名只改这一行）。
-// APK 文件 = <名>.apk，Low 版 = <名>-low.apk；applicationId 另见 defaultConfig，不随此变。
+// APK 文件 = <名>.apk，Full 版 = <名>-full.apk，Low 版 = <名>-low.apk；applicationId 另见 defaultConfig，不随此变。
 ext.dshaReleaseName = 'dsha-AllitorFk.-dsh0.2.1-rc.2'
 // 是否启用官方 dsha.cc 更新源：待老板决定，默认关闭。
 ext.dshaOfficialUpdateFeed = (project.findProperty('dsha.officialUpdateFeed') ?: 'false') == 'true'
