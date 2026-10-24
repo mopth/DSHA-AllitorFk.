@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "runtimeId": "697099fa66bab4ccd07ed839877a9526504ffa3191428a0fc5a08e42fca39d52",
+  "runtimeId": "f4b2b13b62fe9d89807a1f060386125d55b9bbecd97ac974d2c4f94b0228bf6f",
   "baseVersion": "10",
   "dshVersion": "0.2.1-rc.3",
   "launcherContract": "DSHA_ARM64_V2",
@@ -436,7 +436,7 @@
     "app-integration/allitor/takeover.js": "cad507f4aa5a35dd2a3ff130938713894b93028ce8caf23409cfbc0b5e591742",
     "app-integration/browser-origin-restore.html": "ab208364c7d37d7504f5d36b17a319231530ddc16e25c16d922e19978a05d2cc",
     "app-integration/browser-origin-state.js": "a6f31048c288aef55e1a7097cfeb5a676670d0583eb96e8c34aecae4c56104c8",
-    "app-integration/client.js": "616b44046ed2463de58dc42fdc0d526848d1f5b9b0aa71986b5ed93807c34125",
+    "app-integration/client.js": "86979a7f7d5c8d8bd9a35e05a90d90aa5e6e499656b17fee9a23acfc0a6d4080",
     "app-integration/cordis.patch.yml": "9ebf20f8521b2bf357dc568b8998d0d505be0dd7c0e941d74941ae9690300f09",
     "app-integration/ext/cli.mjs": "dceb59ca3f1ca31d40bdf0848ce51a5e256537690813e94cd594955aab4a28f2",
     "app-integration/ext/dshx.js": "ae7c44df960834ecd5eb07b33ee19537525ce16c9f1fbab50ef5e30459cbebbd",

@@ -2578,6 +2578,17 @@
         "node24"
       ],
       "environment": {}
+    },
+    {
+      "path": "tools/test-allitor-webview-shim.mjs",
+      "stage": "fast",
+      "reason": "AllitorFk D3 WebView shim fills gaps only",
+      "args": [],
+      "timeoutSeconds": 120,
+      "requires": [
+        "node24"
+      ],
+      "environment": {}
     }
   ],
   "historicalExcluded": [

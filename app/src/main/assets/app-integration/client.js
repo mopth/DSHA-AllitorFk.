@@ -1,4 +1,18 @@
 window.__ModuleLoader__.load({id:'dsh-app-integration', factory: () => {
+  // AllitorFk D3：旧 WebView 兼容垫片（仅在缺失时补齐，绝不覆盖原生实现）。
+  (function installWebViewShim(g) {
+    const def = (o, k, v) => { if (o && !(k in o)) Object.defineProperty(o, k, {value: v, writable: true, configurable: true}); };
+    def(Object, 'hasOwn', (o, k) => Object.prototype.hasOwnProperty.call(o, k));
+    for (const C of [Array, String, g.Int8Array && Object.getPrototypeOf(Int8Array)]) if (C) def(C.prototype, 'at', function (i) { i = Math.trunc(i) || 0; if (i < 0) i += this.length; return i < 0 || i >= this.length ? undefined : this[i]; });
+    def(Array.prototype, 'findLast', function (f, t) { for (let i = this.length - 1; i >= 0; i--) if (f.call(t, this[i], i, this)) return this[i]; return undefined; });
+    def(Array.prototype, 'findLastIndex', function (f, t) { for (let i = this.length - 1; i >= 0; i--) if (f.call(t, this[i], i, this)) return i; return -1; });
+    def(String.prototype, 'replaceAll', function (a, b) { return typeof a === 'string' ? this.split(a).join(b) : this.replace(a, b); });
+    def(Promise, 'withResolvers', function () { let resolve, reject; const promise = new this((a, b) => { resolve = a; reject = b; }); return {promise, resolve, reject}; });
+    def(g, 'requestIdleCallback', cb => setTimeout(() => cb({didTimeout: false, timeRemaining: () => 0}), 1));
+    def(g, 'cancelIdleCallback', id => clearTimeout(id));
+    def(g, 'structuredClone', v => v === undefined ? v : JSON.parse(JSON.stringify(v)));
+    if (g.AbortSignal) def(AbortSignal, 'timeout', ms => { const c = new AbortController(); setTimeout(() => c.abort(new DOMException('TimeoutError', 'TimeoutError')), ms); return c.signal; });
+  })(window);
   const LIMIT = 256 * 1024 * 1024;
   const prefix = 'dsha.images.revision:';
   const DRAFT_OWNER = 'DSHA_IMAGE_DRAFT_V1';
