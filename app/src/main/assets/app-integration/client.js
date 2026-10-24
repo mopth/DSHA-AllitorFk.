@@ -625,7 +625,28 @@ window.__ModuleLoader__.load({id:'dsh-app-integration', factory: () => {
       document.removeEventListener('dsha-native-route-cancel',cancel);
       document.removeEventListener('dsha-native-open-session',open); };
   }
+  // AllitorFk 框选批注：把用户在预览页框选的批注追加到当前会话输入框（不自动发送）。
+  function installAnnotationInbox(ctx, fetchImpl = (...a) => fetch(...a), every = 3000) {
+    const index = createSessionIndex(ctx); let busy = false;
+    const tick = async () => {
+      if (busy || document.visibilityState === 'hidden') return;
+      const id = index.current(); const binding = id && ctx.sessions.binding(id);
+      if (!binding) return;
+      busy = true;
+      try {
+        const r = await fetchImpl('/__dsha/allitor/api/annotations/take', {method:'POST', credentials:'same-origin',
+          headers:{'content-type':'application/json','x-dsha-allitor':'1'}, body:'{}'});
+        if (!r.ok) return;
+        const notes = await r.json();
+        if (Array.isArray(notes) && notes.length) ctx.conversation.input.requestDraftInitialization(binding,
+          {prompt: notes.map(n => String(n.text)).join('\n\n'), whenDraftExists:'append'});
+      } catch {} finally { busy = false; }
+    };
+    const timer = setInterval(tick, every);
+    return () => clearInterval(timer);
+  }
   function apply(ctx) {
+    ctx.effect(() => installAnnotationInbox(ctx), 'dsha-allitor-annotations');
     ctx.effect(() => installNativeRoute(ctx), 'dsha-native-session-route');
     ctx.inject(['connection'], scoped => scoped.effect(() => installStreamResume(scoped), 'dsha-browser-stream-resume'));
     ctx.effect(() => {
@@ -678,5 +699,5 @@ window.__ModuleLoader__.load({id:'dsh-app-integration', factory: () => {
         db?.close(); stopReading(); stopDraftDeletion(); document.removeEventListener('dsha-close-details',closeDetails); };
     },'dsha-browser-state');
   }
-  return {inject:['conversation','sessions','workspaces','layout','sidebarRight','uiWorkspace'],apply,watchDraft,usable,knownDraft,writeDraft,lease,protectedDrafts,recoveryCandidates,recoverDraftLeases,draftFailure,installDraftDeletionProof,residentInputs,createSessionIndex,installReadingPosition,installStreamResume};
+  return {inject:['conversation','sessions','workspaces','layout','sidebarRight','uiWorkspace'],apply,watchDraft,usable,knownDraft,writeDraft,lease,protectedDrafts,recoveryCandidates,recoverDraftLeases,draftFailure,installDraftDeletionProof,residentInputs,createSessionIndex,installReadingPosition,installStreamResume,installAnnotationInbox};
 }});

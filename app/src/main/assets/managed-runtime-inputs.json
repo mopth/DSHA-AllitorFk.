@@ -383,6 +383,61 @@
       "executable": false
     },
     {
+      "asset": "app-integration/allitor/agent.js",
+      "target": "root/dsha-app-integration/allitor/agent.js",
+      "executable": false
+    },
+    {
+      "asset": "app-integration/allitor/allitor.html",
+      "target": "root/dsha-app-integration/allitor/allitor.html",
+      "executable": false
+    },
+    {
+      "asset": "app-integration/allitor/annotate.html",
+      "target": "root/dsha-app-integration/allitor/annotate.html",
+      "executable": false
+    },
+    {
+      "asset": "app-integration/allitor/annotations.js",
+      "target": "root/dsha-app-integration/allitor/annotations.js",
+      "executable": false
+    },
+    {
+      "asset": "app-integration/allitor/browser.js",
+      "target": "root/dsha-app-integration/allitor/browser.js",
+      "executable": false
+    },
+    {
+      "asset": "app-integration/allitor/engines.js",
+      "target": "root/dsha-app-integration/allitor/engines.js",
+      "executable": false
+    },
+    {
+      "asset": "app-integration/allitor/guard.js",
+      "target": "root/dsha-app-integration/allitor/guard.js",
+      "executable": false
+    },
+    {
+      "asset": "app-integration/allitor/preview.js",
+      "target": "root/dsha-app-integration/allitor/preview.js",
+      "executable": false
+    },
+    {
+      "asset": "app-integration/allitor/routes.js",
+      "target": "root/dsha-app-integration/allitor/routes.js",
+      "executable": false
+    },
+    {
+      "asset": "app-integration/allitor/semver.js",
+      "target": "root/dsha-app-integration/allitor/semver.js",
+      "executable": false
+    },
+    {
+      "asset": "app-integration/allitor/takeover.js",
+      "target": "root/dsha-app-integration/allitor/takeover.js",
+      "executable": false
+    },
+    {
       "asset": "plugin-capabilities.py",
       "target": "root/.dsh/plugin-capabilities.py",
       "executable": false

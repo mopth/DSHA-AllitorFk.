@@ -2567,6 +2567,17 @@
         "node24"
       ],
       "environment": {}
+    },
+    {
+      "path": "tools/test-allitor-core.mjs",
+      "stage": "fast",
+      "reason": "AllitorFk takeover/preview/annotation/browser/agent-channel/MCP core",
+      "args": [],
+      "timeoutSeconds": 120,
+      "requires": [
+        "node24"
+      ],
+      "environment": {}
     }
   ],
   "historicalExcluded": [

@@ -1,0 +1,28 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AllitorFk 控制台</title><style>
+body{font:14px system-ui,sans-serif;margin:0;padding:12px;background:#111;color:#eee}h2{font-size:16px;margin:18px 0 8px}
+.card{background:#1d1d1d;border:1px solid #333;border-radius:8px;padding:10px;margin:6px 0}.muted{color:#999}
+button{background:#2a62d6;color:#fff;border:0;border-radius:6px;padding:6px 10px;margin:2px}button.deny{background:#555}button.warn{background:#b33}
+.ok{color:#6c6}.bad{color:#e66}a{color:#8ab4ff}</style></head><body>
+<h1 style="font-size:18px">AllitorFk 控制台</h1>
+<h2>AI 接管授权</h2><div id="tk" class="muted">加载中…</div><button class="warn" id="revokeAll">全部撤销</button>
+<h2>静态页预览</h2><div id="pv" class="muted"></div>
+<h2>框选批注</h2><div id="an" class="muted"></div>
+<h2>插件兼容性 (engines.dsh)</h2><div id="pl" class="muted"></div>
+<script>
+const B='/__dsha/allitor';
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+async function post(p,b){const r=await fetch(B+p,{method:'POST',headers:{'content-type':'application/json','x-dsha-allitor':'1'},body:JSON.stringify(b||{})});if(!r.ok)alert((await r.json().catch(()=>({}))).error||r.status);load();}
+function tkRow(t){const left=t.expiresAt?Math.max(0,Math.round((t.expiresAt-Date.now())/60000))+' 分钟':'';
+ let a='';if(t.state==='pending')a=`<button data-d="${esc(t.id)}" data-ap="1">批准</button><button class="deny" data-d="${esc(t.id)}" data-ap="0">拒绝</button>`;
+ else if(t.state==='granted')a=`<button class="warn" data-r="${esc(t.id)}">撤销</button>`;
+ return `<div class="card"><b>${esc(t.scopeLabel||t.scope)}</b> · ${esc(t.state)} ${esc(left)} · ${esc(t.minutes)} 分钟<br><span class="muted">理由：${esc(t.reason)}</span><br>${a}</div>`;}
+async function load(){const s=await (await fetch(B+'/api/state')).json();
+ tk.innerHTML=s.takeover.length?s.takeover.map(tkRow).join(''):'暂无请求。AI 需先请求，你批准后才可操作，可随时撤销。';
+ pv.innerHTML=s.previews.length?s.previews.map(p=>`<div class="card">${esc(p.dir)}<br><a href="${B}/annotate/${esc(p.id)}" target="_blank" rel="noopener">打开并框选批注</a> <button class="deny" data-s="${esc(p.id)}">停止</button></div>`).join(''):'暂无预览';
+ an.innerHTML=s.annotations.length?s.annotations.map(a=>`<div class="card">${esc(a.path)}：${esc(a.note)}</div>`).join(''):'暂无';
+ pl.innerHTML=`<div class="muted">当前 dsh ${esc(s.plugins.dshVersion||'?')}</div>`+s.plugins.plugins.map(p=>`<div class="card"><b>${esc(p.name)}</b> ${esc(p.version)} <span class="${p.state==='incompatible'?'bad':'ok'}">${esc(p.message)}</span></div>`).join('');}
+document.addEventListener('click',e=>{const d=e.target.dataset;if(d.d)post('/api/takeover/decide',{id:d.d,approve:d.ap==='1'});if(d.r)post('/api/takeover/revoke',{id:d.r});if(d.s)post('/api/preview/stop',{id:d.s});});
+revokeAll.onclick=()=>post('/api/takeover/revoke',{all:true});
+load();setInterval(load,4000);
+</script></body></html>

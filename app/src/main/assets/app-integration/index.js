@@ -2,6 +2,7 @@ import { writeFileSync, renameSync, unlinkSync, readFileSync } from 'node:fs';
 import { confirmedIdle } from './activity.js';
 import { runtimePlugins } from './runtime-plugins.js';
 import { registerExtensionRoutes } from './ext/routes.js';
+import { registerAllitorRoutes } from './allitor/routes.js';
 export const inject = ['agents', 'sessions', 'sessionProjections'];
 export function apply(ctx) {
   ctx.inject(['webServer','connection'], scoped => {
@@ -15,6 +16,7 @@ export function apply(ctx) {
       res.end(req.method === 'HEAD' ? undefined : page);
     }}), 'dsha-browser-origin-restore');
     scoped.effect(() => registerExtensionRoutes(scoped), 'dsha-extensions');
+    scoped.effect(() => registerAllitorRoutes(scoped, { agent: Boolean(process.env.DSHA_WEB_GENERATION) }), 'dsha-allitor');
   });
   const generation = process.env.DSHA_WEB_GENERATION;
   if (!generation) return;

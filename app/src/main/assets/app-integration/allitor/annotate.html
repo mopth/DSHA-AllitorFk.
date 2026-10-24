@@ -1,0 +1,21 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>预览与框选批注</title><style>
+html,body{margin:0;height:100%;background:#000;color:#eee;font:14px system-ui,sans-serif}
+#bar{position:fixed;top:0;left:0;right:0;height:40px;display:flex;gap:6px;align-items:center;padding:0 8px;background:#1d1d1d;z-index:3}
+#wrap{position:absolute;top:40px;left:0;right:0;bottom:0}iframe{width:100%;height:100%;border:0;background:#fff}
+#ov{position:absolute;inset:0;display:none;cursor:crosshair;z-index:2}#box{position:absolute;border:2px solid #f43;background:rgba(255,68,51,.15)}
+button{background:#2a62d6;color:#fff;border:0;border-radius:6px;padding:6px 10px}</style></head><body>
+<div id="bar"><button id="mode">框选</button><span id="msg">点击「框选」后在页面上拖出区域</span></div>
+<div id="wrap"><iframe id="f" sandbox="allow-scripts allow-forms" referrerpolicy="no-referrer"></iframe><div id="ov"><div id="box" hidden></div></div></div>
+<script>
+const ID='__PREVIEW_ID__',B='/__dsha/allitor';f.src=B+'/preview/'+ID+'/';
+let on=false,s=null,r=null;
+mode.onclick=()=>{on=!on;ov.style.display=on?'block':'none';mode.textContent=on?'取消':'框选';box.hidden=true;};
+ov.onpointerdown=e=>{s={x:e.offsetX,y:e.offsetY};ov.setPointerCapture(e.pointerId);};
+ov.onpointermove=e=>{if(!s)return;r={x:Math.min(s.x,e.offsetX),y:Math.min(s.y,e.offsetY),w:Math.abs(e.offsetX-s.x),h:Math.abs(e.offsetY-s.y)};
+ Object.assign(box.style,{left:r.x+'px',top:r.y+'px',width:r.w+'px',height:r.h+'px'});box.hidden=false;};
+ov.onpointerup=async()=>{s=null;if(!r||r.w<4||r.h<4)return;const note=prompt('对该区域的批注：');if(!note){box.hidden=true;return;}
+ const res=await fetch(B+'/api/annotations',{method:'POST',headers:{'content-type':'application/json','x-dsha-allitor':'1'},
+  body:JSON.stringify({previewId:ID,path:'/',rect:{x:Math.round(r.x),y:Math.round(r.y),w:Math.round(r.w),h:Math.round(r.h)},viewport:{w:ov.clientWidth,h:ov.clientHeight},note})});
+ msg.textContent=res.ok?'已发送到会话输入框':'发送失败 '+res.status;r=null;};
+</script></body></html>
