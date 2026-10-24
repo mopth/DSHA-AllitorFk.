@@ -149,3 +149,10 @@ GPL、MPL、LGPL 等组件的具体再分发义务应按相应包和修改范围
 - **texlive**：TeX Live 2023（Ubuntu deb，LPPL/GPL/公共领域等混合，见各包 copyright），Noto CJK 字体为 SIL OFL-1.1。`dsha-python3-external` 是本仓库生成的无文件标记包（只声明 Provides: python3），用于满足 texlive-latex-extra 辅助脚本对 python3 的依赖而不覆盖 DSHA 自带的 /usr/bin/python3。
 - **AssetStudio / AssetStudio Mobile**（`assetstudio-mcp` 扩展，版本 1.10.2）：上游 [Perfare/AssetStudio](https://github.com/Perfare/AssetStudio)，MIT，Copyright (c) 2016 Radu、Copyright (c) 2016-2020 Perfare；全文见 `tools/assetstudio-mcp/licenses/AssetStudio-MIT.txt`（与上游 LICENSE 逐字一致）。随包复用的是其 Kotlin 移植 AssetStudio Mobile 1.10.2 的纯 JVM 核心（`tools/assetstudio-mcp/vendor/`，保留原文件头），未含界面、NDK 解码器与任何签名材料。**风险**：该移植源码包没有 LICENSE 文件，唯一许可依据是其 README 中"AssetStudio 为 MIT；本项目遵循相同许可"的声明，详见 `tools/assetstudio-mcp/licenses/AssetStudioMobile-NOTICE.txt`；若作者另有声明，需撤下该扩展或替换移植代码。同包附 brotli dec 0.1.2（MIT）与 Kotlin 标准库（Apache-2.0）。
 - 扩展包格式、安装器与扩展中心界面均为本仓库独立实现，未复制任何第三方（含 Kxxy）代码。
+
+## AllitorFk rc.3 运行时补充
+
+- **@emnapi/runtime 1.11.3**（MIT，https://github.com/toyobayashi/emnapi ，原包 `https://registry.npmjs.org/@emnapi/runtime/-/runtime-1.11.3.tgz`）：随 Node 22 下 `npm ci`（含 optional）进入运行归档；许可全文随包内 `LICENSE` 保留。
+- **@img/sharp-wasm32 0.35.5**（Apache-2.0 AND LGPL-3.0-or-later AND MIT，含 LGPL libvips 的 WASM 构建）：**不随 APK 分发**。linux-arm64 使用原生 `@img/sharp-linux-arm64` + `@img/sharp-libvips-linux-arm64`，WASM 回退从不被选中；`tools/build-dsh-runtime.py` 以 `unused-wasm-fallback` 规则剔除，rc.2 同样未含。
+- **@deepseek-ai/libreoffice-kit-wasm 0.1.5**（MPL-2.0，原包 `https://registry.npmjs.org/@deepseek-ai/libreoffice-kit-wasm/-/libreoffice-kit-wasm-0.1.5.tgz`，lock integrity sha512 固定）：**npm 上没有 provenance / 构建来源证明（attestation）**。只能证明与锁内原包逐字节一致，不能证明 `soffice.wasm` 由所附 sources 可重现构建。
+

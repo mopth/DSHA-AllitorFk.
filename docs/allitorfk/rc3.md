@@ -39,6 +39,12 @@
 - **会话清理**：browser_full 被撤销或到期（15 秒内的轮询）时自动清空全部站点 cookie 与 Chromium 配置；仍建议用后手动“清除会话”。
 - localhost/.local/.internal 判断容忍末尾点（如 `localhost.`）。
 
+## Office 引擎与应急运行时（rc.3 office-fix）
+- 根因：`@deepseek-ai/libreoffice-kit-wasm` 要求 Node ≥22.19，用 Node 20 执行 `npm ci` 时被静默跳过。现用 Node 22 且包含 optional 重新安装；`build-dsh-runtime.py` 缺 `soffice.wasm` / `soffice.data` 即失败，`tools/test-runtime-office-engine.py` 核对发布归档。
+- `@img/sharp-wasm32`（含 LGPL libvips WASM）在 linux-arm64 从不使用，构建时剔除（`unused-wasm-fallback`），与 rc.2 一致；原生 `sharp-linux-arm64` 仍随包并由测试核对。
+- libreoffice-kit-wasm 0.1.5 在 npm 上无 provenance attestation，只能核对与锁内 integrity 一致。
+- **应急运行时取舍（老板选 A）**：`tools/recovery-runtime/lock.json` 继续钉在此前已接受的独立归档 `6d2a4d2e…`（修复前的 rc.3 运行时），不与主运行时共用，APK 因此多约 80 MB。rc.2 时代的 `0bf8830e…` 已无法与 rc.3 应急配方配合（`RECOVERY_PDF_RECIPE_PATH`）。**只有在真机上通过四项验收（独立启动、能力限制、web、停止）后，才改为与主运行时共用一份。**
+
 ## 未完成（子集）
 - D1 核心热更新：`CoreHotUpdate`（已验证下载：大小上限 + SHA-256 + 版本白名单 + 最低应用版本；active/previous/staged 槽；试运行 2 次未报健康自动回滚；活动槽每次重新哈希，被篡改即回滚）已实现并有单测。尚未接入启动器：内置核心受签名运行时描述符约束，接入需让描述符承认更新哈希，另起一项。
 - F2 加密备份、D2 设备/Shell 权限分级：基线已有（PortableBackupCrypto AES-256-GCM + CredentialProjection；DeviceGrants/NativeConsentPolicy），未重写。

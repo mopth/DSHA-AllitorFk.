@@ -10,7 +10,7 @@
     },
     {
       "asset": "recovery-dsh-runtime.bin",
-      "sha256": "33512ec6dac0aba87666c9c97b7053a71005eb758d4fb2051f1fa691220a0fb7",
+      "sha256": "6d2a4d2efb0eed3a5a58f25753fa18d712fcba7ec65199e4641e946e00aa9853",
       "seed": "app/src/main/assets/dsh-runtime.bin"
     }
   ]

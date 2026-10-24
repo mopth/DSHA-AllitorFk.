@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "archiveSha256": "33512ec6dac0aba87666c9c97b7053a71005eb758d4fb2051f1fa691220a0fb7",
+  "archiveSha256": "0e92d4189ec9625cdc4b731221a25eb4a7f33fc309fc8b106eef824f31b09308",
   "packages": {
     ".bin": "e538d5a987f49edfa9611b33e32cb9b64d290741fcff95837e09b3842dc9ef7c",
     "@agentclientprotocol/sdk": "2ad364c17a32f29dd05f7d28a052359a893f009ff5ad283e0acb5dd621deb765",
@@ -361,7 +361,6 @@
     "@img/colour": "da5aa306e0355a3e81e31e4ffad720d3c5f10fe26ffac11712bf9dfcb199e489",
     "@img/sharp-libvips-linux-arm64": "8e278e92513ecda16004858c8adf969be2eef7b0d32a9b8df501a75d1ddee7a2",
     "@img/sharp-linux-arm64": "2d304f723a92dbd5d65ae7d8efb4c9e812e8e05fe518a7c586347e213e3cfe19",
-    "@img/sharp-wasm32": "534d1f45c5cb8e1e2fd87566f54bd35c9d1eab2cc260daeb8dde1056996d66dc",
     "@joplin/turndown-plugin-gfm": "195f543e0e1def279ead94687117b60d2b14a87fdf4f16f650a490b9f100b5bd",
     "@js-temporal/polyfill": "b7390d92ec8200bc26e81015890abe55f1a9bdf25c85ceb72dc40de81bf6ade7",
     "@keyv/serialize": "1fd62ab4a95e603339112d0594a242232961a1e90d65ea9b69360e348ea2402f",

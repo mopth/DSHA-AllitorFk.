@@ -1,7 +1,7 @@
 {
   "version": "0.2.1-rc.3",
   "inputs": {
-    "tools/build-dsh-runtime.py": "53e5f536adc46cb2dc969d64411e080a9ae0e209054bfa08e6e16ef2b937d677",
+    "tools/build-dsh-runtime.py": "d6cb301a66b51f8268f664b658646e9471d4bf94e7618ecbd76cdd3db49317a7",
     "tools/source_text.py": "fbe5428810615989be55f00b944c2cd98a03c087992630ecb9fff03e91edc23c",
     "tools/dsh-runtime/package.json": "687196d3306c3c98e769d684d3033ad80430975f2eabf1f6386f327cc9010d80",
     "tools/dsh-runtime/package-lock.json": "5d37cba4af2ec8b1afe1e72512acbcf2107be0d12f14c4180b8a058879e38b81",
@@ -80,5 +80,5 @@
     "tools/runtime_stable_patches.py": "cf215453637824ce0ba014c12805d1acfbf9aaf936371dc02d41b03bc0c0c0ca",
     "tools/runtime_input_contract.py": "5c0ae822c8b8049a5421cc6bfdad5cf834aa306941e573f357c725a8bc47a10c"
   },
-  "archive_sha256": "33512ec6dac0aba87666c9c97b7053a71005eb758d4fb2051f1fa691220a0fb7"
+  "archive_sha256": "0e92d4189ec9625cdc4b731221a25eb4a7f33fc309fc8b106eef824f31b09308"
 }

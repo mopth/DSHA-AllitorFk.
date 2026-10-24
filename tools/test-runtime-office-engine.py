@@ -22,6 +22,23 @@ class OfficeEngineTest(unittest.TestCase):
             self.assertIn(name, sizes, 'dsh-runtime.bin missing ' + relative)
             self.assertGreater(sizes[name], bdr.OFFICE_ENGINE_MIN_BYTES)
 
+    def test_sharp_uses_native_arm64_not_wasm_fallback(self):
+        names = set()
+        with tarfile.open(RUNTIME, 'r:gz') as archive:
+            for member in archive:
+                names.add(member.name)
+        self.assertFalse(any('/@img/sharp-wasm32/' in n for n in names), 'LGPL wasm fallback must not ship')
+        self.assertTrue(any('/@img/sharp-linux-arm64/' in n and n.endswith('.node') for n in names))
+        self.assertTrue(any('/@img/sharp-libvips-linux-arm64/' in n for n in names))
+        self.assertEqual('unused-wasm-fallback', bdr.omitted(Path('@img/sharp-wasm32/lib/x.wasm')))
+        self.assertEqual('', bdr.omitted(Path('@img/sharp-linux-arm64/lib/sharp.node')))
+
+    def test_recovery_runtime_stays_on_accepted_independent_archive(self):
+        import json
+        lock = json.loads((ROOT / 'tools/recovery-runtime/lock.json').read_text(encoding='utf-8'))
+        row = next(r for r in lock['archives'] if r['asset'] == 'recovery-dsh-runtime.bin')
+        self.assertEqual('6d2a4d2efb0eed3a5a58f25753fa18d712fcba7ec65199e4641e946e00aa9853', row['sha256'])
+
     def test_builder_refuses_tree_without_engine(self):
         with tempfile.TemporaryDirectory() as tmp:
             with self.assertRaises(ValueError):

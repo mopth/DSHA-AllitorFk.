@@ -599,6 +599,11 @@ def omitted(relative, foreign=()):
             return 'foreign-platform'
         except ValueError:
             pass
+    # sharp's WASM fallback (LGPL libvips build) is never selected on linux-arm64, where the
+    # native @img/sharp-linux-arm64 binding is shipped; rc.2 did not ship it either.
+    for index in range(len(parts) - 1):
+        if parts[index] == '@img' and parts[index + 1] == 'sharp-wasm32':
+            return 'unused-wasm-fallback'
     if 'prebuilds' in parts:
         at = parts.index('prebuilds') + 1
         if at < len(parts) and parts[at] != 'linux-arm64':
