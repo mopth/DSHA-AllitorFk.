@@ -2512,6 +2512,61 @@
       "environment": {},
       "reason": "Actual production Java ManagedPatchChain/ExactTextPatch full chains: fresh, prepared-repeat, canonical fallback, exact 1817 upgrade and broken V1 rejection/recovery. Independent APK archive admission also available.",
       "cli": "--jdk PATH; optional --apk PATH for exact built APK; pinned upstream and historical worker source, no device data."
+    },
+    {
+      "path": "tools/test-extensions.mjs",
+      "stage": "fast",
+      "reason": "AllitorFk extension center: safe .dshx unpack, routes auth, one-tap download (host fixtures only)",
+      "args": [],
+      "timeoutSeconds": 120,
+      "requires": [
+        "node24"
+      ],
+      "environment": {}
+    },
+    {
+      "path": "tools/test-mobile-compress-once.mjs",
+      "stage": "fast",
+      "reason": "AllitorFk: response compression is applied at most once",
+      "args": [],
+      "timeoutSeconds": 120,
+      "requires": [
+        "node24"
+      ],
+      "environment": {}
+    },
+    {
+      "path": "tools/test-mobile-preset-popover.mjs",
+      "stage": "fast",
+      "reason": "AllitorFk: mode picker anchored popover",
+      "args": [],
+      "timeoutSeconds": 120,
+      "requires": [
+        "node24"
+      ],
+      "environment": {}
+    },
+    {
+      "path": "tools/test-plugin-engine-gate.py",
+      "stage": "fast",
+      "reason": "AllitorFk B4: explicit engines.dsh mismatch refuses plugin install; peer ranges stay advisory",
+      "args": [],
+      "timeoutSeconds": 120,
+      "requires": [
+        "python39"
+      ],
+      "environment": {}
+    },
+    {
+      "path": "tools/test-allitor-engines.mjs",
+      "stage": "fast",
+      "reason": "AllitorFk B4: engines.dsh semver evaluation (own implementation)",
+      "args": [],
+      "timeoutSeconds": 120,
+      "requires": [
+        "node24"
+      ],
+      "environment": {}
     }
   ],
   "historicalExcluded": [

@@ -519,9 +519,28 @@ def transactions():
     return _transactions
 
 
+def engine_gate(pkg):
+    """AllitorFk B4: an explicit engines.dsh that excludes the running dsh refuses the install.
+
+    peerDependencies stay advisory (shown in the preview as before); only the dedicated
+    engines.dsh field is a hard gate. DSHA_PLUGIN_ALLOW_ENGINE_MISMATCH=1 is the manual override.
+    """
+    engines = pkg.get("engines") if isinstance(pkg.get("engines"), dict) else {}
+    requirement = engines.get("dsh")
+    if not isinstance(requirement, str) or not requirement.strip():
+        return None
+    meta = lifecycle().package_metadata({"name": pkg.get("name", ""), "version": pkg.get("version", ""),
+                                         "engines": {"dsh": requirement.strip()}})
+    if meta.get("compatibility") == "incompatible" and os.environ.get("DSHA_PLUGIN_ALLOW_ENGINE_MISMATCH") != "1":
+        raise ValueError("插件声明 engines.dsh=%s，与当前 dsh %s 不兼容，已拒绝安装" % (requirement.strip(), meta.get("installedDsh") or "未知"))
+    return meta.get("compatibility")
+
+
 def register_plugin(root, source, expected_version=None, *, restoring=False):
     pkg = plugin_package(root)
     name = pkg["name"]
+    if not restoring:
+        engine_gate(pkg)
     prepare_dependencies(root, pkg, restoring=restoring)
     source = dependencies().source_label(source)
     dest = local(os.path.join(PLUGIN_SRC, name))
