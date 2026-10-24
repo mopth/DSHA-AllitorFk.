@@ -433,6 +433,11 @@
       "executable": false
     },
     {
+      "asset": "app-integration/allitor/native-confirm.js",
+      "target": "root/dsha-app-integration/allitor/native-confirm.js",
+      "executable": false
+    },
+    {
       "asset": "app-integration/allitor/preview.js",
       "target": "root/dsha-app-integration/allitor/preview.js",
       "executable": false

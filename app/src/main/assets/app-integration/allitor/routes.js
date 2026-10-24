@@ -11,6 +11,7 @@ import { createChromiumEngine } from './cdp.js';
 import { startEgressProxy } from './egress-proxy.js';
 import { checkEngines } from './engines.js';
 import { startAgentChannel } from './agent.js';
+import { nativeConfirm, questionFor } from './native-confirm.js';
 
 export const BASE = '/__dsha/allitor';
 const PAGE_CSP = "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; frame-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'self'";
@@ -99,7 +100,17 @@ export function registerAllitorRoutes(scoped, options = {}) {
       const blocked = writeGate(req);
       if (blocked) return json(res, blocked[0], { error: blocked[1] });
       const body = await readJson(req);
-      if (sub === '/api/takeover/decide') return json(res, 200, core.takeover.decide(body.id, body.approve === true));
+      if (sub === '/api/takeover/decide') {
+        if (body.approve !== true) return json(res, 200, core.takeover.decide(body.id, false));
+        const pending = core.takeover.status(body.id);
+        if (!pending || pending.state !== 'pending') return json(res, 409, { error: 'TAKEOVER_NOT_PENDING' });
+        // A forged cookie is possible from inside proot; only a human tap on the native dialog approves.
+        let ok = false;
+        try { ok = await (options.confirm ?? nativeConfirm)(questionFor(pending, SCOPES)); }
+        catch (error) { return json(res, 503, { error: String(error.message).slice(0, 200) }); }
+        if (!ok) { core.takeover.decide(body.id, false); return json(res, 403, { error: 'TAKEOVER_NATIVE_DENIED' }); }
+        return json(res, 200, core.takeover.decide(body.id, true));
+      }
       if (sub === '/api/takeover/revoke') { if (body.all === true) { core.takeover.revokeAll(); return json(res, 200, { ok: true }); } return json(res, 200, core.takeover.revoke(body.id)); }
       if (sub === '/api/browser/sessions/clear') return json(res, 200, await core.browser.clearSession({ site: typeof body.site === 'string' ? body.site : '*' }));
       if (sub === '/api/preview/stop') return json(res, 200, { stopped: core.previews.stop(body.id) });

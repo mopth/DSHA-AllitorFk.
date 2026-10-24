@@ -73,10 +73,11 @@ assert.equal(tokenEquals('a', 'a'), true); assert.equal(tokenEquals('a', 'b'), f
 
 // routes over a real HTTP server with a fake authorizeIndex (cookie "ok=1")
 const core = createAllitor({ previewOptions: { allowedRoots: [root] }, fetchPage: async () => ({ status: 200, headers: {}, body: Buffer.from('x') }) });
+const confirmQs = []; let confirmAnswer = true;
 let handler; const agentDir = join(root, 'agent');
 const off = registerAllitorRoutes({ webServer: { register: d => { handler = d.handler; return () => {}; } },
   connection: { authorizeIndex: (q, s) => { if (q.headers.cookie === 'ok=1') return true; s.writeHead(401); s.end(); return false; } } },
-  { core, agentDir, scanPlugins: () => ({ dshVersion: '0.2.1-rc.3', plugins: [] }) });
+  { core, agentDir, confirm: async q => { confirmQs.push(q); return confirmAnswer; }, scanPlugins: () => ({ dshVersion: '0.2.1-rc.3', plugins: [] }) });
 const srv = http.createServer((q, s) => handler(q, s)); await new Promise(f => srv.listen(0, '127.0.0.1', f));
 const port = srv.address().port, base = `http://127.0.0.1:${port}/__dsha/allitor`;
 const H = { cookie: 'ok=1', origin: `http://127.0.0.1:${port}`, 'x-dsha-allitor': '1', 'content-type': 'application/json' };
@@ -92,7 +93,13 @@ assert.equal(statSync(agentDir).mode & 0o777, 0o700);
 const req1 = await call('takeover.request', { scope: 'preview', reason: '预览', minutes: 5 }, agentDir);
 await assert.rejects(call('takeover.decide', { id: req1.id, approve: true }, agentDir), /AGENT_OP/);
 await assert.rejects(call('preview.start', { dir: join(root, 'site') }, agentDir), /PREVIEW_NOT_AUTHORIZED/);
-assert.equal((await fetch(base + '/api/takeover/decide', { method: 'POST', headers: H, body: JSON.stringify({ id: req1.id, approve: true }) })).status, 200);
+confirmAnswer = false;
+assert.equal((await fetch(base + '/api/takeover/decide', { method: 'POST', headers: H, body: JSON.stringify({ id: req1.id, approve: true }) })).status, 403, 'cookie alone cannot approve');
+assert.equal(core.takeover.status(req1.id).state, 'denied');
+const req1b = await call('takeover.request', { scope: 'preview', reason: '预览', minutes: 5 }, agentDir);
+confirmAnswer = true;
+assert.equal((await fetch(base + '/api/takeover/decide', { method: 'POST', headers: H, body: JSON.stringify({ id: req1b.id, approve: true }) })).status, 200);
+assert.match(confirmQs.at(-1), /AI 自述理由（未经核实）：预览/);
 const started = await call('preview.start', { dir: join(root, 'site') }, agentDir);
 const prev = await fetch(`http://127.0.0.1:${port}${started.raw}`); // capability URL, no cookie
 assert.equal(prev.status, 200); assert.match(prev.headers.get('content-security-policy'), /^sandbox allow-scripts/);

@@ -23,6 +23,14 @@
   - Chromium 引擎（设备上存在 Chromium 时，或设 `ALLITOR_CHROMIUM`）：每站点独立 user-data-dir，全部流量经本机公网专用出口代理（`--proxy-bypass-list=<-loopback>`，回环也走代理并被拒），禁用 QUIC 与非代理 UDP 的 WebRTC。
   - 控制台可按站点或全部清除会话（同时删除 Chromium 档案）。
 
+## 授权 Cookie 签名密钥核查（审查项 3）
+- 结论：**可读**。DSH 的浏览器会话签名密钥存于 `/root/.dsh/.credentials.yaml`（0600，属主 root），而 AI 的 shell 工具在同一 proot 内以 root 运行，因此能读到密钥并伪造 authorizeIndex Cookie；启动令牌同理可从进程信息取得。仅靠 Cookie + Origin 不能证明是人点击。
+- 修复：批准接管（`/api/takeover/decide` 且 approve=true）额外要求 Android 原生弹窗确认——Web 进程经设备桥 `/app/ask` 请宿主 App（proot 外）弹出「批准 / 拒绝」，只有用户点「批准」才生效；桥不可用、App 在后台、超时或关闭弹窗一律按拒绝处理（fail closed）。拒绝、撤销等收紧方向的操作仍只需 Cookie。
+- 残余风险：AI 若另获无障碍/虚拟屏点击能力，理论上可尝试点击该弹窗；这些能力本身另有原生授权，建议接管期间不要同时授予。持有伪造 Cookie 的 AI 仍可添加批注、停止预览、清除会话（均不扩大权限）。
+
+## browser_full 下载与 GitHub 白名单
+- 应用其它下载路径（插件、扩展、更新）仍只允许既有的 GitHub 白名单来源。`browser_full` 的「下载到沙箱」是**单独授权的例外**：仅在用户对该次 `browser_full` 请求批准（含原生弹窗确认）后、在其时限内可用，任意公网 http(s) 来源，落到 `/root/allitor-downloads`，50 MiB 上限，不会被自动安装或执行。
+
 ## 未完成（子集）
 - D1 核心热更新：`CoreHotUpdate`（已验证下载：大小上限 + SHA-256 + 版本白名单 + 最低应用版本；active/previous/staged 槽；试运行 2 次未报健康自动回滚；活动槽每次重新哈希，被篡改即回滚）已实现并有单测。尚未接入启动器：内置核心受签名运行时描述符约束，接入需让描述符承认更新哈希，另起一项。
 - F2 加密备份、D2 设备/Shell 权限分级：基线已有（PortableBackupCrypto AES-256-GCM + CredentialProjection；DeviceGrants/NativeConsentPolicy），未重写。
