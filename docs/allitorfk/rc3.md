@@ -24,6 +24,5 @@
   - 控制台可按站点或全部清除会话（同时删除 Chromium 档案）。
 
 ## 未完成（子集）
-- F3 工具耗时卡片、F4 max_tokens 截断提示：需改 DSH 前端打包产物，未做。
-- D1 核心热更新回滚：仅有现成 recovery runtime；未做在线热更新。
+- D1 核心热更新：`CoreHotUpdate`（已验证下载：大小上限 + SHA-256 + 版本白名单 + 最低应用版本；active/previous/staged 槽；试运行 2 次未报健康自动回滚；活动槽每次重新哈希，被篡改即回滚）已实现并有单测。尚未接入启动器：内置核心受签名运行时描述符约束，接入需让描述符承认更新哈希，另起一项。
 - F2 加密备份、D2 设备/Shell 权限分级：基线已有（PortableBackupCrypto AES-256-GCM + CredentialProjection；DeviceGrants/NativeConsentPolicy），未重写。
