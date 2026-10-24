@@ -105,3 +105,9 @@
 - Release build p3-build-release2.log OK; 3 APKs verified (aapt2/apksigner), authorities follow applicationId, no dsh.android.client in manifests.
 - Chroot run 3: everything PASS except run jdk21 (old zipalign check, fixed) and run texlive (page number "1" glued to the pdftotext output; \pagestyle{empty} added). Rerun those two with --packs.
 - Commit ddece73f on allitorfk/phase3 (local only).
+
+## Phase 3 FINAL 2026-10-24 (UTC+8)
+- Chroot final (p3-verify-chroot-final.log/.json): SUMMARY 55 pass 0 fail, all 16 packs activate/run/remove, 3 refuse cases, refuse-remove-required, apt-get check before/after, package set restored (upgradedKept = 14 base libs upgraded from noble-updates, kept on purpose).
+- texlive smoke now uses only texlive: xelatex+ctex → PDF non-empty, starts with %PDF-, kpsewhich ctex.sty → texlive-pdf-ok (pdffonts/pdftotext belong to documents).
+- Only tools/verify-extensions.py changed since the 06:45 APKs → no rebuild needed.
+- Not tested: real device (engines under the new package, extensions on the phone, coexistence with the official app).

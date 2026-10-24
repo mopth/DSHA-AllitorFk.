@@ -58,13 +58,14 @@ CHECKS = {
     'documents': "pdftotext -v 2>&1 | sed -n 1p && qpdf --version | sed -n 1p && pandoc --version | sed -n 1p && tesseract --version 2>&1 | sed -n 1p && tesseract --list-langs 2>&1 | tail -n +2 | tr '\\n' ' '",
     'texlive': "rm -rf /tmp/t && mkdir -p /tmp/t && cd /tmp/t"
                " && printf '\\\\documentclass[fontset=none]{ctexart}\\n\\\\setCJKmainfont{Noto Sans CJK SC}\\n\\\\begin{document}\\n\\\\pagestyle{empty}\\n你好，世界。DSHA 扩展包 xelatex 测试。\\n\\\\end{document}\\n' >zh.tex"
-               " && xelatex -interaction=nonstopmode -halt-on-error zh.tex >/dev/null && pdffonts zh.pdf | sed -n 3,4p"
-               " && pdftotext zh.pdf - | tr -d ' \\n' | sed 's/^/pdf-text:/'",
+               " && xelatex -interaction=nonstopmode -halt-on-error zh.tex >/dev/null"
+               " && test -s zh.pdf && head -c 5 zh.pdf | grep -qx '%PDF-'"
+               " && kpsewhich ctex.sty >/dev/null && echo texlive-pdf-ok",
     'ghostscript': "gs --version",
     'devtools': "gdb --version | sed -n 1p && strace -V | sed -n 1p && rg --version | sed -n 1p && fdfind --version && tmux -V && git lfs version && autoconf --version | sed -n 1p",
 }
 # 运行输出里必须出现的文字（防止“命令成功但没真跑”）。
-EXPECT = {'dev-base': 'hello-g++', 'clang': 'tidy-ok', 'jdk21': 'hello-java', 'android-build': 'apk-signed-ok', 'texlive': 'pdf-text:你好，世界', 'go': 'hello-go', 'rust': 'hello-rust', 'kotlin': 'hello-kotlin',
+EXPECT = {'dev-base': 'hello-g++', 'clang': 'tidy-ok', 'jdk21': 'hello-java', 'android-build': 'apk-signed-ok', 'texlive': 'texlive-pdf-ok', 'go': 'hello-go', 'rust': 'hello-rust', 'kotlin': 'hello-kotlin',
           'ruby': 'hello-ruby', 'php': 'hello-php', 'ghostscript': '10.'}
 
 
