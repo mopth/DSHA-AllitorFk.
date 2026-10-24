@@ -45,7 +45,7 @@ export function createAllitor(options = {}) {
   const sessions = options.sessions ?? createSessions();
   let proxy = null;
   const engine = options.engine !== undefined ? options.engine : createChromiumEngine({ profilesDir: options.profilesDir ?? '/root/.dsh/allitor/browser-profiles',
-    downloadsDir: options.downloadsDir ?? '/root/allitor-downloads', proxyPort: async () => (proxy ??= await startEgressProxy()).port });
+    downloadsDir: options.downloadsDir ?? '/root/allitor-downloads', proxyPort: async () => (proxy ??= await startEgressProxy()) });
   const browser = options.browser ?? createBrowser({ allowed: () => takeover.granted('browser'), allowedFull: () => takeover.granted('browser_full'),
     fetchPage: options.fetchPage, sessions, engine, downloadsDir: options.downloadsDir ?? '/root/allitor-downloads' });
   takeover.subscribe(() => { if (!takeover.granted('browser') && !takeover.granted('browser_full')) browser.reset(); });

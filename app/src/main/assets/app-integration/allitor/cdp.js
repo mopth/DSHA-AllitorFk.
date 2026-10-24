@@ -55,10 +55,21 @@ export function createChromiumEngine({ executable = findChromium(), profilesDir,
     if (cur) { await cur.conn.close(); cur = null; }
     const profileDir = join(profilesDir, site.replace(/[^a-z0-9.-]/g, '_'));
     mkdirSync(profileDir, { recursive: true, mode: 0o700 }); mkdirSync(downloadsDir, { recursive: true });
-    const port = typeof proxyPort === 'function' ? await proxyPort() : proxyPort;
+    const px = typeof proxyPort === 'function' ? await proxyPort() : proxyPort;
+    const port = typeof px === 'object' ? px.port : px, token = typeof px === 'object' ? px.token : null;
     const conn = launcher(executable, chromiumArgs({ profileDir, proxyPort: port }));
     const { targetId } = await conn.send('Target.createTarget', { url: 'about:blank' });
     const { sessionId } = await conn.send('Target.attachToTarget', { targetId, flatten: true });
+    if (token) {
+      // Answer only the proxy's challenge with the per-launch credential; site auth prompts are cancelled.
+      conn.on(m => {
+        if (m.sessionId !== sessionId) return;
+        if (m.method === 'Fetch.requestPaused') conn.send('Fetch.continueRequest', { requestId: m.params.requestId }, sessionId).catch(() => {});
+        if (m.method === 'Fetch.authRequired') conn.send('Fetch.continueWithAuth', { requestId: m.params.requestId, authChallengeResponse:
+          m.params.authChallenge?.source === 'Proxy' ? { response: 'ProvideCredentials', username: 'allitor', password: token } : { response: 'CancelAuth' } }, sessionId).catch(() => {});
+      });
+      await conn.send('Fetch.enable', { handleAuthRequests: true, patterns: [{ urlPattern: '*' }] }, sessionId);
+    }
     await conn.send('Page.enable', {}, sessionId);
     await conn.send('Browser.setDownloadBehavior', { behavior: 'allow', downloadPath: downloadsDir, eventsEnabled: true });
     cur = { site, conn, sessionId };

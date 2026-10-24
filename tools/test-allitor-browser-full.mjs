@@ -69,13 +69,20 @@ tk.revokeAll(); await assert.rejects(br.open('https://shop.example/'), /NOT_AUTH
 // egress proxy refuses loopback/private for both CONNECT and plain http
 const local = http.createServer((q, s) => s.end('secret')); await new Promise(r => local.listen(0, '127.0.0.1', r));
 const proxy = await startEgressProxy();
-const connect = target => new Promise(r => { const s = net.connect(proxy.port, '127.0.0.1', () => s.write(`CONNECT ${target} HTTP/1.1\r\nHost: ${target}\r\n\r\n`)); s.once('data', d => { r(d.toString().split('\r\n')[0]); s.destroy(); }); });
+const PA = 'Proxy-Authorization: Basic ' + Buffer.from('allitor:' + proxy.token).toString('base64');
+const connect = (target, auth = PA) => new Promise(r => { const s = net.connect(proxy.port, '127.0.0.1', () => s.write(`CONNECT ${target} HTTP/1.1\r\nHost: ${target}\r\n${auth ? auth + '\r\n' : ''}\r\n`)); s.once('data', d => { r(d.toString().split('\r\n')[0]); s.destroy(); }); });
+assert.match(await connect('8.8.8.8:443', null), /407/, 'no credential');
+assert.match(await connect('8.8.8.8:443', 'Proxy-Authorization: Basic ' + Buffer.from('allitor:wrong').toString('base64')), /407/, 'wrong credential');
+assert.match(await connect('8.8.8.8:22'), /403/, 'CONNECT only to 443/80');
 assert.match(await connect(`127.0.0.1:${local.address().port}`), /403/);
+assert.match(await connect('127.0.0.1:443'), /403/);
 assert.match(await connect('10.0.0.1:443'), /403/);
 for (const t of ['[::ffff:127.0.0.1]:443', '[::ffff:7f00:1]:443', '[64:ff9b::a9fe:a9fe]:443', '[::127.0.0.1]:443', '[fe80::1]:443']) assert.match(await connect(t), /403/, t);
-assert.match(await connect(`localhost:${local.address().port}`), /403/);
-const plain = await new Promise(r => http.get({ host: '127.0.0.1', port: proxy.port, path: `http://127.0.0.1:${local.address().port}/` }, res => { r(res.statusCode); res.resume(); }));
-assert.equal(plain, 403);
+assert.match(await connect('localhost:443'), /403/);
+const viaProxy = (path, auth = true) => new Promise(r => http.get({ host: '127.0.0.1', port: proxy.port, path, headers: auth ? { 'proxy-authorization': PA.split(': ')[1] } : {} }, res => { r(res.statusCode); res.resume(); }));
+assert.equal(await viaProxy('http://127.0.0.1:80/'), 403);
+assert.equal(await viaProxy('http://8.8.8.8:25/'), 403, 'HTTP forwarding port allowlist');
+assert.equal(await viaProxy('http://8.8.8.8/', false), 407);
 assert.ok(chromiumArgs({ profileDir: '/p', proxyPort: 1 }).includes('--proxy-bypass-list=<-loopback>'));
 
 // optional real Chromium run
@@ -86,7 +93,7 @@ if (process.env.ALLITOR_TEST_CHROMIUM === '1' && exe) {
   // a second proxy maps only example.com to it and still refuses everything else.
   const { address: gw } = await import('node:dns').then(d => d.promises.lookup('example.com'));
   const testProxy = await startEgressProxy({ resolve: async h => { if (h === 'example.com') return gw; throw new Error('BROWSER_PRIVATE_ADDRESS'); } });
-  const eng = createChromiumEngine({ executable: exe, profilesDir: prof, downloadsDir: dl, proxyPort: testProxy.port });
+  const eng = createChromiumEngine({ executable: exe, profilesDir: prof, downloadsDir: dl, proxyPort: testProxy });
   const snap = await eng.open('https://example.com/');
   assert.match(snap.title, /Example/);
   assert.equal(JSON.parse((await eng.evaluate('JSON.stringify(1+1)')).value), 2);
