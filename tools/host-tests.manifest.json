@@ -2600,6 +2600,17 @@
         "python39"
       ],
       "environment": {}
+    },
+    {
+      "path": "tools/test-allitor-tool-duration.mjs",
+      "stage": "fast",
+      "reason": "AllitorFk F3 tool durations + F4 max-tokens continue",
+      "args": [],
+      "timeoutSeconds": 120,
+      "requires": [
+        "node24"
+      ],
+      "environment": {}
     }
   ],
   "historicalExcluded": [

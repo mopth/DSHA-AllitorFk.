@@ -659,7 +659,81 @@ window.__ModuleLoader__.load({id:'dsh-app-integration', factory: () => {
     const timer = setInterval(tick, every);
     return () => clearInterval(timer);
   }
+  // AllitorFk DSHA_TOOL_DURATION_V1（F3）：在工具调用行上显示耗时。只观察 DOM 的
+  // [data-chat-call-id] 行与其 [data-tool][data-state]（preparing/running → ok/error/stopped），
+  // 不改宿主 React 节点结构：徽标挂在行尾，独立元素，可随时移除。页面打开前已结束的调用不显示（无起点）。
+  const TOOL_DONE = new Set(['ok', 'error', 'stopped']);
+  function formatDuration(ms) {
+    if (!(ms >= 0)) return '';
+    if (ms < 1000) return ms + 'ms';
+    if (ms < 60000) return (ms / 1000).toFixed(ms < 10000 ? 1 : 0) + 's';
+    const m = Math.floor(ms / 60000), sec = Math.round((ms % 60000) / 1000);
+    return m + 'm' + (sec ? sec + 's' : '');
+  }
+  function installToolDurations(root = document, now = () => Date.now()) {
+    const started = new Map(), finished = new Map();
+    const KEY = 'dsha.allitor.toolDurations';
+    try { for (const [id, ms] of JSON.parse(sessionStorage.getItem(KEY) || '[]')) finished.set(id, ms); } catch {}
+    const persist = () => { try { sessionStorage.setItem(KEY, JSON.stringify([...finished].slice(-400))); } catch {} };
+    const scan = () => {
+      for (const row of root.querySelectorAll('[data-chat-call-id]')) {
+        const id = row.getAttribute('data-chat-call-id'), toolRow = row.querySelector('[data-tool][data-state]');
+        if (!id || !toolRow) continue;
+        const state = toolRow.getAttribute('data-state');
+        if (!TOOL_DONE.has(state)) { if (!started.has(id)) started.set(id, now()); }
+        else if (!finished.has(id) && started.has(id)) { finished.set(id, now() - started.get(id)); started.delete(id); persist(); }
+        let badge = row.querySelector(':scope > [data-dsha-tool-duration]');
+        const ms = finished.get(id), live = started.has(id);
+        if (ms === undefined && !live) { badge?.remove(); continue; }
+        if (!badge) { badge = document.createElement('span'); badge.setAttribute('data-dsha-tool-duration', ''); row.appendChild(badge); }
+        const text = ms !== undefined ? '⏱ ' + formatDuration(ms) : '⏱ ' + formatDuration(now() - started.get(id)) + '…';
+        if (badge.textContent !== text) badge.textContent = text;
+        badge.setAttribute('data-live', live ? '1' : '0');
+        badge.title = ms !== undefined ? '工具耗时 ' + formatDuration(ms) : '运行中';
+      }
+    };
+    const style = document.createElement('style');
+    style.setAttribute('data-dsha-allitor', 'tool-duration');
+    style.textContent = '[data-dsha-tool-duration]{display:block;margin:2px 0 0 22px;font-size:11px;line-height:1.4;color:var(--dsw-alias-label-tertiary,#888);font-variant-numeric:tabular-nums;user-select:none}[data-dsha-tool-duration][data-live="1"]{color:var(--dsw-alias-label-secondary,#aaa)}';
+    document.head.appendChild(style);
+    let queued = false;
+    const mo = new MutationObserver(() => { if (!queued) { queued = true; requestAnimationFrame(() => { queued = false; scan(); }); } });
+    mo.observe(root.body || root, {subtree: true, childList: true, attributes: true, attributeFilter: ['data-state']});
+    const tick = setInterval(() => { if (started.size) scan(); }, 1000);
+    scan();
+    return () => { mo.disconnect(); clearInterval(tick); style.remove(); for (const b of root.querySelectorAll('[data-dsha-tool-duration]')) b.remove(); };
+  }
+  // AllitorFk DSHA_MAXTOKENS_CONTINUE_V1（F4）：rc.3 已有「已达到输出 token 上限」提示；这里在提示旁加
+  // 「继续」按钮，只把“继续”追加到当前会话输入框，不自动发送。
+  function installMaxTokensContinue(ctx, root = document) {
+    const index = createSessionIndex(ctx);
+    const scan = () => {
+      for (const title of root.querySelectorAll('[class*="_maxTokensTitle"]')) {
+        const host = title.parentElement;
+        if (!host || host.querySelector('[data-dsha-maxtokens-continue]')) continue;
+        const b = document.createElement('button');
+        b.type = 'button'; b.textContent = '继续输出'; b.setAttribute('data-dsha-maxtokens-continue', '');
+        b.title = '把“继续”填入输入框（不会自动发送）';
+        b.addEventListener('click', () => {
+          const id = index.current(), binding = id && ctx.sessions.binding(id);
+          if (!binding) return;
+          try { ctx.conversation.input.requestDraftInitialization(binding, {prompt: '继续', whenDraftExists: 'append'}); } catch {}
+        });
+        host.appendChild(b);
+      }
+    };
+    const style = document.createElement('style');
+    style.setAttribute('data-dsha-allitor', 'maxtokens');
+    style.textContent = '[data-dsha-maxtokens-continue]{margin-top:6px;padding:3px 10px;border-radius:6px;border:1px solid var(--dsw-alias-border-base,#555);background:transparent;color:inherit;font-size:12px;cursor:pointer}';
+    document.head.appendChild(style);
+    const mo = new MutationObserver(scan);
+    mo.observe(root.body || root, {subtree: true, childList: true});
+    scan();
+    return () => { mo.disconnect(); style.remove(); for (const b of root.querySelectorAll('[data-dsha-maxtokens-continue]')) b.remove(); };
+  }
   function apply(ctx) {
+    ctx.effect(() => installToolDurations(), 'dsha-allitor-tool-durations');
+    ctx.effect(() => installMaxTokensContinue(ctx), 'dsha-allitor-maxtokens-continue');
     ctx.effect(() => installAnnotationInbox(ctx), 'dsha-allitor-annotations');
     ctx.effect(() => installNativeRoute(ctx), 'dsha-native-session-route');
     ctx.inject(['connection'], scoped => scoped.effect(() => installStreamResume(scoped), 'dsha-browser-stream-resume'));
@@ -713,5 +787,5 @@ window.__ModuleLoader__.load({id:'dsh-app-integration', factory: () => {
         db?.close(); stopReading(); stopDraftDeletion(); document.removeEventListener('dsha-close-details',closeDetails); };
     },'dsha-browser-state');
   }
-  return {inject:['conversation','sessions','workspaces','layout','sidebarRight','uiWorkspace'],apply,watchDraft,usable,knownDraft,writeDraft,lease,protectedDrafts,recoveryCandidates,recoverDraftLeases,draftFailure,installDraftDeletionProof,residentInputs,createSessionIndex,installReadingPosition,installStreamResume,installAnnotationInbox};
+  return {inject:['conversation','sessions','workspaces','layout','sidebarRight','uiWorkspace'],apply,watchDraft,usable,knownDraft,writeDraft,lease,protectedDrafts,recoveryCandidates,recoverDraftLeases,draftFailure,installDraftDeletionProof,residentInputs,createSessionIndex,installReadingPosition,installStreamResume,installAnnotationInbox,installToolDurations,installMaxTokensContinue,formatDuration};
 }});
