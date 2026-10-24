@@ -55,13 +55,13 @@ export function createAllitor(options = {}) {
     'takeover.list': () => takeover.list(),
     'preview.start': a => { if (!takeover.granted('preview')) throw new Error('PREVIEW_NOT_AUTHORIZED: ask the user with allitor_takeover_request(scope="preview") first');
       const p = previews.start(a.dir, { entry: a.entry }); return { ...p, path: `${BASE}/annotate/${p.id}`, raw: `${BASE}/preview/${p.id}/` }; },
-    'preview.stop': a => ({ stopped: previews.stop(a.id) }),
+    'preview.stop': a => { if (!takeover.granted('preview')) throw new Error('PREVIEW_NOT_AUTHORIZED'); return { stopped: previews.stop(a.id) }; },
     'annotations.take': () => annotations.take('agent').map(a => ({ ...a, text: annotationText(a) })),
     'browser.open': a => browser.open(a.url, { engine: a.engine === 'chromium' ? 'chromium' : 'text' }), 'browser.read': a => browser.read(a), 'browser.links': a => browser.links(a),
     'browser.follow': a => browser.follow(a), 'browser.back': () => browser.back(), 'browser.find': a => browser.find(a),
     'browser.forms': () => browser.forms(), 'browser.submit': a => browser.submit(a), 'browser.status': () => browser.status(),
     'browser.download': a => browser.download(a), 'browser.eval': a => browser.evaluate(a), 'browser.screenshot': () => browser.screenshot(),
-    'browser.sessions': () => browser.sessions(), 'browser.session_clear': a => browser.clearSession(a),
+    'browser.sessions': () => browser.sessions(), 'browser.session_clear': a => { if (!takeover.granted('browser_full')) throw new Error('BROWSER_FULL_NOT_AUTHORIZED'); return browser.clearSession(a); },
   };
   return { takeover, previews, annotations, browser, sessions, ops, close() { browser.reset(); proxy?.close(); } };
 }

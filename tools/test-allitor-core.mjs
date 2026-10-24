@@ -102,6 +102,8 @@ const taken = await (await fetch(base + '/api/annotations/take', { method: 'POST
 assert.equal(taken.length, 1); assert.match(taken[0].text, /n1/);
 assert.equal((await call('annotations.take', {}, agentDir)).length, 0, 'already delivered to composer');
 await fetch(base + '/api/takeover/revoke', { method: 'POST', headers: H, body: '{"all":true}' });
+await assert.rejects(call('preview.stop', { id: started.id }, agentDir), /PREVIEW_NOT_AUTHORIZED/);
+await assert.rejects(call('browser.session_clear', { site: '*' }, agentDir), /BROWSER_FULL_NOT_AUTHORIZED/);
 await assert.rejects(call('preview.start', { dir: join(root, 'site') }, agentDir), /NOT_AUTHORIZED/);
 writeFileSync(join(root, 'badtok'), 'x');
 // forged token is refused
