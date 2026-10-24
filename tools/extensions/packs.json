@@ -560,6 +560,40 @@
         "tmux -V",
         "autoconf --version"
       ]
+    },
+    {
+      "id": "assetstudio-mcp",
+      "category": "devtools",
+      "requires": [
+        "jdk21"
+      ],
+      "name": {
+        "zh": "AssetStudio MCP（Unity 资源）",
+        "en": "AssetStudio MCP (Unity assets)"
+      },
+      "summary": {
+        "zh": "基于 AssetStudio Mobile（MIT）纯 JVM 核心的 Unity 资源浏览 MCP 服务：默认 stdio；可选仅 127.0.0.1 + 令牌的 HTTP。无安卓界面、无签名材料、不含任何游戏资源",
+        "en": "Unity asset browser MCP server on the AssetStudio Mobile (MIT) pure-JVM core: stdio by default, optional loopback-only HTTP with a token. No Android UI, no signing material, no game assets"
+      },
+      "upstream": [
+        {
+          "kind": "local",
+          "path": "tools/assetstudio-mcp/dist/assetstudio-mcp-tree.tar",
+          "url": "https://github.com/mopth/DSHA-AllitorFk./tree/allitorfk/rc3/tools/assetstudio-mcp",
+          "sha256": "2bdda97ba412464b8eb7044e1aa02a192a47ae5ca3e027de48e15fe6fa83a0c7",
+          "strip": "assetstudio-mcp/",
+          "license": "MIT (AssetStudio, AssetStudio Mobile core, brotli dec) + Apache-2.0 (Kotlin stdlib); see licenses/",
+          "licenseFile": "licenses/AssetStudio-MIT.txt"
+        }
+      ],
+      "version": "1.10.2-allitorfk.1",
+      "bins": [
+        "bin/assetstudio-mcp"
+      ],
+      "smoke": [
+        "assetstudio-mcp --version",
+        "printf '%s\\n' '{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"tools/list\"}' | assetstudio-mcp --stdio | grep -q list_assets"
+      ]
     }
   ]
 }

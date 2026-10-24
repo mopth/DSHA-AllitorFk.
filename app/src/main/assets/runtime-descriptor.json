@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "runtimeId": "57281720a327f5ed893219b8df8c5b36e5ee08faae7449b2efbd86b9a1575d16",
+  "runtimeId": "581a8f267e4a863c3a44e60fc784e293c2d4586507a65b8f1ada0a67a2b0a82f",
   "baseVersion": "10",
   "dshVersion": "0.2.1-rc.3",
   "launcherContract": "DSHA_ARM64_V2",
@@ -432,7 +432,7 @@
     "app-integration/ext/extensions.html": "41252870d631d8c71590047aeef774c8aa6496e301137be9d7ebfed540abe5ed",
     "app-integration/ext/manager.js": "722f59da67b4ae33711112f9c760c878405bd9ae03d0ac514cef313875b0e600",
     "app-integration/ext/routes.js": "35fcaf8a975d321ef3b2962b08c22d6c4744e07051f1486268225aa5129e9bf2",
-    "app-integration/ext-catalog.json": "fdcc356a5380814030cd59bb46922c612893d828c519d37f5339966048bed1af",
+    "app-integration/ext-catalog.json": "f009e6aa31de48a1a6efd7121c9b9a4f63108ff0e078d2d713836f9a7f3fb741",
     "app-integration/index.js": "01497c8896d84d67bf4dd78c6fec3c41f99ac5b3a9faa75a5893b78774b071a7",
     "app-integration/package.json": "9b958725f4029e8b830c39b6dd88b071f5c3ac2477b90ceb4ee038122fc36a00",
     "app-integration/runtime-plugins.js": "0ec4632cd54a3868f5c37f3de19ca338f0630cfb18afe6e07f5d01bcbb3653aa",

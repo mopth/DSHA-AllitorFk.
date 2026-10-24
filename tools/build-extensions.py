@@ -190,6 +190,19 @@ def build_pack(pack, lock, data, cache, out):
     tree = Tree(pid)
     licenses = []
     for i, entry in enumerate(lock.get('upstream', [])):
+        if entry['kind'] == 'local':
+            # 本仓库源码构建的产物（如 tools/assetstudio-mcp/build.py 的 tree tar），只认锁里的 sha256。
+            rel = PurePosixPath(entry['path'])
+            if rel.is_absolute() or '..' in rel.parts or not entry['path'].startswith('tools/'):
+                raise ValueError('EXT_LOCAL_PATH:' + entry['path'])
+            path = ROOT / entry['path']
+            name = safe_rel(rel.name)
+            if not path.is_file() or extlib.digest(path) != entry['sha256']:
+                raise ValueError('EXT_LOCAL_DIGEST:' + entry['path'])
+            from_archive(tree, {**entry, 'kind': 'tar'}, path)
+            add_wrappers(tree, entry)
+            licenses.append({'name': name, 'license': entry['license'], 'url': entry['url'], 'sha256': entry['sha256']})
+            continue
         name = safe_rel(PurePosixPath(entry['url']).name)
         path = fetch(entry['url'], cache / 'upstream' / name, entry['sha256'], args.offline)
         if entry['kind'] in ('tar', 'zip'):

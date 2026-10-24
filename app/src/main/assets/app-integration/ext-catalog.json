@@ -410,7 +410,33 @@
    "licenses": [
     "Ubuntu (per-package copyright)"
    ]
+  },
+  {
+   "id": "assetstudio-mcp",
+   "file": "assetstudio-mcp.dshx",
+   "sha256": "a376eb104b00f1fb516e2f27fcde82944c5bb8bd235aa0c9bbb667f3e93e21b2",
+   "bytes": 2283174,
+   "installedBytes": 2454276,
+   "name": {
+    "zh": "AssetStudio MCP（Unity 资源）",
+    "en": "AssetStudio MCP (Unity assets)"
+   },
+   "summary": {
+    "zh": "基于 AssetStudio Mobile（MIT）纯 JVM 核心的 Unity 资源浏览 MCP 服务：默认 stdio；可选仅 127.0.0.1 + 令牌的 HTTP。无安卓界面、无签名材料、不含任何游戏资源",
+    "en": "Unity asset browser MCP server on the AssetStudio Mobile (MIT) pure-JVM core: stdio by default, optional loopback-only HTTP with a token. No Android UI, no signing material, no game assets"
+   },
+   "category": "devtools",
+   "version": "1.10.2-allitorfk.1",
+   "requires": [
+    "jdk21"
+   ],
+   "agpl": false,
+   "debs": 0,
+   "upstream": true,
+   "licenses": [
+    "MIT (AssetStudio, AssetStudio Mobile core, brotli dec) + Apache-2.0 (Kotlin stdlib); see licenses/"
+   ]
   }
  ],
- "packsSha256": "067396b2aba259a05d4b300c2175b28c38259adb985925729771ece3729bb874"
+ "packsSha256": "3713290f12371b20637c9db123fa72ca46570202ec78db6c3086db767cbf84cd"
 }

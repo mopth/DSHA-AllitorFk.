@@ -1,0 +1,14 @@
+AssetStudio Mobile (Kotlin port of Perfare/AssetStudio), version 1.10.2.
+
+The source archive this pack was built from has no separate LICENSE file. Its README says:
+"AssetStudio 为 MIT；本项目遵循相同许可" (AssetStudio is MIT; this project follows the same license).
+The vendored files under vendor/com/assetstudio/mobile/ (core/, render/, export/ObjExporter.kt,
+mcp/McpServerCore.kt) are therefore redistributed under the MIT terms in AssetStudio-MIT.txt,
+with their original headers kept.
+
+Left out on purpose: the Android/Compose UI, the NDK texture decoders, Bitmap glue
+(core/texture/BitmapExt.kt), AssetExporter, the HTTP server/manager (replaced by a loopback-only,
+token-protected transport written for AllitorFk), and all signing material (no keystore, no
+passwords).
+
+Use this tool only on game files you have the right to inspect. This pack ships no game assets.
